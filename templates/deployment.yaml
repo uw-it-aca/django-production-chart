@@ -1,0 +1,54 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "django-production-chart.release-identifier" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.release-identifier" . }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "django-production-chart.release-identifier" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "django-production-chart.release-identifier" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ include "django-production-chart.release-identifier" . }}
+          image: "{{ .Values.aws_account | replace ":" "" }}.dkr.ecr.us-west-2.amazonaws.com/{{ .Values.repo }}-provisioner-web-ecr:{{ .Values.branch }}"
+          imagePullPolicy: "Always"
+          env:
+            - name: DB
+              value: {{ .Values.DB }}
+            - name: BRANCH
+              value: "{{ .Values.branch }}"
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rds
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rds
+                  key: password
+            - name: DATABASE_DB_NAME
+              value: "{{ .Values.branch | replace "-" "_" }}"
+            - name: DATABASE_HOSTNAME
+              value: "rds.default.svc.cluster.local"
+            - name: ENV
+              value: "dev"
+            - name: PORT
+              value: "8080"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
