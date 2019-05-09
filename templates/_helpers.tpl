@@ -31,6 +31,6 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{ define "django-production-chart.release-identifier" -}}
+{{ define "django-production-chart.releaseIdentifier" -}}
 {{- printf "%s-prod-%s" .Values.repo .Values.branch -}}
 {{- end -}}
