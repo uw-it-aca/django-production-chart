@@ -38,7 +38,7 @@ spec:
           imagePullPolicy: "Always"
           env:
             - name: DB
-              value: {{ .Values.database.engine }}
+              value: {{ .Values.database.engine | quote }}
             - name: DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -50,11 +50,11 @@ spec:
                   name: {{ .Values.database.secretName }}
                   key: password
             - name: DATABASE_DB_NAME
-              value: "{{ .Values.database.name }}"
+              value: {{ .Values.database.name }}
             - name: DATABASE_HOSTNAME
-              value: "{{ .Values.database.hostname }}"
+              value: {{ .Values.database.hostname }}
             - name: ENV
-              value: "dev"
+              value: "prod"
           command: ["/scripts/deploy.sh"]
           resources:
 {{ toYaml .Values.resources | indent 12 }}

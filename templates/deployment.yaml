@@ -36,12 +36,12 @@ spec:
           env:
 {{- if .Values.certs.mounted }}
            - name: CERT_PATH
-             value: "{{ .Values.certName }}"
+             value: {{ .Values.certName | quote }}
            - name: KEY_PATH
-             value: "{{ .Values.keyName }}"
+             value: {{ .Values.keyName | quote }}
 {{- end }}
             - name: DB
-              value: {{ .Values.database.engine }}
+              value: {{ .Values.database.engine | quote }}
             - name: DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -53,13 +53,9 @@ spec:
                   name: {{ .Values.database.secretName }}
                   key: password
             - name: DATABASE_DB_NAME
-              value: "{{ .Values.database.name }}"
+              value: {{ .Values.database.name | quote }}
             - name: DATABASE_HOSTNAME
-              value: "{{ .Values.database.hostname }}"
-            - name: ENV
-              value: "{{ .Values.env }}"
-            - name: PORT
-              value: "8080"
+              value: {{ .Values.database.hostname | quote }}
 {{ toYaml .Values.environmentVariables | indent 12 }}
           ports:
             - name: http

@@ -7,7 +7,6 @@ replicaCount: 2
 minReplicas: 2
 maxReplicas: 75
 
-
 repo: ""
 
 nameOverride: ""
@@ -33,6 +32,9 @@ ingress:
 database:
   engine: "mysql"
 
+certs:
+  mounted: false
+
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -44,6 +46,12 @@ resources:
   requests:
     cpu: 100m
     memory: 512Mi
+
+environmentVariables:
+  - name: "ENV"
+    value: "dev"
+  - name: "PORT"
+    value: "8080"
 
 certs:
   mounted: False
