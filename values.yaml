@@ -7,16 +7,22 @@ replicaCount: 2
 minReplicas: 2
 maxReplicas: 75
 
-repo: ""
+repo: "prereq"
 
 nameOverride: ""
 fullnameOverride: ""
 
-branch: ""
+branch: "master"
 
 service:
   type: ClusterIP
   port: 80
+
+image:
+  repository: "acait/django-contianer"
+  tag: "develop"
+
+commitHash: eabc3212
 
 ingress:
   enabled: false

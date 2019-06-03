@@ -1,3 +1,4 @@
+{{- $root := . -}}
 {{- $fullName := include "django-production-chart.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $branch := .Values.branch}}
@@ -33,7 +34,7 @@ spec:
         {{- range .paths }}
           - path: {{ . }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ include "django-production-chart.releaseIdentifier" $root }}
               servicePort: http
         {{- end }}
   {{- end }}

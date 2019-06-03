@@ -19,26 +19,28 @@ spec:
         app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+{{- if .Values.certs.mounted}}
+      volumes:
+        - name: certs-volume
+          secret:
+            secretName: {{ .Values.certs.secretName | quote }}
+{{- end }}
       containers:
         - name: {{ include "django-production-chart.releaseIdentifier" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.commitHash }}"
           imagePullPolicy: "Always"
 {{- if .Values.certs.mounted}}
           volumeMounts:
             - name: certs-volume
               readOnly: true
               mountPath: "/certs"
-          volumes:
-            - name: certs-volume
-              secret:
-                secretName: {{ .Values.certs.secretName }}
 {{- end }}
           env:
 {{- if .Values.certs.mounted }}
-           - name: CERT_PATH
-             value: {{ .Values.certName | quote }}
-           - name: KEY_PATH
-             value: {{ .Values.keyName | quote }}
+            - name: CERT_PATH
+              value: {{ .Values.certs.certPath | quote }}
+            - name: KEY_PATH
+              value: {{ .Values.certs.keyPath | quote }}
 {{- end }}
             - name: DB
               value: {{ .Values.database.engine | quote }}
@@ -52,6 +54,10 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.database.secretName }}
                   key: password
+            - name: ENV
+              value: "prod"
+            - name: PORT
+              value: "8080"
             - name: DATABASE_DB_NAME
               value: {{ .Values.database.name | quote }}
             - name: DATABASE_HOSTNAME

@@ -3,10 +3,11 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}-autoscaler
   namespace: default
-  app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-  helm.sh/chart: {{ include "django-production-chart.chart" . }}
-  app.kubernetes.io/instance: {{ .Release.Name }}
-  app.kubernetes.io/managed-by: {{ .Release.Service }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -14,4 +15,8 @@ spec:
     name: {{ include "django-production-chart.releaseIdentifier" . }}
   minReplicas: {{ .Values.minReplicas }}
   maxReplicas: {{ .Values.maxReplicas }}
-  targetCPUUtilizationPercentage: 50
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 50

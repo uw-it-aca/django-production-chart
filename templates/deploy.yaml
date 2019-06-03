@@ -3,8 +3,8 @@ kind: Job
 metadata:
   name: "{{.Release.Name}}"
   labels:
-    app.kubernetes.io/managed-by: {{.Release.Service | quote }}
-    app.kubernetes.io/instance: {{.Release.Name | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
     helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
   annotations:
     # This is what defines this resource as a hook. Without this line, the
@@ -15,10 +15,10 @@ metadata:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "django-development-chart.releaseIdentifier" . }}-release-job-{{ .Values.commitHash | trunc 7 }}
+  name: {{ include "django-production-chart.releaseIdentifier" . }}-release-job-{{ .Values.commitHash | trunc 7 }}-{{ randAlphaNum 3 | lower}}
   labels:
-    app.kubernetes.io/name: {{ include "django-development-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-development-chart.chart" . }}
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
@@ -33,8 +33,8 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-        - name: {{ include "django-development-chart.releaseIdentifier" . }}
-          image: "{{ .Values.aws_account | replace ":" "" }}.dkr.ecr.us-west-2.amazonaws.com/{{ .Values.repo }}-provisioner-web-ecr:{{ .Values.commitHash }}"
+        - name: {{ include "django-production-chart.releaseIdentifier" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.commitHash }}"
           imagePullPolicy: "Always"
           env:
             - name: DB
