@@ -62,6 +62,13 @@ spec:
               value: {{ .Values.database.name | quote }}
             - name: DATABASE_HOSTNAME
               value: {{ .Values.database.hostname | quote }}
+{{- range .Values.environmentVariablesSecrets }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef: 
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+{{- end }}
 {{ toYaml .Values.environmentVariables | indent 12 }}
           ports:
             - name: http
