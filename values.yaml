@@ -4,7 +4,7 @@
 
 replicaCount: 2
 
-minReplicas: 2
+minReplicas: 5
 maxReplicas: 75
 
 repo: "prereq"
