@@ -1,0 +1,40 @@
+{{- $root := . -}}
+{{- $fullName := include "django-production-chart.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+{{- $branch := .Values.branch}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.name" . }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ . }}
+            backend:
+              serviceName: {{ include "django-production-chart.releaseIdentifier" $root }}
+              servicePort: http
+        {{- end }}
+  {{- end }}

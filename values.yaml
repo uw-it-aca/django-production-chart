@@ -1,0 +1,69 @@
+# Default values for django-production-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+minReplicas: 5
+maxReplicas: 75
+
+repo: "prereq"
+
+nameOverride: ""
+fullnameOverride: ""
+
+branch: "master"
+
+service:
+  type: ClusterIP
+  port: 80
+
+image:
+  repository: "acait/django-contianer"
+  tag: "develop"
+
+commitHash: eabc3212
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+database:
+  engine: "mysql"
+
+certs:
+  mounted: false
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 500m
+    memory: 1024Mi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+environmentVariables:
+  - name: "ENV"
+    value: "dev"
+  - name: "PORT"
+    value: "8080"
+
+certs:
+  mounted: False
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
