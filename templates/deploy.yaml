@@ -82,6 +82,7 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          command: ["/scripts/deploy.sh"]
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
