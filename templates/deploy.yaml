@@ -31,6 +31,12 @@ spec:
         app.kubernetes.io/instance: {{.Release.Name | quote }}
         helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
     spec:
+{{- if .Values.certs.mounted}}
+      volumes:
+        - name: certs-volume
+          secret:
+            secretName: {{ .Values.certs.secretName | quote }}
+{{- end }}
       restartPolicy: Never
       containers:
         - name: {{ include "django-production-chart.releaseIdentifier" . }}
