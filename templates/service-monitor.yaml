@@ -1,0 +1,12 @@
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "django-production-chart.releaseIdentifier" . }}
+spec:
+  endpoints:
+    - port: http
+  selector:
+    matchLabels:
+      app: {{ include "django-production-chart.releaseIdentifier" . }}
+{{- end }}
