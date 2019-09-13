@@ -54,9 +54,9 @@ resources:
     memory: 512Mi
 
 metrics:
-  enabled: true
+  enabled: false
   serviceMonitor:
-    enabled: true
+    enabled: false
 
 environmentVariables:
   - name: "ENV"
