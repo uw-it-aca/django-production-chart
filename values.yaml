@@ -53,6 +53,11 @@ resources:
     cpu: 100m
     memory: 512Mi
 
+metrics:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+
 environmentVariables:
   - name: "ENV"
     value: "dev"
