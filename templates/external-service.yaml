@@ -1,0 +1,21 @@
+{{- if .Values.externalService.enabled -}}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.externalService.name }}
+spec:
+  type: {{ .Values.externalService.type }}
+  ports:
+    - port: {{ .Values.externalService.servicePort }}
+      targetPort: {{ .Values.externalService.servicePort }}
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: {{ .Values.externalService.name }}
+subsets:
+  - addresses:
+      - ip: {{ .Values.externalService.serviceAddress }}
+    ports:
+      - port: {{ .Values.externalService.servicePort }}
+{{- end -}}

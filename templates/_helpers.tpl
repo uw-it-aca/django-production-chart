@@ -32,5 +32,5 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{ define "django-production-chart.releaseIdentifier" -}}
-{{- printf "%s-prod-%s" .Values.repo .Values.branch -}}
+{{- printf "%s-prod-%s" .Values.repo .Values.instance -}}
 {{- end -}}
