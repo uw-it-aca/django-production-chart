@@ -44,9 +44,6 @@ externalService:
 cronjob:
   enabled: false
 
-cronjob:
-  enabled: false
-
 certs:
   mounted: false
 
