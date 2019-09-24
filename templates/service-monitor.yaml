@@ -8,5 +8,5 @@ spec:
     - port: http
   selector:
     matchLabels:
-      app: {{ include "django-production-chart.releaseIdentifier" . }}
+      app.kubernetes.io/instance: {{ include "django-production-chart.releaseIdentifier" . }}
 {{- end }}

@@ -38,6 +38,9 @@ ingress:
 database:
   engine: "mysql"
 
+externalService:
+  enabled: false
+
 certs:
   mounted: false
 
