@@ -31,75 +31,9 @@ spec:
         app.kubernetes.io/instance: {{.Release.Name | quote }}
         helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
     spec:
-{{- if .Values.certs.mounted}}
-      volumes:
-        - name: certs-volume
-          secret:
-            secretName: {{ .Values.certs.secretName | quote }}
-{{- end }}
-      restartPolicy: Never
-      containers:
-        - name: {{ include "django-production-chart.releaseIdentifier" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.commitHash }}"
-          imagePullPolicy: "Always"
-          env:
-{{- if .Values.certs.mounted}}
-          volumeMounts:
-            - name: certs-volume
-              readOnly: true
-              mountPath: "/certs"
-{{- end }}
-          env:
-{{- if .Values.certs.mounted }}
-            - name: CERT_PATH
-              value: {{ .Values.certs.certPath | quote }}
-            - name: KEY_PATH
-              value: {{ .Values.certs.keyPath | quote }}
-{{- end }}
-            - name: DB
-              value: {{ .Values.database.engine | quote }}
-            - name: DATABASE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.secretName }}
-                  key: username
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.secretName }}
-                  key: password
-            - name: ENV
-              value: "prod"
-            - name: PORT
-              value: "8080"
-            - name: DATABASE_DB_NAME
-              value: {{ .Values.database.name | quote }}
-            - name: DATABASE_HOSTNAME
-              value: {{ .Values.database.hostname | quote }}
-{{- range .Values.environmentVariablesSecrets }}
-            - name: {{ .name }}
-              valueFrom:
-                secretKeyRef: 
-                  name: {{ .secretName }}
-                  key: {{ .secretKey }}
-{{- end }}
-{{ toYaml .Values.environmentVariables | indent 12 }}
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          command: ["/scripts/deploy.sh"]
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+      restartPolicy: "Never"
+{{- include "django-production-chart.specContainerBase" . | nindent 6 -}}
+{{- include "django-production-chart.specContainerResources" . | nindent 10 -}}
+{{- include "django-production-chart.specContainerEnv" . | nindent 10 -}}
+{{- include "django-production-chart.specContainerCommand" (dict "command" (list ( "/scripts/deploy.sh" | quote ))) | nindent 14 -}}
+{{- include "django-production-chart.specContainerPorts" . | nindent 10 -}}
