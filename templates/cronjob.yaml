@@ -28,7 +28,7 @@ spec:
 {{- include "django-production-chart.specContainerBase" $dot | nindent 10 -}}
 {{- include "django-production-chart.specContainerResources" $dot | nindent 14 -}}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 14 -}}
-{{- include "django-production-chart.specContainerCommand" (dict "cmd" .command) | nindent 14 -}}
+{{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 14 -}}
 {{ printf "\n" }}
 {{- end -}}
 {{- end -}}
