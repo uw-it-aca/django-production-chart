@@ -30,7 +30,7 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   path: /
-  tls: []
+  tls: {}
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
@@ -39,6 +39,9 @@ database:
   engine: "mysql"
 
 externalService:
+  enabled: false
+
+cronjob:
   enabled: false
 
 certs:
