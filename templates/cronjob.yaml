@@ -14,9 +14,9 @@ metadata:
 spec:
   schedule: {{ .schedule | quote }}
   concurrencyPolicy: {{ default "Forbid" .concurrencyPolicy | quote }}
+  successfulJobsHistoryLimit: {{ default 0 .successfulJobsHistoryLimit }}
   failedJobsHistoryLimit: {{ default 3 .failedJobsHistoryLimit }}
   jobTemplate:
-    successfulJobsHistoryLimit: {{ default 0 .successfulJobsHistoryLimit }}
     spec:
       template:
         metadata:
