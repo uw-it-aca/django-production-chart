@@ -13,8 +13,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "django-production-chart.releaseIdentifier" . }}
-  minReplicas: {{ .Values.minReplicas }}
-  maxReplicas: {{ .Values.maxReplicas }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
     - type: Resource
       resource:
