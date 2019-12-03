@@ -10,7 +10,7 @@ volumes:
 {{- end }}
 containers:
   - name: {{ include "django-production-chart.releaseIdentifier" . }}
-    image: "{{ .Values.image.repository }}:{{ .Values.commitHash }}"
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
     imagePullPolicy: "Always"
 {{- if .Values.certs.mounted }}
     volumeMounts:
