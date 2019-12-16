@@ -24,8 +24,6 @@ image:
   repository: "acait/django-contianer"
   tag: "develop"
 
-commitHash: eabc3212
-
 
 autoscaling:
   enabled: true

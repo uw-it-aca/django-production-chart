@@ -15,7 +15,7 @@ metadata:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "django-production-chart.releaseIdentifier" . }}-release-job-{{ .Values.commitHash | trunc 7 }}-{{ randAlphaNum 3 | lower}}
+  name: {{ include "django-production-chart.releaseIdentifier" . }}-release-job-{{ .Values.image.tag | trunc 7 }}-{{ randAlphaNum 3 | lower}}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
