@@ -13,6 +13,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}
   annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.type }}
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
