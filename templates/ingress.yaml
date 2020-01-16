@@ -11,9 +11,9 @@ metadata:
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- with .Values.ingress.annotations }}
   annotations:
     kubernetes.io/ingress.class: {{ .Values.ingress.type }}
+{{- with .Values.ingress.annotations }}
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
