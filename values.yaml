@@ -51,6 +51,23 @@ externalService:
 cronjob:
   enabled: false
 
+memcached:
+  enabled: false
+  cmdflags:
+    maxItemMemory: 64
+    extendedOptions: modern
+    verbosity: v
+  updateStrategy:
+    type: RollingUpdate
+# override default, which is:
+#  replicaCount: 2
+# override defaults, which are:
+#  resources:
+#    requests:
+#      memory: 64Mi
+#      cpu: 50m
+
+
 certs:
   mounted: false
 
