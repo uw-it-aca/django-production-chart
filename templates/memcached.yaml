@@ -78,7 +78,7 @@ spec:
       - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
         image: {{ default "memcached:1.5.21" .Values.memcached.image | quote }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
-        command: 
+        command:
 {{- with .Values.memcached.command}}
 {{ toYaml . | indent 8 }}
 {{else}}
