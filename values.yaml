@@ -53,10 +53,6 @@ cronjob:
 
 memcached:
   enabled: false
-  cmdflags:
-    maxItemMemory: 64
-    extendedOptions: modern
-    verbosity: v
   updateStrategy:
     type: RollingUpdate
 # override default, which is:

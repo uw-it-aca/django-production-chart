@@ -78,16 +78,17 @@ spec:
       - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
         image: {{ default "memcached:1.5.21" .Values.memcached.image | quote }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
-        command:
-        - memcached
-        - -m {{ .Values.memcached.cmdflags.maxItemMemory }}
-        {{- if .Values.memcached.cmdflags.extendedOptions }}
-        - -o
-        - {{ .Values.memcached.cmdflags.extendedOptions }}
-        {{- end }}
-        {{- if .Values.memcached.cmdflags.verbosity }}
-        - -{{ .Values.memcached.cmdflags.verbosity }}
-        {{- end }}
+        command: 
+{{- with .Values.memcached.command}}
+{{ toYaml . | indent 8 }}
+{{else}}
+          - memcached
+          - -m
+          - 64
+          - -o
+          - modern
+          - -v
+{{- end }}
 {{- with .Values.memcached.extraArgs }}
 {{ toYaml . | indent 8 }}
 {{- end }}
@@ -136,7 +137,7 @@ spec:
 {{ toYaml . | trim | indent 8}}
 {{- end }}
   updateStrategy:
-    type: {{ default "RollingUpdate" .Values.memcached.updateStrategy.type }}
+    type: {{ .Values.memcached.updateStrategy.type }}
     {{- if (eq "Recreate" .Values.memcached.updateStrategy.type) }}
     rollingUpdate: null
     {{- end }}
