@@ -60,7 +60,7 @@ spec:
       app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
       app.kubernetes.io/instance: {{ .Release.Name | quote }}
   serviceName: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-  replicas: {{ default 2 .Values.memcached.replicaCount }}
+  replicas: {{ .Values.memcached.replicaCount }}
   template:
     metadata:
       labels:
