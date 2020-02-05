@@ -29,6 +29,12 @@ env:
     value: {{ .Values.database.name | quote }}
   - name: DATABASE_HOSTNAME
     value: {{ .Values.database.hostname | quote }}
+{{- if .Values.memcached.enabled }}
+  - name: MEMCACHED_SERVER_COUNT
+    value: {{ .Values.memcached.replicaCount }}
+  - name: MEMCACHED_SERVER_SPEC
+    value: {{ ( include "django-production-chart.releaseIdentifier" . ) }}-memcached-{{ "{}" }}.{{ ( include "django-production-chart.releaseIdentifier" .) }}.{{ .Release.Namespace }}.svc.cluster.local
+{{- end }}
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}
     valueFrom:
