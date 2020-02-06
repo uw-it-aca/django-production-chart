@@ -51,6 +51,26 @@ externalService:
 cronjob:
   enabled: false
 
+memcached:
+  enabled: false
+  replicaCount: 2
+  updateStrategy:
+    type: RollingUpdate
+# override default command, which is:
+#  command:
+#   - memcached
+#   - -m
+#   - 64
+#   - -o
+#   - modern
+#   - -v
+# override defaults, which are:
+#  resources:
+#    requests:
+#      memory: 64Mi
+#      cpu: 50m
+
+
 certs:
   mounted: false
 

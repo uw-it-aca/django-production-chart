@@ -1,0 +1,144 @@
+{{- if .Values.memcached.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  annotations:
+{{ toYaml .Values.serviceAnnotations | indent 4 }}
+spec:
+  clusterIP: None
+  ports:
+  - name: memcache
+    port: 11211
+    targetPort: memcache
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+  - name: metrics
+    port: 9150
+    targetPort: metrics
+{{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  endpoints:
+  - port: metrics
+{{- end }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  serviceName: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+  replicas: {{ .Values.memcached.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+{{- with .Values.podLabels }}
+{{ toYaml . | indent 8 }}
+{{- end}}
+{{- with .Values.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+    spec:
+      containers:
+      - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+        image: {{ default "memcached:1.5.21" .Values.memcached.image | quote }}
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        command:
+{{- with .Values.memcached.command}}
+{{ toYaml . | indent 8 }}
+{{else}}
+          - memcached
+          - -m
+          - 64
+          - -o
+          - modern
+          - -v
+{{- end }}
+{{- with .Values.memcached.extraArgs }}
+{{ toYaml . | indent 8 }}
+{{- end }}
+        ports:
+        - name: memcache
+          containerPort: 11211
+        livenessProbe:
+          tcpSocket:
+            port: memcache
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: memcache
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        resources:
+{{ toYaml .Values.memcached.resources | indent 10 }}
+{{- if .Values.metrics.enabled }}
+      - name: metrics
+        image: "prom/memcached-exporter:latest"
+        imagePullPolicy: {{ default "" .Values.metrics.imagePullPolicy | quote }}
+        ports:
+        - name: metrics
+          containerPort: 9150
+        resources:
+{{ toYaml .Values.metrics.resources | indent 10 }}
+{{- end }}
+{{- with .Values.extraContainers }}
+{{ tpl . $ | indent 6 }}
+{{- end }}
+{{- with .Values.extraVolumes }}
+      volumes:
+{{ tpl . $ | indent 6 }}
+{{- end }}
+{{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | trim | indent 8}}
+{{- end }}
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | trim | indent 8}}
+{{- end }}
+{{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | trim | indent 8}}
+{{- end }}
+  updateStrategy:
+    type: {{ .Values.memcached.updateStrategy.type }}
+    {{- if (eq "Recreate" .Values.memcached.updateStrategy.type) }}
+    rollingUpdate: null
+    {{- end }}
+{{- end -}}
