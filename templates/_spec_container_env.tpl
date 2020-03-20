@@ -21,10 +21,6 @@ env:
       secretKeyRef:
         name: {{ .Values.database.secretName }}
         key: password
-  - name: ENV
-    value: "prod"
-  - name: PORT
-    value: "8080"
   - name: DATABASE_DB_NAME
     value: {{ .Values.database.name | quote }}
   - name: DATABASE_HOSTNAME
