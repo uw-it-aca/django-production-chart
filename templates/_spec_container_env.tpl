@@ -3,6 +3,8 @@ Application container base spec environment variables
 */}}
 {{- define "django-production-chart.specContainerEnv" -}}
 env:
+  - name: PORT
+    value: "8080"
 {{- if .Values.certs.mounted }}
   - name: CERT_PATH
     value: {{ .Values.certs.certPath | quote }}
