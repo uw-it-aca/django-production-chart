@@ -31,7 +31,7 @@ env:
   - name: MEMCACHED_SERVER_COUNT
     value: {{ .Values.memcached.replicaCount | quote }}
   - name: MEMCACHED_SERVER_SPEC
-    value: {{ ( include "django-production-chart.releaseIdentifier" . ) }}-memcached-{{ "{}" }}.{{ ( include "django-production-chart.releaseIdentifier" .) }}.{{ .Release.Namespace }}-memcached.svc.cluster.local:11211
+    value: {{ ( include "django-production-chart.releaseIdentifier" . ) }}-memcached-{{ "{}" }}.{{ ( include "django-production-chart.releaseIdentifier" .) }}.{{ .Release.Namespace }}-memcached.svc.cluster.local
 {{- end }}
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}
