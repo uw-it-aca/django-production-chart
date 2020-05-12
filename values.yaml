@@ -53,7 +53,7 @@ cronjob:
 
 memcached:
   enabled: false
-  replicaCount: 2
+  replicaCount: 1
   updateStrategy:
     type: RollingUpdate
 # override default command, which is:
