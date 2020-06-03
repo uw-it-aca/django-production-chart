@@ -92,7 +92,7 @@ metrics:
     enabled: false
 
 readiness:
-  enabled: true
+  enabled: false
 ## optionally define command, httpGet, tcpSocket
 ## default is command below
 #  command:
