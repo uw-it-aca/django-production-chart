@@ -27,8 +27,7 @@ spec:
     targetPort: metrics
 {{- end }}
   selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+    app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
 {{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
 ---
 apiVersion: monitoring.coreos.com/v1
