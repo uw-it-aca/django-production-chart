@@ -1,4 +1,6 @@
 {{- if .Values.memcached.enabled }}
+{{- $command := .Values.memcached.command | default (list "memcached" "-m" "64" "-o" "modern" "-v") -}}
+{{- $extraArgs := .Values.memcached.extraArgs | default "" -}}
 ---
 apiVersion: v1
 kind: Service
@@ -9,8 +11,10 @@ metadata:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
+{{- if .Values.serviceAnnotations -}}
   annotations:
 {{ toYaml .Values.serviceAnnotations | indent 4 }}
+{{- end }}
 spec:
   clusterIP: None
   ports:
@@ -78,20 +82,7 @@ spec:
       - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
         image: {{ default "memcached:1.5.21" .Values.memcached.image | quote }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
-        command:
-{{- with .Values.memcached.command}}
-{{ toYaml . | indent 8 }}
-{{else}}
-          - memcached
-          - -m
-          - 64
-          - -o
-          - modern
-          - -v
-{{- end }}
-{{- with .Values.memcached.extraArgs }}
-{{ toYaml . | indent 8 }}
-{{- end }}
+{{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" $extraArgs) | indent 8}}
         ports:
         - name: memcache
           containerPort: 11211

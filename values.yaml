@@ -91,6 +91,22 @@ metrics:
   serviceMonitor:
     enabled: false
 
+readiness:
+  enabled: true
+## optionally define command, httpGet, tcpSocket
+## default is command below
+#  command:
+#    - "/scripts/ready.sh"
+## alternatives must define/provide endpoint
+#  httpGet:
+#    path: /readiness
+#    port: "8080"
+#  tcpSocket:
+#    port: "5050"
+## optionally override delay and period
+#  initialDelay: "5"
+#  period: "5"
+
 environmentVariables:
   - name: "ENV"
     value: "dev"

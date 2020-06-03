@@ -1,9 +1,17 @@
 {{/*
-Application container base spec environment variables
+Application container base spec command
 */}}
 {{- define "django-production-chart.specContainerCommand" -}}
-command: {{ .command }}
+{{ if .command -}}
+command:
+{{- range .command }}
+  - {{ . }}
+{{- end -}}
+{{- end -}}
 {{ if .args -}}
-args: {{ .args }}
+args:
+{{- range .args }}
+  - {{ . }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
