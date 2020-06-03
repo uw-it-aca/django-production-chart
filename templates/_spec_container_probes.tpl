@@ -13,7 +13,8 @@ readinessProbe:
   tcpSocket:
     port: {{ default "8080" .Values.readiness.tcpSocket.port }}
 {{- else }}
-{{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" "") | indent 2}}
+  exec:
+{{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" "") | indent 4}}
 {{- end }}
   initialDelaySeconds: {{ .Values.readiness.initialDelay | default 5 }}
   periodSeconds: {{ .Values.readiness.period | default 5 }}
