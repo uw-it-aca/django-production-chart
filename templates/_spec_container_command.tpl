@@ -2,16 +2,16 @@
 Application container base spec command
 */}}
 {{- define "django-production-chart.specContainerCommand" -}}
-{{ if .command -}}
+{{- if .command -}}
 command:
 {{- range .command }}
   - {{ . | quote }}
-{{- end -}}
-{{- end -}}
-{{ if .args -}}
+{{- end }}
+{{- end }}
+{{- if .args }}
 args:
 {{- range .args }}
   - {{ . | quote }}
-{{- end -}}
-{{- end -}}
-{{- end -}}
+{{- end }}
+{{- end }}
+{{- end }}
