@@ -116,6 +116,20 @@ environmentVariables:
 certs:
   mounted: False
 
+gcpProject: gcp-project-name
+
+externalSecrets:
+  enabled: false
+  secrets:
+    - name: test.app.uw.edu-secrets
+      externalKey: team/app/test/secrets
+      data:
+        - name: secret-one
+          property: bar
+        - name: secret-too
+          property: mumble
+
+
 nodeSelector: {}
 
 tolerations: []
