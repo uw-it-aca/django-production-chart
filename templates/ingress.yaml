@@ -13,8 +13,8 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
     kubernetes.io/ingress.class: {{ .Values.ingress.type }}
-    nginx.ingress.kubernetes.io/proxy-ssl-protocols: {{ .Values.ingress.sslProtocols }}
-    nginx.ingress.kubernetes.io/proxy-ssl-ciphers: {{ .Values.ingress.sslCiphers }}
+    nginx.ingress.kubernetes.io/ssl-protocols: {{ .Values.ingress.sslProtocols }}
+    nginx.ingress.kubernetes.io/ssl-ciphers: {{ .Values.ingress.sslCiphers }}
 {{- with .Values.ingress.annotations }}
 {{ toYaml . | indent 4 }}
 {{- end }}
