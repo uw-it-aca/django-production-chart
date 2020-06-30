@@ -107,6 +107,13 @@ readiness:
 #  initialDelay: "5"
 #  period: "5"
 
+lifecycle:
+  enabled: false
+#  preStop:
+#    enabled: true
+## default command is
+#    command: ["/bin/sleep" "20"]
+
 environmentVariables:
   - name: "ENV"
     value: "dev"
