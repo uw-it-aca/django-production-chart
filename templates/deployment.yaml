@@ -23,5 +23,5 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
 {{- include "django-production-chart.specControllerScheduling" . | nindent 6 -}}
-{{- include "django-production-chart.specContainerLifecycle" . | nindent 6 -}}
 {{- include "django-production-chart.specContainer" . | nindent 6 -}}
+{{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}
