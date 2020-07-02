@@ -8,10 +8,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
-{{ if .Values.autoscaling.enabled }}
-{{ else }}
+{{- if .Values.autoscaling.enabled }}
+{{- else }}
   replicas: {{ .Values.replicaCount }}
-{{ end }}
+{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
@@ -22,5 +22,6 @@ spec:
         app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+{{- include "django-production-chart.specControllerScheduling" . | nindent 6 -}}
 {{- include "django-production-chart.specContainer" . | nindent 6 -}}
 {{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}

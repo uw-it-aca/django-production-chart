@@ -114,15 +114,15 @@ spec:
       volumes:
 {{ tpl . $ | indent 6 }}
 {{- end }}
-{{- with .Values.nodeSelector }}
+{{- with .Values.memcached.nodeSelector }}
       nodeSelector:
 {{ toYaml . | trim | indent 8}}
 {{- end }}
-{{- with .Values.tolerations }}
+{{- with .Values.memcached.tolerations }}
       tolerations:
 {{ toYaml . | trim | indent 8}}
 {{- end }}
-{{- with .Values.affinity }}
+{{- with .Values.memcached.affinity }}
       affinity:
 {{ toYaml . | trim | indent 8}}
 {{- end }}
