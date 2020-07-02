@@ -16,13 +16,15 @@ affinity:
 {{- if .podsSpanNodes }}
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
             - key: "app.kubernetes.io/name"
               operator: In
               values:
               - "{{ include "django-production-chart.releaseIdentifier" $dot }}"
-        topologyKey: "kubernetes.io/hostname"
+          topologyKey: kubernetes.io/hostname
 {{- else }}
 {{ toYaml . | trim | indent 2}}
 {{- end }}
