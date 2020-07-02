@@ -142,3 +142,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+## set directly, or use shortcut below to schedule pods across nodes
+#affinity:
+#   podsSpanNodes: true
