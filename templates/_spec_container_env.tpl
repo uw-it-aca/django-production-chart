@@ -13,6 +13,7 @@ env:
 {{- end }}
   - name: DB
     value: {{ .Values.database.engine | quote }}
+{{- if (ne "sqlite3" .Values.database.engine) }}
   - name: DATABASE_USERNAME
     valueFrom:
       secretKeyRef:
@@ -27,6 +28,7 @@ env:
     value: {{ .Values.database.name | quote }}
   - name: DATABASE_HOSTNAME
     value: {{ .Values.database.hostname | quote }}
+{{- end }}
 {{- if .Values.memcached.enabled }}
   - name: MEMCACHED_SERVER_COUNT
     value: {{ .Values.memcached.replicaCount | quote }}
