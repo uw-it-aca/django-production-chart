@@ -11,8 +11,11 @@ env:
   - name: KEY_PATH
     value: {{ .Values.certs.keyPath | quote }}
 {{- end }}
+{{- if .Values.database.engine }}
   - name: DB
     value: {{ .Values.database.engine | quote }}
+{{- end }}
+{{- if .Values.database.secretName }}
   - name: DATABASE_USERNAME
     valueFrom:
       secretKeyRef:
@@ -23,10 +26,15 @@ env:
       secretKeyRef:
         name: {{ .Values.database.secretName }}
         key: password
+{{- end }}
+{{- if .Values.database.name }}
   - name: DATABASE_DB_NAME
     value: {{ .Values.database.name | quote }}
+{{- end }}
+{{- if .Values.database.hostname }}
   - name: DATABASE_HOSTNAME
     value: {{ .Values.database.hostname | quote }}
+{{- end }}
 {{- if .Values.memcached.enabled }}
   - name: MEMCACHED_SERVER_COUNT
     value: {{ .Values.memcached.replicaCount | quote }}
