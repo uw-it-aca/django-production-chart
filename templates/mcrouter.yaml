@@ -22,8 +22,7 @@ spec:
     port: {{ default 5000 .Values.memcached.mcrouter.params.port }}
     targetPort: mcrouter-port
   selector:
-    app.kubernetes.io/name:  {{ include "django-production-chart.releaseIdentifier" . }} 
-    app.kubernetes.io/instance: {{ $releaseName }}
+    app.kubernetes.io/name: {{ $appName }}
 ---
 apiVersion: v1
 kind: ConfigMap
