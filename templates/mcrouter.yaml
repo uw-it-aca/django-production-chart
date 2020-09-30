@@ -62,7 +62,8 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) }}
+      app.kubernetes.io/name: {{ printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) }}
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
   template:
     metadata:
       labels:
