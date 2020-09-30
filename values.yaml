@@ -54,8 +54,6 @@ cronjob:
 memcached:
   enabled: false
   replicaCount: 1
-  updateStrategy:
-    type: RollingUpdate
 # override default command, which is:
 #  command:
 #   - memcached
@@ -69,6 +67,19 @@ memcached:
 #    requests:
 #      memory: 64Mi
 #      cpu: 50m
+# optionally layer mcrouter for scaling if necessary
+  updateStrategy:
+    type: RollingUpdate
+  mcrouter:
+    enabled: false
+    controller: "daemonset"
+    params:
+      port:  5000
+    daemonsetParams:
+      hostPort: 5000
+    statefulsetParams:
+      replicas: 1
+      antiAffinity: "hard"
 
 
 certs:
