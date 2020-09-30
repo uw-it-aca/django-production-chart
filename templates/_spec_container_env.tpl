@@ -38,7 +38,7 @@ env:
 {{- if .Values.memcached.enabled }}
 {{- if .Values.memcached.mcrouter.enabled }}
   - name: MEMCACHED_SERVER_COUNT
-    value: 1
+    value: "1"
   - name: MEMCACHED_SERVER_SPEC
     value: {{ ( include "django-production-chart.releaseIdentifier" . ) }}-mcrouter.{{ .Release.Namespace }}.svc.cluster.local:{{ default 5000 .Values.memcached.mcrouter.params.port }}
 {{- else }}
