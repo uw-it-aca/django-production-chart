@@ -1,17 +1,20 @@
 {{- if and .Values.memcached.enabled .Values.memcached.mcrouter.enabled }}
 {{- $memcachedService := printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $appName := printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $releaseName := .Release.Name -}}
 {{- $releaseNamespace := .Release.Namespace -}}
 {{- $controller := .Values.memcached.mcrouter.controller | default "daemonset" -}}
+{{- $antiAffinity := .Values.memcached.mcrouter.statefulsetParams.antiAffinity | default "hard" -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) }}
+  name: {{ $appName }}
   namespace: {{ $releaseNamespace }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ $releaseName | quote }}
 spec:
   clusterIP: None
   ports:
@@ -20,7 +23,7 @@ spec:
     targetPort: mcrouter-port
   selector:
     app.kubernetes.io/name:  {{ include "django-production-chart.releaseIdentifier" . }} 
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ $releaseName }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -30,7 +33,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ $releaseName | quote }}
 data:
   config.json: |-
 {{- if .Values.memcached.mcrouter.params.configFile }}{{ range .Files.Lines .Values.memcached.mcrouter.params.configFile }}
@@ -54,24 +57,24 @@ data:
 apiVersion: {{ template "daemonset.apiVersion" . }}
 kind: DaemonSet
 metadata:
-  name: {{ printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) }}
+  name: {{ $appName }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ $releaseName | quote }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) }}
-      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+      app.kubernetes.io/name: {{ $appName }}
+      app.kubernetes.io/instance: {{ $releaseName | quote }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) }}
-        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        app.kubernetes.io/name: {{ $appName }}
+        app.kubernetes.io/instance: {{ $releaseName | quote }}
     spec:
       containers:
-      - name: {{ printf "%s-mcrouter" ( include "django-production-chart.releaseIdentifier" . ) }}
+      - name: {{ $appName }}
         image: {{ default "jphalip/mcrouter:0.36.0" .Values.memcached.mcrouter.image }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         command: ["mcrouter"]
@@ -102,4 +105,77 @@ spec:
         configMap:
           name: {{ printf "%s-mcrouter-configmap" ( include "django-production-chart.releaseIdentifier" . ) }}
 {{- end -}}
+{{- if eq $controller "statefulset" }}
+---
+apiVersion: {{ template "statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ $appName }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/instance: {{ $releaseName | quote }}
+spec:
+  serviceName: {{ $appName }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $appName }}
+      app.kubernetes.io/instance: {{ $releaseName | quote }}
+  replicas: {{ default 1  .Values.memcached.mcrouter.statefulsetParams.replicas }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $appName }}
+        app.kubernetes.io/instance: {{ $releaseName | quote }}
+    spec:
+      affinity:
+        podAntiAffinity:
+        {{- if eq $antiAffinity "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: {{ $appName }}
+                app.kubernetes.io/instance: {{ $releaseName | quote }}
+        {{- else if eq $antiAffinity "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 5
+            podAffinityTerm:
+            - topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                app.kubernetes.io/name: {{ $appName }}
+                app.kubernetes.io/instance: {{ $releaseName | quote }}
+        {{- end }}
+      containers:
+      - name: {{ $appName }}
+        image: {{ default "jphalip/mcrouter:0.36.0" .Values.memcached.mcrouter.image }}
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        command: ["mcrouter"]
+        args:
+        - -p {{ default 5000 .Values.memcached.mcrouter.params.port }}
+        - --config-file=/etc/mcrouter/config.json
+        volumeMounts:
+        - name: config
+          mountPath: /etc/mcrouter
+        ports:
+        - name: mcrouter-port
+          containerPort: {{ default 5000 .Values.memcached.mcrouter.params.port }}
+        livenessProbe:
+          tcpSocket:
+            port: mcrouter-port
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: mcrouter-port
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ printf "%s-mcrouter-configmap" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- end }}
 {{- end -}}
