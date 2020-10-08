@@ -85,6 +85,13 @@ spec:
         ports:
         - name: memcache
           containerPort: 11211
+{{- if .Values.memcached.liveness.enabled }}
+        livenessProbe:
+          tcpSocket:
+            port: memcache
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+{{- end }}
         readinessProbe:
           tcpSocket:
             port: memcache
