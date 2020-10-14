@@ -1,3 +1,4 @@
+{{- if .Values.ingress.enabled }}
 {{- $root := . -}}
 {{- $fullName := include "django-production-chart.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
@@ -39,3 +40,4 @@ spec:
               servicePort: http
         {{- end }}
   {{- end }}
+{{- end }}
