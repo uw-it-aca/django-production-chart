@@ -1,6 +1,6 @@
 {{- if .Values.daemon.enabled }}
 {{- $dot := . -}}
-{{- range .Values.daemon.daemons -}}
+{{- range .Values.daemon.daemons }}
 ---
 apiVersion: apps/v1
 kind: ReplicaSet
@@ -27,6 +27,5 @@ spec:
 {{- include "django-production-chart.specContainerResources" $dot | nindent 10 -}}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 10 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 -}}
-{{ printf "\n" }}
-{{- end -}}
-{{- end -}}
+{{- end }}
+{{- end }}
