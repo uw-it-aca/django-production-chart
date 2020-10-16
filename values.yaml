@@ -51,6 +51,10 @@ externalService:
 cronjob:
   enabled: false
 
+daemon:
+  enabled: false
+
+
 memcached:
   enabled: false
   replicaCount: 1
