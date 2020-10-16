@@ -15,7 +15,7 @@ spec:
   replicas: {{ default 1 .replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" $dot }}
+      app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
       app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
   template:
     metadata:

@@ -1,0 +1,29 @@
+---
+language: generic
+
+env:
+  global:
+    - HELM_APP_URL=https://get.helm.sh
+    - HELM_APP_TGZ=helm-v3.0.0-linux-amd64.tar.gz
+    - KUBEVAL_URL=https://github.com/instrumenta/kubeval/releases/latest/download
+    - KUBEVAL_TGZ=kubeval-linux-amd64.tar.gz
+
+before_script:
+  - set -e
+
+install:
+  - cd .travis-ci
+  - mkdir ./bin
+  - PATH=`pwd`/bin/:$PATH
+  - wget -q ${HELM_APP_URL}/${HELM_APP_TGZ}
+  - tar xzfv ${HELM_APP_TGZ}
+  - mv linux-amd64/helm ./bin
+  - wget -q ${KUBEVAL_URL}/${KUBEVAL_TGZ}
+  - tar xzfv ${KUBEVAL_TGZ}
+  - mv ./kubeval ./bin
+
+script:
+  - helm template test .. --set-string "image.tag=007" --set-string "gcpProject=007" -f ../values.yaml > /tmp/test-manifest
+  - kubeval /tmp/test-manifest --strict --exit-on-error --ignore-missing-schemas
+  - helm template test .. --set-string "image.tag=007" --set-string "gcpProject=007" -f test-values.yaml > /tmp/test-manifest
+  - kubeval /tmp/test-manifest --strict --exit-on-error --ignore-missing-schemas
