@@ -20,7 +20,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" $dot }}
+        app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
         app.kubernetes.io/instance: {{ $dot.Release.Name }}
     spec:
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 -}}
