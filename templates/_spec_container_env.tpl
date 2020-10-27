@@ -5,6 +5,8 @@ Application container base spec environment variables
 env:
   - name: PORT
     value: "8080"
+  - name: RELEASE_ID
+    value: {{ include "django-production-chart.releaseIdentifier" . }}
 {{- if .Values.certs.mounted }}
   - name: CERT_PATH
     value: {{ .Values.certs.certPath | quote }}
