@@ -1,0 +1,82 @@
+{{- if and .Values.cronjob.enabled .Values.metrics.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+{{- if .Values.serviceAnnotations -}}
+  annotations:
+{{ toYaml .Values.serviceAnnotations | indent 4 }}
+{{- end }}
+spec:
+  type: clusterIP
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+  selector:
+    app.kubernetes.io/name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  endpoints:
+  - port: metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+  labels:
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+spec:
+  replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: pushgateway
+          image: "prom/pushgateway:v1.2.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 9091
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9091
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9091
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+{{- end }}
