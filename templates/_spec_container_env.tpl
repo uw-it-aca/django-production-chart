@@ -37,6 +37,10 @@ env:
   - name: DATABASE_HOSTNAME
     value: {{ .Values.database.hostname | quote }}
 {{- end }}
+{{- if and .Values.cronjob.enabled .Values.metrics.enabled }}
+  - name: PUSHGATEWAY
+    value: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- end }}
 {{- if .Values.memcached.enabled }}
 {{- if .Values.memcached.mcrouter.enabled }}
   - name: MEMCACHED_SERVER_COUNT
