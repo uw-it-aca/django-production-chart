@@ -51,13 +51,13 @@ spec:
   replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
   template:
     metadata:
       labels:
-        app: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
     spec:
       containers:
         - name: pushgateway
