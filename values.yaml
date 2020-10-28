@@ -109,7 +109,8 @@ metrics:
   serviceMonitor:
     enabled: true
   pushgateway:
-    enabled: false
+    enabled: true
+    replicaCount: 1
 
 readiness:
   enabled: false
