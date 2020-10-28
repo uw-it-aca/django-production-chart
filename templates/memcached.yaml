@@ -28,7 +28,6 @@ spec:
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
