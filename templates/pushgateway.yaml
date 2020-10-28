@@ -60,7 +60,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
     spec:
       containers:
-        - name: pushgateway
+        - name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
           image: "prom/pushgateway:v1.2.0"
           imagePullPolicy: IfNotPresent
           ports:
