@@ -108,6 +108,8 @@ metrics:
   enabled: true
   serviceMonitor:
     enabled: true
+  pushgateway:
+    enabled: false
 
 readiness:
   enabled: false
