@@ -28,6 +28,25 @@ spec:
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  endpoints:
+  - port: metrics
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
