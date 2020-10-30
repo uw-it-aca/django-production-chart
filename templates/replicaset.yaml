@@ -15,8 +15,7 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: metrics
-    port: http
+  - port: {{ $dot.Values.service.port }}
     targetPort: 8080
   selector:
     app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
