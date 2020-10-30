@@ -1,5 +1,24 @@
 {{- if .Values.daemon.enabled }}
 {{- $dot := . -}}
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  endpoints:
+  - port: 8080
+{{- end }}
 {{- range .Values.daemon.daemons }}
 ---
 apiVersion: apps/v1
@@ -7,7 +26,7 @@ kind: ReplicaSet
 metadata:
   name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+    app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
     app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
     app.kubernetes.io/managed-by: {{ $dot.Release.Service | quote }}
