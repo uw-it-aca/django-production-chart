@@ -6,7 +6,7 @@ metadata:
   name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- if .Values.serviceAnnotations -}}
