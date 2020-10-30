@@ -17,7 +17,7 @@ spec:
   clusterIP: None
   ports:
   - name: metrics
-    port: 9090
+    port: 9091
     targetPort: metrics
   selector:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
