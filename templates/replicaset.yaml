@@ -1,15 +1,14 @@
 {{- if .Values.daemon.enabled }}
 {{- $dot := . -}}
-{{- range .Values.daemon.daemons }}
-{{- if $dot.Values.metrics.enabled }}
+{{- if .Values.metrics.enabled }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+  name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
   namespace: {{ $dot.Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+    app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
     app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
 spec:
@@ -18,9 +17,10 @@ spec:
   - port: {{ $dot.Values.service.port }}
     targetPort: 8080
   selector:
-    app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+    app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
     app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
 {{- end }}
+{{- range .Values.daemon.daemons }}
 ---
 apiVersion: apps/v1
 kind: ReplicaSet
