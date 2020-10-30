@@ -17,7 +17,7 @@ spec:
   - port: {{ $dot.Values.service.port }}
     targetPort: 8080
   selector:
-    app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
+    daemon-group: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) | quote }}
     app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
 {{- end }}
 {{- range .Values.daemon.daemons }}
@@ -41,6 +41,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+        daemon-group: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) | quote }}
         app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
     spec:
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 -}}
