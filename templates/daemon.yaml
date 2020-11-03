@@ -55,9 +55,12 @@ spec:
         app.kubernetes.io/instance: {{ $release_id }}
         role: management-command-daemon
     spec:
-{{- include "django-production-chart.specContainerBase" $dot | nindent 6 -}}
-{{- include "django-production-chart.specContainerResources" $dot | nindent 10 -}}
-{{- include "django-production-chart.specContainerEnv" $dot | nindent 10 -}}
-{{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 -}}
+{{- include "django-production-chart.specContainerBase" $dot | nindent 6 }}
+          ports:
+            - name: metrics
+              containerPort: 8080
+{{- include "django-production-chart.specContainerResources" $dot | nindent 10 }}
+{{- include "django-production-chart.specContainerEnv" $dot | nindent 10 }}
+{{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 }}
 {{- end }}
 {{- end }}
