@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ $release_id }}
-      purpose: "management-command-daemon"
+      role: "management-command-daemon"
 {{- end }}
 {{- range .Values.daemon.daemons }}
 ---
@@ -35,7 +35,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
         app.kubernetes.io/instance: {{ $release_id }}
-        purpose: "management-command-daemon"
+        role: "management-command-daemon"
     spec:
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 -}}
 {{- include "django-production-chart.specContainerResources" $dot | nindent 10 -}}
