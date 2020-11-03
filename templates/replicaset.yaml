@@ -1,48 +1,41 @@
 {{- if .Values.daemon.enabled }}
-{{- $dot := . -}}
-{{- if .Values.metrics.enabled }}
----
-apiVersion: v1
-kind: Service
+{{- $dot := . }}
+{{- $release_id := ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
 metadata:
-  name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
-  namespace: {{ $dot.Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
-    app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
-    helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
+  name: {{ printf "%s-daemon" $release_id }}
 spec:
-  clusterIP: None
-  ports:
-  - port: {{ $dot.Values.service.port }}
-    targetPort: 8080
+  endpoints:
+    - port: 8080
   selector:
-    daemon-group: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) | quote }}
-    app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
+    matchLabels:
+      app.kubernetes.io/instance: {{ $release_id }}
+      purpose: "management-command-daemon"
 {{- end }}
 {{- range .Values.daemon.daemons }}
 ---
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+  name: {{ printf "%s-daemon-%s" $release_id .name }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) }}
-    app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
-    app.kubernetes.io/managed-by: {{ $dot.Release.Service | quote }}
+    app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+    app.kubernetes.io/instance: {{ $release_id }}
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
 spec:
   replicas: {{ default 1 .replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
-      app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
+      app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+      app.kubernetes.io/instance: {{ $release_id }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ printf "%s-daemon-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
-        daemon-group: {{ printf "%s-daemon" ( include "django-production-chart.releaseIdentifier" $dot ) | quote }}
-        app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
+        app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+        app.kubernetes.io/instance: {{ $release_id }}
+        purpose: "management-command-daemon"
     spec:
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 -}}
 {{- include "django-production-chart.specContainerResources" $dot | nindent 10 -}}
