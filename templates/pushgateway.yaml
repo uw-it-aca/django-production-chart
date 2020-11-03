@@ -9,7 +9,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: $release_id
+    app.kubernetes.io/instance: {{ $release_id }}
 {{- if .Values.serviceAnnotations -}}
   annotations:
 {{ toYaml .Values.serviceAnnotations | indent 4 }}
@@ -22,7 +22,7 @@ spec:
     targetPort: metrics
   selector:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-    app.kubernetes.io/instance: $release_id
+    app.kubernetes.io/instance: {{ $release_id }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -31,7 +31,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-    app.kubernetes.io/instance: $release_id
+    app.kubernetes.io/instance: {{ $release_id }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
 spec:
   selector:
@@ -47,19 +47,19 @@ metadata:
   name: {{ printf "%s-pushgateway" $release_id }}
   labels:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-    app.kubernetes.io/instance: $release_id
+    app.kubernetes.io/instance: {{ $release_id }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
 spec:
   replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-      app.kubernetes.io/instance: $release_id
+      app.kubernetes.io/instance: {{ $release_id }}
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-        app.kubernetes.io/instance: $release_id
+        app.kubernetes.io/instance: {{ $release_id }}
     spec:
       containers:
         - name: {{ printf "%s-pushgateway" $release_id }}
