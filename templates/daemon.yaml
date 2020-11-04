@@ -9,6 +9,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ printf "%s-daemon" $release_id }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    role: management-command-daemon
 spec:
   clusterIP: None
   ports:
