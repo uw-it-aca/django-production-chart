@@ -14,7 +14,7 @@ spec:
   clusterIP: None
   ports:
     - name: metrics
-      port: 8080
+      port: 9100
       targetPort: metrics
       protocol: TCP
   selector:
@@ -36,7 +36,7 @@ spec:
 {{- range .Values.daemon.daemons }}
 ---
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
   name: {{ printf "%s-daemon-%s" $release_id .name }}
   labels:
@@ -59,7 +59,7 @@ spec:
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 }}
           ports:
             - name: metrics
-              containerPort: 8080
+              containerPort: 9100
 {{- include "django-production-chart.specContainerResources" $dot | nindent 10 }}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 10 }}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 }}
