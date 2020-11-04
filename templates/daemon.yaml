@@ -42,6 +42,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
     app.kubernetes.io/instance: {{ $release_id }}
+    role: management-command-daemon
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
 spec:
   replicas: {{ default 1 .replicaCount }}
