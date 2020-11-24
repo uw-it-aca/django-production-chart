@@ -23,7 +23,7 @@ install:
   - mv ./kubeval ./bin
 
 script:
-  - helm template test .. --set-string "image.tag=007" --set-string "gcpProject=007" -f ../values.yaml > /tmp/test-manifest
+  - helm template test .. --set-string "image.tag=007" -f ../values.yaml > /tmp/test-manifest
   - kubeval /tmp/test-manifest --strict --exit-on-error --ignore-missing-schemas
-  - helm template test .. --set-string "image.tag=007" --set-string "gcpProject=007" -f test-values.yaml > /tmp/test-manifest
+  - helm template test .. --set-string "image.tag=007" -f test-values.yaml > /tmp/test-manifest
   - kubeval /tmp/test-manifest --strict --exit-on-error --ignore-missing-schemas
