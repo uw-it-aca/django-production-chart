@@ -144,8 +144,6 @@ environmentVariables:
 certs:
   mounted: False
 
-gcpProject: gcp-project-name
-
 externalSecrets:
   enabled: false
   secrets:
