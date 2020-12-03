@@ -45,9 +45,8 @@ spec:
     spec:
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deployment }}
-{{- if .Values.securityPolicy.deployment.securityContext }}
-      securityContext:
-{{ toYaml .Values.securityPolicy.deployment.securityContext | indent 8 }}
+{{- if .Values.securityPolicy.deployment.spec }}
+{{ toYaml .Values.securityPolicy.deployment.spec | indent 6 }}
 {{- end }}
 {{- end }}
 {{- end }}

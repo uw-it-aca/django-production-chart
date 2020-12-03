@@ -70,6 +70,7 @@ spec:
 {{- end }}
     spec:
 {{- if .Values.securityPolicy.enabled }}
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
 {{- end }}

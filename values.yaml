@@ -30,18 +30,24 @@ securityPolicy:
   deployment:
     annotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
-    securityContext:
-      runAsNonRoot: true
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
   daemon:
     annotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
-    securityContext:
-      runAsNonRoot: true
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
   cronjob:
     annotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
-    securityContext:
-      runAsNonRoot: true
+    template:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
   containerBase:
     securityContext:
       allowPrivilegeEscalation: false
@@ -49,7 +55,6 @@ securityPolicy:
       capabilities:
         drop:
           - ALL
-#          - NET_RAW
 
 autoscaling:
   enabled: true
