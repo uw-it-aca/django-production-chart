@@ -34,6 +34,7 @@ securityPolicy:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1000
   daemon:
     annotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
@@ -41,6 +42,7 @@ securityPolicy:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1000
   cronjob:
     annotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
@@ -48,6 +50,7 @@ securityPolicy:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
+        runAsUser: 1000
   containerBase:
     securityContext:
       allowPrivilegeEscalation: false
