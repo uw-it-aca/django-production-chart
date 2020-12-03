@@ -24,6 +24,32 @@ image:
   repository: "acait/django-contianer"
   tag: "develop"
 
+# security policy for various components
+securityPolicy:
+  enabled: false
+  deployment:
+    annotations:
+      seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+    securityContext:
+      runAsNonRoot: true
+  daemon:
+    annotations:
+      seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+    securityContext:
+      runAsNonRoot: true
+  cronjob:
+    annotations:
+      seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+    securityContext:
+      runAsNonRoot: true
+  containerBase:
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+#          - NET_RAW
 
 autoscaling:
   enabled: true

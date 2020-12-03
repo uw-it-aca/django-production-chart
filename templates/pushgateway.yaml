@@ -49,6 +49,10 @@ metadata:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
     app.kubernetes.io/instance: {{ $release_id }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
+{{- if .Values.securityPolicy.enabled }}
+  annotations:
+    checkov.io/skip1: CKV_K8S_40=pushgateway exemption
+{{- end }}
 spec:
   replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}
   selector:
@@ -60,11 +64,34 @@ spec:
       labels:
         app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
         app.kubernetes.io/instance: {{ $release_id }}
+{{- if .Values.securityPolicy.enabled }}
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+{{- end }}
     spec:
+{{- if .Values.securityPolicy.enabled }}
+      securityContext:
+        runAsNonRoot: true
+{{- end }}
       containers:
         - name: {{ printf "%s-pushgateway" $release_id }}
           image: "prom/pushgateway:v1.2.0"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
+{{- if .Values.securityPolicy.enabled }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+{{- end }}
+          resources:
+            limits:
+              cpu: 500m
+              memory: 64Mi
+            requests:
+              cpu: 150m
+              memory: 16Mi
           ports:
             - name: metrics
               containerPort: 9091

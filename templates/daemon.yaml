@@ -44,6 +44,11 @@ metadata:
     app.kubernetes.io/instance: {{ $release_id }}
     role: management-command-daemon
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
+{{- if $dot.Values.securityPolicy.enabled }}
+  annotations:
+    checkov.io/skip1: CKV_K8S_9=Management command presumes initialized app
+    checkov.io/skip2: CKV_K8S_40=Django-container base sets uid 1000
+{{- end }}
 spec:
   replicas: {{ default 1 .replicaCount }}
   selector:
@@ -56,7 +61,23 @@ spec:
         app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
         app.kubernetes.io/instance: {{ $release_id }}
         role: management-command-daemon
+{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.daemon }}
+{{- if $dot.Values.securityPolicy.daemon.annotations }}
+      annotations:
+{{ toYaml $dot.Values.securityPolicy.daemon.annotations | indent 8 }}
+{{- end }}
+{{- end }}
+{{- end }}
     spec:
+{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.daemon }}
+{{- if $dot.Values.securityPolicy.daemon.securityContext }}
+      securityContext:
+{{ toYaml $dot.Values.securityPolicy.daemon.securityContext | indent 8 }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 }}
           ports:
             - name: metrics

@@ -17,6 +17,14 @@ containers:
   - name: {{ include "django-production-chart.releaseIdentifier" . }}
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
     imagePullPolicy: "Always"
+{{- if .Values.securityPolicy.enabled }}
+{{- if .Values.securityPolicy.containerBase }}
+{{- if .Values.securityPolicy.containerBase.securityContext }}
+    securityContext:
+{{ toYaml .Values.securityPolicy.containerBase.securityContext | indent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}
     volumeMounts:
 {{- if .Values.certs.mounted }}
       - name: certs-volume

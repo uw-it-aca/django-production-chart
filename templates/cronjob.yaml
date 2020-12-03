@@ -11,6 +11,10 @@ metadata:
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
     app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
     app.kubernetes.io/managed-by: {{ $dot.Release.Service | quote }}
+{{- if $dot.Values.securityPolicy.enabled }}
+  annotations:
+    checkov.io/skip1: CKV_K8S_40=Django-container base sets uid 1000
+{{- end }}
 spec:
   schedule: {{ .schedule | quote }}
   concurrencyPolicy: {{ default "Forbid" .concurrencyPolicy | quote }}
@@ -23,7 +27,28 @@ spec:
           labels:
             app: {{ $dot.Release.Name | quote }}
             cron: {{ .name | quote }}
+{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.cronjob }}
+{{- if $dot.Values.securityPolicy.cronjob.annotations }}
+          annotations:
+{{ toYaml $dot.Values.securityPolicy.cronjob.annotations | indent 12 }}
+{{- end }}
+{{- end }}
+{{- end }}
         spec:
+{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.cronjob }}
+{{- if $dot.Values.securityPolicy.cronjob.securityContext }}
+          securityContext:
+{{ toYaml $dot.Values.securityPolicy.cronjob.securityContext | indent 12 }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if .serviceAccountName }}
+          serviceAccountName: {{ .serviceAccountName }}
+{{- else }}
+          automountServiceAccountToken: false
+{{- end }}
           restartPolicy: {{ default "OnFailure" .restartPolicy | quote }}
 {{- include "django-production-chart.specContainerBase" $dot | nindent 10 -}}
 {{- include "django-production-chart.specContainerResources" $dot | nindent 14 -}}
