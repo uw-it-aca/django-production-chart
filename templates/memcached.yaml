@@ -99,6 +99,8 @@ spec:
     spec:
 {{- if .Values.securityPolicy.enabled }}
       automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 11211
 {{- end }}
       containers:
       - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
