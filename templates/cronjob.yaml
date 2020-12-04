@@ -14,7 +14,8 @@ metadata:
 {{- if $dot.Values.securityPolicy.enabled }}
   annotations:
     checkov.io/skip1: CKV_K8S_8=Liveness not relevant in this context
-    checkov.io/skip2: CKV_K8S_40=Django-container base sets uid 1000
+    checkov.io/skip2: CKV_K8S_22=Readonly root file system too restictive
+    checkov.io/skip3: CKV_K8S_40=Django-container base sets uid 1000
 {{- end }}
 spec:
   schedule: {{ .schedule | quote }}
