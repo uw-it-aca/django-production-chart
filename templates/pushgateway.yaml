@@ -52,6 +52,9 @@ metadata:
 {{- if .Values.securityPolicy.enabled }}
   annotations:
     checkov.io/skip1: CKV_K8S_40=pushgateway exemption
+    checkov.io/skip2: CKV_K8S_22=Readonly root file system
+    checkov.io/skip3: CKV_K8S_23=Pushgateway run as specfic user
+    checkov.io/skip4: CKV_K8S_29=Security context
 {{- end }}
 spec:
   replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}
@@ -71,8 +74,6 @@ spec:
     spec:
 {{- if .Values.securityPolicy.enabled }}
       automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
 {{- end }}
       containers:
         - name: {{ printf "%s-pushgateway" $release_id }}
@@ -81,7 +82,6 @@ spec:
 {{- if .Values.securityPolicy.enabled }}
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
