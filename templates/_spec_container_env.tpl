@@ -4,7 +4,7 @@ Application container base spec environment variables
 {{- define "django-production-chart.specContainerEnv" -}}
 env:
   - name: PORT
-    value: "8080"
+    value: {{ default 8080 .Values.containerPort | quote }}
   - name: RELEASE_ID
     value: {{ include "django-production-chart.releaseIdentifier" . }}
 {{- if .Values.certs.mounted }}

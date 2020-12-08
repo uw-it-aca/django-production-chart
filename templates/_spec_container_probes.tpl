@@ -8,10 +8,10 @@ readinessProbe:
 {{- if .Values.readiness.httpGet -}}
   httpGet:
     path: {{ .Values.readiness.httpGet.path | default "/readiness" }}
-    port: {{ .Values.readiness.httpGet.port | default 8080 }}
+    port: {{ default 8080 .Values.readiness.httpGet.port | quote }}
 {{- else if .Values.readiness.tcpSocket -}}
   tcpSocket:
-    port: {{ default "8080" .Values.readiness.tcpSocket.port }}
+    port: {{ default 8080 .Values.readiness.tcpSocket.port | quote }}
 {{- else }}
   exec:
 {{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" "") | indent 4}}

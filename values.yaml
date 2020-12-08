@@ -16,6 +16,8 @@ fullnameOverride: ""
 
 branch: "master"
 
+containerPort: 8080
+
 service:
   type: ClusterIP
   port: 80
@@ -174,8 +176,6 @@ lifecycle:
 environmentVariables:
   - name: "ENV"
     value: "dev"
-  - name: "PORT"
-    value: "8080"
 
 certs:
   mounted: False
