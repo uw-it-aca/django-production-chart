@@ -51,10 +51,7 @@ metadata:
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
 {{- if .Values.securityPolicy.enabled }}
   annotations:
-    checkov.io/skip1: CKV_K8S_40=pushgateway exemption
     checkov.io/skip2: CKV_K8S_22=Readonly root file system
-    checkov.io/skip3: CKV_K8S_23=Pushgateway run as specfic user
-    checkov.io/skip4: CKV_K8S_29=Security context
 {{- end }}
 spec:
   replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}
@@ -74,6 +71,12 @@ spec:
     spec:
 {{- if .Values.securityPolicy.enabled }}
       automountServiceAccountToken: false
+{{- end }}
+{{- if .Values.securityPolicy.enabled }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
 {{- end }}
       containers:
         - name: {{ printf "%s-pushgateway" $release_id }}

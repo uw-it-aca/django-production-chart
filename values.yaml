@@ -35,6 +35,7 @@ securityPolicy:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        fsGroup: 1000
   daemon:
     annotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
@@ -43,6 +44,7 @@ securityPolicy:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        fsGroup: 1000
   cronjob:
     annotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
@@ -51,12 +53,15 @@ securityPolicy:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        fsGroup: 1000
   containerBase:
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
           - ALL
+        add:
+          - PERFMON
 
 autoscaling:
   enabled: true
