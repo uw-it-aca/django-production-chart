@@ -26,7 +26,7 @@ image:
   repository: "acait/django-contianer"
   tag: "develop"
 
-# security policy for various components
+# baseline security policy for various components
 securityPolicy:
   enabled: false
   deployment:
@@ -37,6 +37,7 @@ securityPolicy:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
   daemon:
     annotations:
@@ -46,6 +47,7 @@ securityPolicy:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
   cronjob:
     annotations:
@@ -55,13 +57,11 @@ securityPolicy:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
   containerBase:
     securityContext:
       allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
 
 autoscaling:
   enabled: true
