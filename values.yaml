@@ -62,6 +62,11 @@ securityPolicy:
   containerBase:
     securityContext:
       allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+        add:
+          - NET_BIND_SERVICE
 
 autoscaling:
   enabled: true
