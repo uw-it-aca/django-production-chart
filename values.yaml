@@ -60,8 +60,6 @@ securityPolicy:
       capabilities:
         drop:
           - ALL
-        add:
-          - PERFMON
 
 autoscaling:
   enabled: true
