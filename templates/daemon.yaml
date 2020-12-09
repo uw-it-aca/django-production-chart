@@ -50,7 +50,8 @@ metadata:
     checkov.io/skip2: CKV_K8S_9=Management command presumes initialized app
     checkov.io/skip3: CKV_K8S_22=Readonly root file system too restictive
     checkov.io/skip4: CKV_K8S_25=Add capability for metrics api
-    checkov.io/skip5: CKV_K8S_40=Django-container base sets uid 1000
+    checkov.io/skip5: CKV_K8S_31=Seccomp default breaks HPA metrics api queries
+    checkov.io/skip6: CKV_K8S_40=Django-container base sets uid 1000
 {{- end }}
 spec:
   replicas: {{ default 1 .replicaCount }}

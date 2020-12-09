@@ -30,8 +30,6 @@ image:
 securityPolicy:
   enabled: false
   deployment:
-    annotations:
-      seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -40,8 +38,6 @@ securityPolicy:
         runAsGroup: 1000
         fsGroup: 1000
   daemon:
-    annotations:
-      seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -66,6 +62,7 @@ securityPolicy:
         drop:
           - ALL
         add:
+          - NET_BIND_SERVICE
           - NET_ADMIN
           - SYS_TIME
 
