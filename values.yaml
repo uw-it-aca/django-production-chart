@@ -46,8 +46,6 @@ securityPolicy:
         runAsGroup: 1000
         fsGroup: 1000
   cronjob:
-    annotations:
-      seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
     template:
       automountServiceAccountToken: false
       securityContext:
