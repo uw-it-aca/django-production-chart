@@ -56,7 +56,6 @@ securityPolicy:
   containerBase:
     securityContext:
       allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
       capabilities:
         drop:
           - ALL
