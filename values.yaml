@@ -38,9 +38,8 @@ securityPolicy:
     skipCheck:
       - "CKV_K8S_8=Liveness probe more trouble than it's worth"
       - "CKV_K8S_22=Readonly root file system too restictive"
-      - "CKV_K8S_25=Add capability for metrics api"
       - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
-      - "CKV_K8S_40=Django-container base sets uid 1000"
+      - "CKV_K8S_40=acait uid 1000"
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -53,9 +52,8 @@ securityPolicy:
       - "CKV_K8S_8=Liveness not relevant in this context"
       - "CKV_K8S_9=Management command presumes initialized app"
       - "CKV_K8S_22=Readonly root file system too restictive"
-      - "CKV_K8S_25=Add capability for metrics api"
       - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
-      - "CKV_K8S_40=Django-container base sets uid 1000"
+      - "CKV_K8S_40=acait uid 1000"
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -67,9 +65,8 @@ securityPolicy:
     skipCheck:
       - "CKV_K8S_8=Liveness not relevant in this context"
       - "CKV_K8S_22=Readonly root file system too restictive"
-      - "CKV_K8S_25=Add capability for metrics api"
       - "CKV_K8S_31=Seccomp default apears to break HPA metrics api"
-      - "CKV_K8S_40=Django-container base sets uid 1000"
+      - "CKV_K8S_40=acait uid 1000"
     template:
       automountServiceAccountToken: false
       securityContext:
