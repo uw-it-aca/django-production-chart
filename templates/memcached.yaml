@@ -58,6 +58,19 @@ metadata:
     app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
+{{- if .Values.securityPolicy.enabled }}
+  annotations:
+    checkov.io/skip1: CKV_K8S_8=Liveness probe
+    checkov.io/skip2: CKV_K8S_9=Prom memcached exporter readiness
+    checkov.io/skip3: CKV_K8S_10=Prom memcached exporter cpu requests
+    checkov.io/skip4: CKV_K8S_11=Prom memcached exporter cpu limits
+    checkov.io/skip5: CKV_K8S_12=Prom memcached exporter memory requests
+    checkov.io/skip6: CKV_K8S_13=Prom memcached exporter memory limits
+    checkov.io/skip7: CKV_K8S_14=Prom memcached exporter image tag latest
+    checkov.io/skip8: CKV_K8S_22=Readonly root file system
+    checkov.io/skip9: CKV_K8S_23=Memcached run as specfic user
+    checkov.io/skip11: CKV_K8S_40=Memcached run as high uid
+{{- end }}
 spec:
   selector:
     matchLabels:
@@ -73,16 +86,36 @@ spec:
 {{- with .Values.podLabels }}
 {{ toYaml . | indent 8 }}
 {{- end}}
-{{- with .Values.podAnnotations }}
+{{- if .Values.securityPolicy.enabled }}
       annotations:
+        seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+{{- end }}
+{{- with .Values.podAnnotations }}
+{{- if not .Values.securityPolicy.enabled }}
+      annotations:
+{{- end }}
 {{ toYaml . | indent 8 }}
 {{- end }}
     spec:
+{{- if .Values.securityPolicy.enabled }}
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 11211
+{{- end }}
       containers:
       - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
         image: {{ default "memcached:1.5.21" .Values.memcached.image | quote }}
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        imagePullPolicy: {{ default "Always" .Values.imagePullPolicy | quote }}
 {{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" $extraArgs) | indent 8}}
+{{- if .Values.securityPolicy.enabled }}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 11211
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+{{- end }}
         ports:
         - name: memcache
           containerPort: 11211
@@ -100,15 +133,30 @@ spec:
             port: memcache
           initialDelaySeconds: 5
           timeoutSeconds: 1
+{{- if .Values.memcached.resources }}
         resources:
 {{ toYaml .Values.memcached.resources | indent 10 }}
+{{- end }}
 {{- if .Values.metrics.enabled }}
       - name: metrics
         image: "prom/memcached-exporter:latest"
-        imagePullPolicy: {{ default "" .Values.metrics.imagePullPolicy | quote }}
+        imagePullPolicy: {{ default "Always" .Values.metrics.imagePullPolicy | quote }}
+{{- if .Values.securityPolicy.enabled }}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+{{- end }}
         ports:
         - name: metrics
           containerPort: 9150
+{{- if .Values.metrics.resources }}
+        resources:
+{{ toYaml .Values.metrics.resources | indent 10 }}
+{{- end }}
 {{- end }}
 {{- with .Values.extraContainers }}
 {{ tpl . $ | indent 6 }}

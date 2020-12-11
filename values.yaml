@@ -16,6 +16,8 @@ fullnameOverride: ""
 
 branch: "master"
 
+containerPort: 8080
+
 service:
   type: ClusterIP
   port: 80
@@ -24,6 +26,60 @@ image:
   repository: "acait/django-contianer"
   tag: "develop"
 
+# baseline security policy for various components
+securityPolicy:
+  enabled: false
+  deploy:
+    skipCheck:
+      - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
+      - "CKV_K8S_40=Django-container base sets uid 1000"
+  deployment:
+    skipCheck:
+      - "CKV_K8S_8=Liveness probe more trouble than it's worth"
+      - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
+      - "CKV_K8S_40=acait uid 1000"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+  daemon:
+    skipCheck:
+      - "CKV_K8S_8=Liveness not relevant in this context"
+      - "CKV_K8S_9=Management command presumes initialized app"
+      - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
+      - "CKV_K8S_40=acait uid 1000"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+  cronjob:
+    skipCheck:
+      - "CKV_K8S_8=Liveness not relevant in this context"
+      - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_31=Seccomp default apears to break HPA metrics api"
+      - "CKV_K8S_40=acait uid 1000"
+    template:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+  containerBase:
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
 
 autoscaling:
   enabled: true
@@ -138,8 +194,6 @@ lifecycle:
 environmentVariables:
   - name: "ENV"
     value: "dev"
-  - name: "PORT"
-    value: "8080"
 
 certs:
   mounted: False

@@ -44,6 +44,16 @@ metadata:
     app.kubernetes.io/instance: {{ $release_id }}
     role: management-command-daemon
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
+{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.daemon }}
+{{- if $dot.Values.securityPolicy.daemon.skipCheck }}
+  annotations:
+{{- range $index, $value:= $dot.Values.securityPolicy.daemon.skipCheck }}
+    checkov.io/skip{{ add $index 1 }}: {{ $value | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
 spec:
   replicas: {{ default 1 .replicaCount }}
   selector:
@@ -56,7 +66,22 @@ spec:
         app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
         app.kubernetes.io/instance: {{ $release_id }}
         role: management-command-daemon
+{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.daemon }}
+{{- if $dot.Values.securityPolicy.daemon.annotations }}
+      annotations:
+{{ toYaml $dot.Values.securityPolicy.daemon.annotations | indent 8 }}
+{{- end }}
+{{- end }}
+{{- end }}
     spec:
+{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.daemon }}
+{{- if $dot.Values.securityPolicy.daemon.spec }}
+{{ toYaml $dot.Values.securityPolicy.daemon.spec | indent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 }}
           ports:
             - name: metrics
