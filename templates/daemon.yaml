@@ -45,13 +45,14 @@ metadata:
     role: management-command-daemon
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
 {{- if $dot.Values.securityPolicy.enabled }}
+{{- if $dot.Values.securityPolicy.daemon }}
+{{- if $dot.Values.securityPolicy.daemon.skipCheck }}
   annotations:
-    checkov.io/skip1: CKV_K8S_8=Liveness not relevant in this context
-    checkov.io/skip2: CKV_K8S_9=Management command presumes initialized app
-    checkov.io/skip3: CKV_K8S_22=Readonly root file system too restictive
-    checkov.io/skip4: CKV_K8S_25=Add capability for metrics api
-    checkov.io/skip5: CKV_K8S_31=Seccomp default breaks HPA metrics api queries
-    checkov.io/skip6: CKV_K8S_40=Django-container base sets uid 1000
+{{- range $index, $value:= $dot.Values.securityPolicy.daemon.skipCheck }}
+    checkov.io/skip{{ add $index 1 }}: {{ $value | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
 {{- end }}
 spec:
   replicas: {{ default 1 .replicaCount }}
