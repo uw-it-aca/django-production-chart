@@ -7,7 +7,7 @@ replicaCount: 2
 minReplicas: 5
 maxReplicas: 75
 
-targetAverageUtilization: 90
+targetAverageUtilization: 100
 
 repo: "prereq"
 
