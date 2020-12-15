@@ -185,11 +185,10 @@ readiness:
 #  period: "5"
 
 lifecycle:
-  enabled: false
-#  preStop:
-#    enabled: true
-## default command is
-#    command: ["/bin/sleep" "20"]
+  enabled: true
+  preStop:
+    enabled: true
+    command: ["/bin/sh","-c", "if [ -x /scripts/prestop.sh ] ; then /scripts/prestop.sh; else /bin/sleep 20; fi"]
 
 environmentVariables:
   - name: "ENV"
