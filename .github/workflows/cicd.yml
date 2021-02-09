@@ -81,6 +81,6 @@ jobs:
         run: >-
           docker run -t
            -v ${PWD}:/app
-          garethr/kubeval:${{ inputs.kubeval_version }}
+          garethr/kubeval:${KUBEVAL_VERSION}
           /app/${MANIFEST_FILE_NAME}
           --strict --skip-kinds "${KUBEVAL_SKIP_KINDS}"
