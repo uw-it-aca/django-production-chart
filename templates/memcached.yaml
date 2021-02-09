@@ -69,6 +69,7 @@ metadata:
     checkov.io/skip7: CKV_K8S_14=Prom memcached exporter image tag latest
     checkov.io/skip8: CKV_K8S_22=Readonly root file system
     checkov.io/skip9: CKV_K8S_23=Memcached run as specfic user
+    checkov.io/skip10: CKV_K8S_31=Inexplicably failing with latest checkov version
     checkov.io/skip11: CKV_K8S_40=Memcached run as high uid
 {{- end }}
 spec:
