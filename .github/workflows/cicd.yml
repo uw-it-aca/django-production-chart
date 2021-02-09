@@ -32,10 +32,6 @@ jobs:
           LOCAL_MANIFEST=${PWD}/$MANIFEST_FILE_NAME
           echo "LOCAL_MANIFEST=$LOCAL_MANIFEST" >> $GITHUB_ENV
 
-          # helm chart
-          HELM_CHART_LOCAL_DIR=${PWD}/django-production-chart
-          echo "HELM_CHART_LOCAL_DIR=$HELM_CHART_LOCAL_DIR" >> $GITHUB_ENV
-
           LOCAL_VALUES_FILENAME="prod-values.yml"
           echo "LOCAL_VALUES_FILENAME=$LOCAL_VALUES_FILENAME" >> $GITHUB_ENV
 
@@ -46,7 +42,7 @@ jobs:
         shell: bash
         run: >-
           docker run
-          -v ${HELM_CHART_LOCAL_DIR}:/chart
+          -v ${PWD}:/chart
           alpine/helm:${HELM_APP_VERSION}
           template test-test /chart
           --set-string "image.tag=007"
@@ -70,7 +66,7 @@ jobs:
         shell: bash
         run: >-
           docker run
-          -v ${HELM_CHART_LOCAL_DIR}:/chart
+          -v ${PWD}:/chart
           alpine/helm:${HELM_APP_VERSION}
           template test-test /chart
           --set-string "image.tag=007"
