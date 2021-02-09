@@ -1,0 +1,86 @@
+---
+name: Build and Test
+
+env:
+  TEST_VALUES_PATH: "/uw-it-aca/myuw/master/docker/prod-values.yml"
+  TEST_VALUES_HOST: "https://raw.githubusercontent.com"
+  HELM_APP_VERSION: "3.4.2"
+  KUBEVAL_VERSION: "latest"
+  KUBEVAL_SKIP_KINDS: "ExternalSecret,ServiceMonitor"
+
+on:
+  push:
+    branches: [master, develop, feature/github-actions]
+  pull_request:
+    branches: [master, develop]
+    types: [opened, reopened, synchronize]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Set up environment
+        shell: bash
+        run: |
+          MANIFEST_FILE_NAME=test-manifest.yaml
+          echo "MANIFEST_FILE_NAME=$MANIFEST_FILE_NAME" >> $GITHUB_ENV
+
+          LOCAL_MANIFEST=${PWD}/$MANIFEST_FILE_NAME
+          echo "LOCAL_MANIFEST=$LOCAL_MANIFEST" >> $GITHUB_ENV
+
+          # helm chart
+          HELM_CHART_LOCAL_DIR=${PWD}/django-production-chart
+          echo "HELM_CHART_LOCAL_DIR=$HELM_CHART_LOCAL_DIR" >> $GITHUB_ENV
+
+          LOCAL_VALUES_FILENAME="prod-values.yml"
+          echo "LOCAL_VALUES_FILENAME=$LOCAL_VALUES_FILENAME" >> $GITHUB_ENV
+
+          TEST_HELM_VALUES=${PWD}/${LOCAL_VALUES_FILENAME}
+          echo "TEST_HELM_VALUES=$TEST_HELM_VALUES" >> $GITHUB_ENV
+
+      - name: Generate Test Manifest from default values
+        shell: bash
+        run: >-
+          docker run
+          -v ${HELM_CHART_LOCAL_DIR}:/chart
+          alpine/helm:${HELM_APP_VERSION}
+          template test-test /chart
+          --set-string "image.tag=007"
+          -f /chart/values.yml > ${LOCAL_MANIFEST}
+
+      - name: Validate Manifest
+        shell: bash
+        run: >-
+          docker run -t
+          -v ${PWD}:/app
+          garethr/kubeval:${KUBEVAL_VERSION}
+          /app/${MANIFEST_FILE_NAME}
+          --strict --skip-kinds "${KUBEVAL_SKIP_KINDS}"
+
+      - name: Fetch test helm values
+        shell: bash
+        run: >-
+          curl -s ${TEST_VALUES_HOST}${TEST_VALUES_PATH} > $TEST_HELM_VALUES
+
+      - name: Generate manifest from test helm values
+        shell: bash
+        run: >-
+          docker run
+          -v ${HELM_CHART_LOCAL_DIR}:/chart
+          alpine/helm:${HELM_APP_VERSION}
+          template test-test /chart
+          --set-string "image.tag=007"
+          -f /chart/${LOCAL_VALUES_FILENAME} > ${LOCAL_MANIFEST}
+
+      - name: Validate Manifest
+        shell: bash
+        run: >-
+          docker run -t
+           -v ${PWD}:/app
+          garethr/kubeval:${{ inputs.kubeval_version }}
+          /app/${MANIFEST_FILE_NAME}
+          --strict --skip-kinds "${KUBEVAL_SKIP_KINDS}"
