@@ -38,9 +38,6 @@ jobs:
           TEST_HELM_VALUES=${PWD}/${LOCAL_VALUES_FILENAME}
           echo "TEST_HELM_VALUES=$TEST_HELM_VALUES" >> $GITHUB_ENV
 
-          echo $PWD
-          ls $PWD
-
       - name: Generate Test Manifest from default values
         shell: bash
         run: >-
@@ -49,7 +46,7 @@ jobs:
           alpine/helm:${HELM_APP_VERSION}
           template test-test /chart
           --set-string "image.tag=007"
-          -f /chart/values.yml > ${LOCAL_MANIFEST}
+          -f /chart/values.yaml > ${LOCAL_MANIFEST}
 
       - name: Validate Manifest
         shell: bash
