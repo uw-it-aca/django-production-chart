@@ -86,7 +86,7 @@ spec:
           ports:
             - name: metrics
               containerPort: 9100
-{{- include "django-production-chart.specContainerResources" $dot | nindent 10 }}
+{{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 10 }}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 10 }}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 }}
 {{- end }}

@@ -3,5 +3,5 @@ Application container base spec resources
 */}}
 {{- define "django-production-chart.specContainerResources" -}}
 resources:
-{{ toYaml .Values.resources | indent 2 }}
+{{ toYaml . | indent 2 }}
 {{- end -}}
