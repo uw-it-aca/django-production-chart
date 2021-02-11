@@ -130,7 +130,7 @@ daemon:
 #  daemons:
 #    - name: notify-users
 #      command: ["/scripts/management_daemon.sh"]
-## command can on a seconds interval
+## command can run on a delay seconds interval
 #      args: ['--delay', 15, 'notify_users']
 ## or following a cron specification
 #      args: ['--cron', '*/5 * * * *', 'notify_users']
