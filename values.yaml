@@ -180,6 +180,26 @@ certs:
 gcsCredentials:
   mounted: false
 
+mountedSecrets:
+  enabled: false
+##
+## enabling will project all the secrets in secretName as files named by
+## the secret's key
+##
+#  enabled: true
+#  secretName: "my-app-data"
+##
+## optional: override mountPath default with, say, "/app/secrets"
+##
+#  mountPath: "/data"
+##
+## optional: use items list to pluck specific secrets by key and specify
+## the projected secret's filename in the mountPath directory
+##
+#  items:
+#   - key: "accounts"
+#     path: "accounts.csv"
+
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
