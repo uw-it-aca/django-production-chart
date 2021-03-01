@@ -13,6 +13,18 @@ volumes:
     secret:
       secretName: {{ .Values.gcsCredentials.secretName | quote }}
 {{- end }}
+{{- if .Values.mountedSecrets.enabled }}
+  - name: mounted-secrets-volume
+    secret:
+      secretName: {{ .Values.mountedSecrets.secretName | quote }}
+{{- if .Values.mountedSecrets.items }}
+      items:
+{{- range .Values.mountedSecrets.items }}
+        - key: {{ .key | quote }}
+          path: {{ .path | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
 containers:
   - name: {{ include "django-production-chart.releaseIdentifier" . }}
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -35,5 +47,10 @@ containers:
       - name: gcs-volume
         readOnly: true
         mountPath: "/gcs"
+{{- end }}
+{{- if .Values.mountedSecrets.enabled }}
+      - name: mounted-secrets-volume
+        readOnly: true
+        mountPath: {{ default "/data" .Values.mountedSecrets.mountPath | quote }}
 {{- end }}
 {{- end -}}
