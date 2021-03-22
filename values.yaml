@@ -145,7 +145,10 @@ daemon:
 
 memcached:
   enabled: false
+  image: memcached:1.6.9
   replicaCount: 1
+  updateStrategy:
+    type: RollingUpdate
 # override default command, which is:
 #  command:
 #   - memcached
@@ -159,9 +162,7 @@ memcached:
 #    requests:
 #      memory: 64Mi
 #      cpu: 50m
-# optionally layer mcrouter for scaling if necessary
-  updateStrategy:
-    type: RollingUpdate
+## optionally layer mcrouter for scaling if necessary
   mcrouter:
     enabled: false
     controller: "daemonset"
@@ -172,7 +173,6 @@ memcached:
     statefulsetParams:
       replicas: 1
       antiAffinity: "hard"
-
 
 certs:
   mounted: false
