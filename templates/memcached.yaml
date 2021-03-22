@@ -105,7 +105,7 @@ spec:
 {{- end }}
       containers:
       - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-        image: {{ default "memcached:1.5.21" .Values.memcached.image | quote }}
+        image: {{ .Values.memcached.image | quote }}
         imagePullPolicy: {{ default "Always" .Values.imagePullPolicy | quote }}
 {{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" $extraArgs) | indent 8}}
 {{- if .Values.securityPolicy.enabled }}
