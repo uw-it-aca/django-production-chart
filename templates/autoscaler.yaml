@@ -1,3 +1,4 @@
+{{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -20,3 +21,4 @@ spec:
       resource:
         name: cpu
         targetAverageUtilization: {{ .Values.targetAverageUtilization }}
+{{- end }}
