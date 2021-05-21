@@ -19,8 +19,14 @@ branch: "master"
 containerPort: 8080
 
 service:
-  type: ClusterIP
-  port: 80
+  enabled: true
+  ports:
+    - port: 80
+      targetPort: http
+      name: http
+
+deploymentInitialization:
+  enabled: true
 
 image:
   repository: "acait/django-contianer"

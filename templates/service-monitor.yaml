@@ -5,7 +5,7 @@ metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}
 spec:
   endpoints:
-    - port: http
+    - port: {{ default "http" .Values.metrics.serviceMonitor.port }}
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ include "django-production-chart.releaseIdentifier" . }}
