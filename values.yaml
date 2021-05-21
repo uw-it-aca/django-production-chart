@@ -20,8 +20,10 @@ containerPort: 8080
 
 service:
   enabled: true
-  type: ClusterIP
-  port: 80
+  ports:
+    - port: 80
+      targetPort: http
+      name: http
 
 deploymentInitialization:
   enabled: true
