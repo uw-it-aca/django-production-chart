@@ -16,7 +16,7 @@ fullnameOverride: ""
 
 branch: "master"
 
-containerPort: 8080
+containerPort: 8000
 
 service:
   enabled: true
