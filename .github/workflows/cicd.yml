@@ -61,9 +61,9 @@ jobs:
         shell: bash
         run: >-
           ./${KUBEVAL_DIR}/kubeval ${PWD}/${MANIFEST_FILE_NAME}
-           --schema-location "${KUBEVAL_SCHEMA_LOCATION}/${KUBERNETES_VERSION}"
-           --strict
-           --skip-kinds "${KUBEVAL_SKIP_KINDS}"
+          --schema-location "${KUBEVAL_SCHEMA_LOCATION}/${KUBERNETES_VERSION}"
+          --strict
+          --skip-kinds "${KUBEVAL_SKIP_KINDS}"
 
       - name: Fetch test helm values
         shell: bash
