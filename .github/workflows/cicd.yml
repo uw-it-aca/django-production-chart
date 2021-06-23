@@ -7,6 +7,9 @@ env:
   HELM_APP_VERSION: "3.4.2"
   KUBEVAL_VERSION: "latest"
   KUBEVAL_SKIP_KINDS: "ExternalSecret,ServiceMonitor"
+  KUBEVAL_SCHEMA_LOCATION: "https://raw.githubusercontent.com/yannh/kubernetes-json-schema"
+  KUBERNETES_VERSION: "master"
+  KUBEVAL_DIR: "kubeval-dist"
 
 on:
   push:
@@ -40,43 +43,55 @@ jobs:
 
       - name: Generate Test Manifest from default values
         shell: bash
-        run: >-
-          docker run
-          -v ${PWD}:/chart
-          alpine/helm:${HELM_APP_VERSION}
-          template test-test /chart
-          --set-string "image.tag=007"
-          -f /chart/values.yaml > ${LOCAL_MANIFEST}
+        run: |
+          echo "::group::Generate manifest from test helm values"
+
+          docker run -v ${PWD}:/chart alpine/helm:${HELM_APP_VERSION} template test-test /chart --set-string "image.tag=007" -f /chart/values.yaml > ${LOCAL_MANIFEST}
+
+          echo "::endgroup::"
 
       - name: Validate Manifest
         shell: bash
-        run: >-
-          docker run -t
-          -v ${PWD}:/app
-          garethr/kubeval:${KUBEVAL_VERSION}
-          /app/${MANIFEST_FILE_NAME}
-          --strict --skip-kinds "${KUBEVAL_SKIP_KINDS}"
+        run: |
+          echo "::group::Fetch kubeval"
+
+          (
+              mkdir -p $KUBEVAL_DIR
+              cd $KUBEVAL_DIR
+              wget https://github.com/instrumenta/kubeval/releases/${KUBEVAL_VERSION}/download/kubeval-linux-amd64.tar.gz
+              tar xzf kubeval-linux-amd64.tar.gz
+          )
+
+          echo "::endgroup::"
+          echo "::group::Validate manifest from default values"
+
+          ./${KUBEVAL_DIR}/kubeval ${PWD}/${MANIFEST_FILE_NAME} --schema-location "${KUBEVAL_SCHEMA_LOCATION}/${KUBERNETES_VERSION}" --strict --skip-kinds "${KUBEVAL_SKIP_KINDS}"
+
+          echo "::endgroup::"
 
       - name: Fetch test helm values
         shell: bash
-        run: >-
+        run: |
+          echo "::group::Fetch test helm values (${TEST_VALUES_PATH})"
+
           curl -s ${TEST_VALUES_HOST}${TEST_VALUES_PATH} > $TEST_HELM_VALUES
+
+          echo "::endgroup::"
 
       - name: Generate manifest from test helm values
         shell: bash
-        run: >-
-          docker run
-          -v ${PWD}:/chart
-          alpine/helm:${HELM_APP_VERSION}
-          template test-test /chart
-          --set-string "image.tag=007"
-          -f /chart/${LOCAL_VALUES_FILENAME} > ${LOCAL_MANIFEST}
+        run: |
+          echo "::group::Generate manifest from test helm values"
+
+          docker run -v ${PWD}:/chart alpine/helm:${HELM_APP_VERSION} template test-test /chart --set-string "image.tag=007" -f /chart/${LOCAL_VALUES_FILENAME} > ${LOCAL_MANIFEST}
+
+          echo "::endgroup::"
 
       - name: Validate Manifest
         shell: bash
-        run: >-
-          docker run -t
-          -v ${PWD}:/app
-          garethr/kubeval:${KUBEVAL_VERSION}
-          /app/${MANIFEST_FILE_NAME}
-          --strict --skip-kinds "${KUBEVAL_SKIP_KINDS}"
+        run: |
+          echo "::group::Validate manifest from test helm values"
+
+          ./${KUBEVAL_DIR}/kubeval ${PWD}/${MANIFEST_FILE_NAME} --schema-location "${KUBEVAL_SCHEMA_LOCATION}/${KUBERNETES_VERSION}" --strict --skip-kinds "${KUBEVAL_SKIP_KINDS}"
+
+          echo "::endgroup::"
