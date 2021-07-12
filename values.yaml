@@ -25,6 +25,9 @@ service:
       targetPort: http
       name: http
 
+deployment:
+  enabled: true
+
 deploymentInitialization:
   enabled: true
 
