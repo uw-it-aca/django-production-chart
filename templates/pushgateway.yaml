@@ -17,9 +17,9 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: metrics
-    port: 9091
-    targetPort: metrics
+    - name: metrics
+      port: 9091
+      targetPort: metrics
   selector:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
     app.kubernetes.io/instance: {{ $release_id }}
@@ -39,7 +39,7 @@ spec:
       app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   endpoints:
-  - port: metrics
+    - port: metrics
 ---
 apiVersion: apps/v1
 kind: Deployment
