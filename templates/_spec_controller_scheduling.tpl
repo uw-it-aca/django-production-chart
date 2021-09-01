@@ -24,7 +24,7 @@ affinity:
                 operator: In
                 values:
                   - "{{ include "django-production-chart.releaseIdentifier" $dot }}"
-            topologyKey: kubernetes.io/hostname
+          topologyKey: kubernetes.io/hostname
 {{- else }}
 {{- toYaml . | trim | nindent 2}}
 {{- end }}

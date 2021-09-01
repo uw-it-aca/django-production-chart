@@ -178,9 +178,9 @@ spec:
         affinity:
 {{ toYaml . | trim | indent 10}}
 {{- end }}
-    updateStrategy:
-      type: {{ .Values.memcached.updateStrategy.type }}
-      {{- if (eq "Recreate" .Values.memcached.updateStrategy.type) }}
-      rollingUpdate: null
-      {{- end }}
+  updateStrategy:
+    type: {{ .Values.memcached.updateStrategy.type }}
+    {{- if (eq "Recreate" .Values.memcached.updateStrategy.type) }}
+    rollingUpdate: null
+    {{- end }}
 {{- end -}}
