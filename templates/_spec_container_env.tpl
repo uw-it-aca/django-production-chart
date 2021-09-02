@@ -57,7 +57,7 @@ env:
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}
     valueFrom:
-      secretKeyRef: 
+      secretKeyRef:
         name: {{ .secretName }}
         key: {{ .secretKey }}
 {{- end }}

@@ -25,6 +25,6 @@ spec:
       name: http
 {{- end }}
   selector:
-    app.kubernetes.io/name:  {{ include "django-production-chart.releaseIdentifier" . }} 
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
