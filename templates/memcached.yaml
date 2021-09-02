@@ -18,13 +18,13 @@ metadata:
 spec:
   clusterIP: None
   ports:
-  - name: memcache
-    port: 11211
-    targetPort: memcache
+    - name: memcache
+      port: 11211
+      targetPort: memcache
 {{- if .Values.metrics.enabled }}
-  - name: metrics
-    port: 9150
-    targetPort: metrics
+    - name: metrics
+      port: 9150
+      targetPort: metrics
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
@@ -46,7 +46,7 @@ spec:
       app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   endpoints:
-  - port: metrics
+    - port: metrics
 {{- end }}
 ---
 apiVersion: apps/v1
@@ -104,79 +104,79 @@ spec:
         fsGroup: 11211
 {{- end }}
       containers:
-      - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-        image: {{ .Values.memcached.image | quote }}
-        imagePullPolicy: {{ default "Always" .Values.imagePullPolicy | quote }}
-{{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" $extraArgs) | indent 8}}
+        - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+          image: {{ .Values.memcached.image | quote }}
+          imagePullPolicy: {{ default "Always" .Values.imagePullPolicy | quote }}
+{{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" $extraArgs) | indent 10}}
 {{- if .Values.securityPolicy.enabled }}
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 11211
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 11211
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 {{- end }}
-        ports:
-        - name: memcache
-          containerPort: 11211
+          ports:
+            - name: memcache
+              containerPort: 11211
 {{- if .Values.memcached.liveness }}
   {{- if .Values.memcached.liveness.enabled }}
-        livenessProbe:
-          tcpSocket:
-            port: memcache
-          initialDelaySeconds: 30
-          timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: memcache
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
   {{- end }}
 {{- end }}
-        readinessProbe:
-          tcpSocket:
-            port: memcache
-          initialDelaySeconds: 5
-          timeoutSeconds: 1
+          readinessProbe:
+            tcpSocket:
+              port: memcache
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
 {{- if .Values.memcached.resources }}
-        resources:
-{{ toYaml .Values.memcached.resources | indent 10 }}
+          resources:
+{{ toYaml .Values.memcached.resources | indent 12 }}
 {{- end }}
 {{- if .Values.metrics.enabled }}
-      - name: metrics
-        image: "prom/memcached-exporter:latest"
-        imagePullPolicy: {{ default "Always" .Values.metrics.imagePullPolicy | quote }}
-{{- if .Values.securityPolicy.enabled }}
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 65534
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-{{- end }}
-        ports:
         - name: metrics
-          containerPort: 9150
+          image: "prom/memcached-exporter:latest"
+          imagePullPolicy: {{ default "Always" .Values.metrics.imagePullPolicy | quote }}
+{{- if .Values.securityPolicy.enabled }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+{{- end }}
+          ports:
+            - name: metrics
+              containerPort: 9150
 {{- if .Values.metrics.resources }}
-        resources:
-{{ toYaml .Values.metrics.resources | indent 10 }}
+          resources:
+{{ toYaml .Values.metrics.resources | indent 12 }}
 {{- end }}
 {{- end }}
 {{- with .Values.extraContainers }}
-{{ tpl . $ | indent 6 }}
+{{ tpl . $ | indent 8 }}
 {{- end }}
 {{- with .Values.extraVolumes }}
-      volumes:
-{{ tpl . $ | indent 6 }}
+        volumes:
+{{ tpl . $ | indent 8 }}
 {{- end }}
 {{- with .Values.memcached.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | trim | indent 8}}
+        nodeSelector:
+{{ toYaml . | trim | indent 10}}
 {{- end }}
 {{- with .Values.memcached.tolerations }}
-      tolerations:
-{{ toYaml . | trim | indent 8}}
+        tolerations:
+{{ toYaml . | trim | indent 10}}
 {{- end }}
 {{- with .Values.memcached.affinity }}
-      affinity:
-{{ toYaml . | trim | indent 8}}
+        affinity:
+{{ toYaml . | trim | indent 10}}
 {{- end }}
   updateStrategy:
     type: {{ .Values.memcached.updateStrategy.type }}
