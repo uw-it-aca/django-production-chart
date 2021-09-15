@@ -220,6 +220,20 @@ resources:
     cpu: 25m
     memory: 256Mi
 
+persistentVolume:
+  enabled: false
+#  enabled: true
+#  claims:
+#    - name: my-pvc
+#      accessModes:
+#        - ReadWriteMany
+#      # this is the default, override if desired
+#      #volumeMode: Filesystem
+#      # no storage name by default, set if cluster defined
+#      #storageClassName: slow
+#      storageSize: 10Gi
+#      mountPath: /path/to/mount/in/pod
+
 metrics:
   enabled: true
   serviceMonitor:

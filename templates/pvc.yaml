@@ -1,0 +1,39 @@
+{{- if .Values.persistentVolume.enabled }}
+{{- $dot := . -}}
+{{- range .Values.persistentVolume.claims -}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+spec:
+  accessModes:
+{{- if .accessModes }}
+{{- range .accessModes -}}
+    - {{ . | quote }}
+{{- end -}}
+{{- else }}
+    - ReadWriteMany
+{{- end }}
+  volumeMode: {{ default "Filesystem" .volumeMode | quote }}
+{{- if .storageClassName }}
+  storageClassName: {{ .storageClassName | quote }}
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .storageSize }}
+{{- if .selector }}
+  selector:
+{{- if .selector.matchLabels }}
+    matchLabels:
+{{ toYaml .selector.matchLabels | indent 6 }}
+      release: "stable"
+{{- end }}
+{{- if .selector.matchExpressions }}
+    matchExpressions:
+{{ toYaml .selector.matchExpressions | indent 6 }}
+{{- end }}
+{{- end }}
+{{ printf "\n" }}
+{{- end -}}
+{{- end -}}
