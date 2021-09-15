@@ -8,7 +8,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-{{- include "django-production-chart.specContainerLabels" $root | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" $root | nindent 4 }}
   annotations:
     kubernetes.io/ingress.class: {{ .Values.ingress.type }}
 {{- with .Values.ingress.annotations }}

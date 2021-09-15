@@ -4,10 +4,7 @@ kind: Service
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.name" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   type: {{ default "ClusterIP" .Values.service.type }}
   ports:
