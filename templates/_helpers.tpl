@@ -58,6 +58,6 @@ Return the appropriate apiVersion for statefulset.
 Return the base kubernetes labels.
 */}}
 {{- define "django-production-chart.baseLabels" -}}
-app.kubernetes.io/name: {{ .Release.Name }}
+app.kubernetes.io/name: {{ .Release.Name | trimSuffix "-prod-test" | trimSuffix "-prod-prod" }}
 app.kubernetes.io/instance: {{ include "django-production-chart.releaseIdentifier" . }}
 {{- end -}}
