@@ -16,9 +16,7 @@ spec:
     - ReadWriteMany
 {{- end }}
   volumeMode: {{ default "Filesystem" .volumeMode | quote }}
-{{- if .storageClassName }}
-  storageClassName: {{ .storageClassName | quote }}
-{{- end }}
+  storageClassName: {{ default "default" .storageClassName | quote }}
   resources:
     requests:
       storage: {{ .storageSize }}
