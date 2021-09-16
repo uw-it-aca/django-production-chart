@@ -7,9 +7,8 @@ metadata:
   name: {{ printf "%s-pushgateway" $release_id }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ $release_id }}
+    app.kubernetes.io/component: pushgateway
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.serviceAnnotations -}}
   annotations:
 {{ toYaml .Values.serviceAnnotations | indent 4 }}
@@ -21,8 +20,8 @@ spec:
       port: 9091
       targetPort: metrics
   selector:
-    app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-    app.kubernetes.io/instance: {{ $release_id }}
+    app.kubernetes.io/component: pushgateway
+{{- include "django-production-chart.baseLabels" . | nindent 4 }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -30,14 +29,13 @@ metadata:
   name: {{ printf "%s-pushgateway" $release_id }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-    app.kubernetes.io/instance: {{ $release_id }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/component: pushgateway
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: pushgateway
+{{- include "django-production-chart.baseLabels" . | nindent 6 }}
   endpoints:
     - port: metrics
 ---
@@ -46,9 +44,8 @@ kind: Deployment
 metadata:
   name: {{ printf "%s-pushgateway" $release_id }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-    app.kubernetes.io/instance: {{ $release_id }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/component: pushgateway
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
   annotations:
     checkov.io/skip1: CKV_K8S_22=Readonly root file system
@@ -58,13 +55,13 @@ spec:
   replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-      app.kubernetes.io/instance: {{ $release_id }}
+      app.kubernetes.io/component: pushgateway
+{{- include "django-production-chart.baseLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
-        app.kubernetes.io/instance: {{ $release_id }}
+        app.kubernetes.io/component: pushgateway
+{{- include "django-production-chart.baseLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
       annotations:
         seccomp.security.alpha.kubernetes.io/pod: "runtime/default"

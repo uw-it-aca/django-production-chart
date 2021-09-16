@@ -12,9 +12,8 @@ metadata:
   name: {{ $appName }}
   namespace: {{ $releaseNamespace }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ $releaseName | quote }}
+    app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   clusterIP: None
   ports:
@@ -30,9 +29,8 @@ metadata:
   name: {{ printf "%s-mcrouter-configmap" ( include "django-production-chart.releaseIdentifier" . ) }}
   namespace: {{ $releaseNamespace }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ $releaseName | quote }}
+    app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 data:
   config.json: |-
 {{- if .Values.memcached.mcrouter.params.configFile }}{{ range .Files.Lines .Values.memcached.mcrouter.params.configFile }}
@@ -58,19 +56,17 @@ kind: DaemonSet
 metadata:
   name: {{ $appName }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ $releaseName | quote }}
+    app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ $appName }}
-      app.kubernetes.io/instance: {{ $releaseName | quote }}
+      app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.baseLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ $appName }}
-        app.kubernetes.io/instance: {{ $releaseName | quote }}
+{{- include "django-production-chart.baseLabels" . | nindent 8 }}
     spec:
       containers:
       - name: {{ $appName }}
@@ -111,21 +107,20 @@ kind: StatefulSet
 metadata:
   name: {{ $appName }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ $releaseName | quote }}
+    app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   serviceName: {{ $appName }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ $appName }}
-      app.kubernetes.io/instance: {{ $releaseName | quote }}
+      app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.baseLabels" . | nindent 6 }}
   replicas: {{ default 1  .Values.memcached.mcrouter.statefulsetParams.replicas }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ $appName }}
-        app.kubernetes.io/instance: {{ $releaseName | quote }}
+        app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.baseLabels" . | nindent 8 }}
     spec:
       affinity:
         podAntiAffinity:
@@ -134,8 +129,8 @@ spec:
           - topologyKey: "kubernetes.io/hostname"
             labelSelector:
               matchLabels:
-                app.kubernetes.io/name: {{ $appName }}
-                app.kubernetes.io/instance: {{ $releaseName | quote }}
+                app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.baseLabels" . | nindent 16 }}
         {{- else if eq $antiAffinity "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 5
@@ -143,8 +138,8 @@ spec:
             - topologyKey: "kubernetes.io/hostname"
               labelSelector:
                 matchLabels:
-                app.kubernetes.io/name: {{ $appName }}
-                app.kubernetes.io/instance: {{ $releaseName | quote }}
+                  app.kubernetes.io/component: mcrouter
+{{- include "django-production-chart.baseLabels" . | nindent 16 }}
         {{- end }}
       containers:
       - name: {{ $appName }}

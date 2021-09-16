@@ -8,5 +8,5 @@ spec:
     - port: {{ default "http" .Values.metrics.serviceMonitor.port }}
   selector:
     matchLabels:
-      app.kubernetes.io/instance: {{ include "django-production-chart.releaseIdentifier" . }}
+{{- include "django-production-chart.baseLabels" . | nindent 6 }}
 {{- end }}

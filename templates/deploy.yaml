@@ -4,10 +4,8 @@ kind: Job
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}-release-job-{{ .Values.image.tag | trunc 7 }}-{{ randAlphaNum 3 | lower}}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
-    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/component: job
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deploy }}
 {{- if .Values.securityPolicy.deploy.skipCheck }}
@@ -24,9 +22,8 @@ spec:
     metadata:
       name: "{{.Release.Name}}"
       labels:
-        app.kubernetes.io/managed-by: {{.Release.Service | quote }}
-        app.kubernetes.io/instance: {{.Release.Name | quote }}
-        helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+        app.kubernetes.io/component: job
+{{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deployment }}
 {{- if .Values.securityPolicy.deployment.annotations }}

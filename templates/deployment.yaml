@@ -4,10 +4,8 @@ kind: Deployment
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: deployment
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deployment }}
 {{- if .Values.securityPolicy.deployment.skipCheck }}
@@ -24,13 +22,11 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- include "django-production-chart.baseLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+{{- include "django-production-chart.baseLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deployment }}
 {{- if .Values.securityPolicy.deployment.annotations }}

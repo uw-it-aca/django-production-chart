@@ -4,6 +4,7 @@ kind: Service
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}
   labels:
+    app.kubernetes.io/component: service
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   type: {{ default "ClusterIP" .Values.service.type }}
@@ -22,6 +23,5 @@ spec:
       name: http
 {{- end }}
   selector:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- include "django-production-chart.baseLabels" . | nindent 4 }}
 {{- end }}
