@@ -3,7 +3,7 @@ Resource labels
 */}}
 {{- define "django-production-chart.resourceLabels" -}}
 {{- $labelPrefix := "axdd.s.uw.edu" -}}
-{{- $billingNames := dict "517" "Campus-Events-Calendar-Trumba" "554" "Enterprise-Portal-MyUW" "740" "Lecture-Capture-Panopto" "742" "Learning-Management-Systems-Canvas" "762" "Email-Lists-Mailman" "785" "Student-Experience-Applications" "786" "Student-Instructor-Success-Analytics" "787" "Student-Engagement-Tools" "788" "Training-Management-System-Bridge" "830" "Admissions-Enrollment-Management-Tools" -}}
+{{- $billingNames := dict "517" "campus-events-calendar-trumba" "554" "enterprise-portal-myuw" "629" "campus-technology-support" "740" "lecture-capture-panopto" "742" "learning-management-systems-canvas" "762" "email-lists-mailman" "785" "student-experience-applications" "786" "student-instructor-success-analytics" "787" "student-engagement-tools" "788" "training-management-system-bridge" "828" "research-technologies-teaching-learning" "830" "admissions-enrollment-management-tools" -}}
 {{ include "django-production-chart.baseLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ include "django-production-chart.chart" . }}
