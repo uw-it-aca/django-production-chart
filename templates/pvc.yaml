@@ -19,7 +19,7 @@ spec:
   storageClassName: {{ default "default" .storageClassName | quote }}
   resources:
     requests:
-      storage: {{ .storageSize }}
+      storage: {{ .storageSize | quote }}
 {{- if .selector }}
   selector:
 {{- if .selector.matchLabels }}

@@ -18,6 +18,16 @@ branch: "master"
 
 containerPort: 8000
 
+containerPorts:
+  enabled: false
+#  ports:
+#    - name: http
+#      containerPort: 8000
+#      protocol: TCP
+#    - name: smtp
+#      containerPort: 25
+#      protocol: TCP
+
 service:
   enabled: true
   ports:
@@ -30,6 +40,9 @@ deployment:
 
 deploymentInitialization:
   enabled: true
+
+statefulset:
+  enabled: false
 
 image:
   repository: "acait/django-contianer"
@@ -44,6 +57,19 @@ securityPolicy:
       - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
       - "CKV_K8S_40=Django-container base sets uid 1000"
   deployment:
+    skipCheck:
+      - "CKV_K8S_8=Liveness probe more trouble than it's worth"
+      - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
+      - "CKV_K8S_40=acait uid 1000"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+  statefulset:
     skipCheck:
       - "CKV_K8S_8=Liveness probe more trouble than it's worth"
       - "CKV_K8S_22=Readonly root file system too restictive"
@@ -233,6 +259,13 @@ persistentVolume:
 #      #storageClassName: slow
 #      storageSize: 10Gi
 #      mountPath: /path/to/mount/in/pod
+#  claimTemplates:
+#    - name: my-pvc
+#      accessModes:
+#        - ReadWriteMany
+#      storageSize: 10Gi
+#      mountPath: /path/to/mount/in/pod
+
 
 metrics:
   enabled: true

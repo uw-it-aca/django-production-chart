@@ -59,5 +59,9 @@ containers:
       - name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
         mountPath: {{ .mountPath | quote }}
 {{- end }}
+{{- range .Values.persistentVolume.claimTemplates }}
+      - name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+        mountPath: {{ .mountPath | quote }}
+{{- end }}
 {{- end }}
 {{- end -}}
