@@ -157,6 +157,13 @@ spec:
 {{- if .Values.metrics.resources }}
           resources:
 {{ toYaml .Values.metrics.resources | indent 12 }}
+{{- else -}}
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 25m
+              memory: 64Mi
 {{- end }}
 {{- end }}
 {{- with .Values.extraContainers }}
