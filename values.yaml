@@ -158,13 +158,13 @@ memcached:
   updateStrategy:
     type: RollingUpdate
 # override default command, which is:
-#  command:
-#   - memcached
-#   - -m
-#   - 64
-#   - -o
-#   - modern
-#   - -v
+  command:
+    - "memcached"
+    - "-m"
+    - "64"
+    - "-o"
+    - "modern"
+    - "-v"
 # override resource defaults, which are:
   resources:
     limits:

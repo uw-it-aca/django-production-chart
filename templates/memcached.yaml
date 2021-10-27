@@ -1,5 +1,5 @@
 {{- if .Values.memcached.enabled }}
-{{- $command := .Values.memcached.command | default (list "memcached" "-m" "64" "-o" "modern" "-v") -}}
+{{- $command := .Values.memcached.command -}}
 {{- $extraArgs := .Values.memcached.extraArgs | default "" -}}
 ---
 apiVersion: v1
