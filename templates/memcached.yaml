@@ -134,17 +134,8 @@ spec:
               port: memcache
             initialDelaySeconds: 5
             timeoutSeconds: 1
-{{- if .Values.memcached.resources }}
           resources:
 {{ toYaml .Values.memcached.resources | indent 12 }}
-{{- else }}
-            limits:
-              cpu: 500m
-              memory: 128Mi
-            requests:
-              cpu: 25m
-              memory: 64Mi
-{{- end }}
 {{- if .Values.metrics.enabled }}
         - name: metrics
           image: "prom/memcached-exporter:latest"
