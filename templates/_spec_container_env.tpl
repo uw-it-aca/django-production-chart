@@ -42,17 +42,10 @@ env:
     value: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
 {{- end }}
 {{- if .Values.memcached.enabled }}
-{{- if .Values.memcached.mcrouter.enabled }}
-  - name: MEMCACHED_SERVER_COUNT
-    value: "1"
-  - name: MEMCACHED_SERVER_SPEC
-    value: {{ ( include "django-production-chart.releaseIdentifier" . ) }}-mcrouter.{{ .Release.Namespace }}.svc.cluster.local:{{ default 5000 .Values.memcached.mcrouter.params.port }}
-{{- else }}
   - name: MEMCACHED_SERVER_COUNT
     value: {{ .Values.memcached.replicaCount | quote }}
   - name: MEMCACHED_SERVER_SPEC
     value: {{ ( include "django-production-chart.releaseIdentifier" . ) }}-memcached-{{ "{}" }}.{{ ( include "django-production-chart.releaseIdentifier" .) }}-memcached.{{ .Release.Namespace }}.svc.cluster.local
-{{- end }}
 {{- end }}
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}

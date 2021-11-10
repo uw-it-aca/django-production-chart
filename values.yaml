@@ -184,29 +184,21 @@ memcached:
   updateStrategy:
     type: RollingUpdate
 # override default command, which is:
-#  command:
-#   - memcached
-#   - -m
-#   - 64
-#   - -o
-#   - modern
-#   - -v
-# override defaults, which are:
-#  resources:
-#    requests:
-#      memory: 64Mi
-#      cpu: 50m
-## optionally layer mcrouter for scaling if necessary
-  mcrouter:
-    enabled: false
-    controller: "daemonset"
-    params:
-      port:  5000
-    daemonsetParams:
-      hostPort: 5000
-    statefulsetParams:
-      replicas: 1
-      antiAffinity: "hard"
+  command:
+    - "memcached"
+    - "-m"
+    - "64"
+    - "-o"
+    - "modern"
+    - "-v"
+# override resource defaults, which are:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
 
 certs:
   mounted: false
