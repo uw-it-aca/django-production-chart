@@ -161,20 +161,20 @@ spec:
 {{ tpl . $ | indent 8 }}
 {{- end }}
 {{- with .Values.extraVolumes }}
-        volumes:
+      volumes:
 {{ tpl . $ | indent 8 }}
 {{- end }}
 {{- with .Values.memcached.nodeSelector }}
-        nodeSelector:
-{{ toYaml . | trim | indent 10}}
+      nodeSelector:
+{{ toYaml . | trim | indent 8}}
 {{- end }}
 {{- with .Values.memcached.tolerations }}
-        tolerations:
-{{ toYaml . | trim | indent 10}}
+      tolerations:
+{{ toYaml . | trim | indent 8}}
 {{- end }}
 {{- with .Values.memcached.affinity }}
-        affinity:
-{{ toYaml . | trim | indent 10}}
+      affinity:
+{{ toYaml . | trim | indent 8}}
 {{- end }}
   updateStrategy:
     type: {{ .Values.memcached.updateStrategy.type }}
