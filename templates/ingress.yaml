@@ -17,6 +17,15 @@ metadata:
 {{- with .Values.ingress.annotations }}
 {{ toYaml . | indent 4 }}
 {{- end }}
+{{- if .Values.securityPolicy.enabled }}
+{{- if .Values.securityPolicy.ingress }}
+{{- if .Values.securityPolicy.ingress.skipCheck }}
+{{- range $index, $value:= .Values.securityPolicy.ingress.skipCheck }}
+    checkov.io/skip{{ add $index 1 }}: ${{ value | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
 spec:
 {{- if .Values.ingress.tls }}
   tls:
