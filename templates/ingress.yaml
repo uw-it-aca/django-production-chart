@@ -21,7 +21,7 @@ metadata:
 {{- if .Values.securityPolicy.ingress }}
 {{- if .Values.securityPolicy.ingress.skipCheck }}
 {{- range $index, $value:= .Values.securityPolicy.ingress.skipCheck }}
-    checkov.io/skip{{ add $index 1 }}: ${{ value | quote }}
+    checkov.io/skip{{ add $index 1 }}: ${{ $value | quote }}
 {{- end }}
 {{- end }}
 {{- end }}
