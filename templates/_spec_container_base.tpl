@@ -53,4 +53,15 @@ containers:
         readOnly: true
         mountPath: {{ default "/data" .Values.mountedSecrets.mountPath | quote }}
 {{- end }}
+{{- if .Values.persistentVolume.enabled }}
+{{- $dot := . }}
+{{- range .Values.persistentVolume.claims }}
+      - name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+        mountPath: {{ .mountPath | quote }}
+{{- end }}
+{{- range .Values.persistentVolume.claimTemplates }}
+      - name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+        mountPath: {{ .mountPath | quote }}
+{{- end }}
+{{- end }}
 {{- end -}}
