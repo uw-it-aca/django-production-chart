@@ -70,4 +70,5 @@ spec:
         storageClassName: {{ default "default" .storageClassName | quote }}
 {{- end }}
 {{- end }}
+{{- include "django-production-chart.specContainerSidecars" . | indent 6 -}}
 {{- end }}
