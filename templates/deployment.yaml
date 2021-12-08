@@ -51,4 +51,5 @@ spec:
 {{- include "django-production-chart.specContainer" . | nindent 6 -}}
 {{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}
 {{- include "django-production-chart.specContainerProbes" . | nindent 10 -}}
+{{- include "django-production-chart.specContainerSidecars" . | indent 6 -}}
 {{- end }}
