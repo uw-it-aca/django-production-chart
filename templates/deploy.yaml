@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}-release-job-{{ .Values.image.tag | trunc 7 }}-{{ randAlphaNum 3 | lower}}
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
@@ -23,6 +24,7 @@ spec:
   template:
     metadata:
       name: "{{.Release.Name}}"
+      namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
       labels:
         app.kubernetes.io/managed-by: {{.Release.Service | quote }}
         app.kubernetes.io/instance: {{.Release.Name | quote }}

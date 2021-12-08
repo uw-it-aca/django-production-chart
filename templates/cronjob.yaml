@@ -1,11 +1,13 @@
 {{- if .Values.cronjob.enabled }}
 {{- $dot := . -}}
+{{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
 {{- range .Values.cronjob.jobs -}}
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: {{ printf "%s-cronjob-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
+  namespace: {{ $namespace }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" $dot }}
     helm.sh/chart: {{ include "django-production-chart.chart" $dot }}

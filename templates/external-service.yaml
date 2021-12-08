@@ -3,6 +3,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: {{ .Values.externalService.name }}
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
 spec:
   type: {{ .Values.externalService.type }}
   ports:
@@ -13,6 +14,7 @@ kind: Endpoints
 apiVersion: v1
 metadata:
   name: {{ .Values.externalService.name }}
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
 subsets:
   - addresses:
       - ip: {{ .Values.externalService.serviceAddress }}
