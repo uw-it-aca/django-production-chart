@@ -1,11 +1,12 @@
 {{- if and .Values.cronjob.enabled .Values.metrics.enabled }}
 {{- $release_id := ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ printf "%s-pushgateway" $release_id }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
@@ -28,7 +29,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ printf "%s-pushgateway" $release_id }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $namespace }}
   labels:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
     app.kubernetes.io/instance: {{ $release_id }}
@@ -45,6 +46,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ printf "%s-pushgateway" $release_id }}
+  namespace: {{ $namespace }}
   labels:
     app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
     app.kubernetes.io/instance: {{ $release_id }}
