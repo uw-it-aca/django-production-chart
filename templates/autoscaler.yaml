@@ -3,7 +3,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}-autoscaler
-  namespace: default
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}

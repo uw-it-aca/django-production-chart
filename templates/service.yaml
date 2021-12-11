@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.name" . }}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
