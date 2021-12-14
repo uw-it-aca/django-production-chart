@@ -23,6 +23,9 @@ volumes:
         - key: {{ .key | quote }}
           path: {{ .path | quote }}
 {{- end }}
+{{- range .Values.podVolumes }}
+{{ toYaml . | indent 8 }}
+{{- end }}
 {{- end }}
 {{- end }}
 containers:

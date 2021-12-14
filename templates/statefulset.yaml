@@ -53,6 +53,7 @@ spec:
 {{- include "django-production-chart.specContainer" . | nindent 6 -}}
 {{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}
 {{- include "django-production-chart.specContainerProbes" . | nindent 10 -}}
+{{- include "django-production-chart.specContainerSidecars" . | indent 6 -}}
 {{- if and .Values.persistentVolume.enabled .Values.persistentVolume.claimTemplates }}
 {{- $dot := . }}
   volumeClaimTemplates:
@@ -70,5 +71,4 @@ spec:
         storageClassName: {{ default "default" .storageClassName | quote }}
 {{- end }}
 {{- end }}
-{{- include "django-production-chart.specContainerSidecars" . | indent 6 -}}
 {{- end }}
