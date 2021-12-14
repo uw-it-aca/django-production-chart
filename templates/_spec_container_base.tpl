@@ -23,10 +23,11 @@ volumes:
         - key: {{ .key | quote }}
           path: {{ .path | quote }}
 {{- end }}
-{{- range .Values.podVolumes }}
-{{ toYaml . | indent 8 }}
 {{- end }}
 {{- end }}
+{{- range $name, $map := .Values.podVolumes }}
+  - name: {{ $name | quote }}
+{{ toYaml $map | indent 4 }}
 {{- end }}
 containers:
   - name: {{ include "django-production-chart.releaseIdentifier" . }}
