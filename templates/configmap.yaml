@@ -1,5 +1,6 @@
 {{- $dot := . }}
 {{- range $name, $map := .Values.configmaps }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

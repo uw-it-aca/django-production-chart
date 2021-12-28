@@ -241,6 +241,11 @@ resources:
     cpu: 25m
     memory: 256Mi
 
+#volumeMounts:
+#  - name: my-volume-mount
+#    mountPath: /config/main.cf
+#    name: postfix-config
+
 persistentVolume:
   enabled: false
 #  enabled: true

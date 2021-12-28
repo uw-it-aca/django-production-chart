@@ -68,4 +68,7 @@ containers:
         mountPath: {{ .mountPath | quote }}
 {{- end }}
 {{- end }}
+{{- if .Values.volumeMounts }}
+{{ toYaml .Values.volumeMounts | indent 6 }}
+{{- end }}
 {{- end -}}
