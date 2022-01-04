@@ -53,4 +53,16 @@ spec:
                   name: http
         {{- end }}
   {{- end }}
+{{- if (eq "nginx" .Values.ingress.type) }}
+{{- if .Values.ingress.tcpServices }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+{{ toYaml .Values.ingress.tcpServices  | indent 2 }}
+{{- end }}
+{{- end }}
 {{- end }}
