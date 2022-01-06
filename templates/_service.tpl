@@ -20,7 +20,9 @@ spec:
     - port: {{ .port }}
       targetPort: {{ .targetPort }}
       protocol: {{ default "TCP" .protocol }}
+{{- if .name }}
       name: {{ .name }}
+{{- end }}
 {{- end }}
 {{- else }}
     - port: {{ default 80 .service.port }}
