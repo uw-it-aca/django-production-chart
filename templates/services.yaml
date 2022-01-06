@@ -1,8 +1,8 @@
 {{- $dot := . -}}
-{{- $base_name := ( printf "%s-service" ( include "django-production-chart.releaseIdentifier" . ) ) }}
+{{- $base_name := ( include "django-production-chart.releaseIdentifier" . ) }}
 {{- range .Values.services -}}
 {{- $type := ( default "" .type ) }}
-{{- $name := ( ( empty $type ) | ternary $base_name ( printf "%s-%s" $base_name ( lower $type ) ) ) }}
+{{- $name := ( ( empty $type ) | ternary $base_name ( printf "%s-service-%s" $base_name ( lower $type ) ) ) }}
 ---
 {{ include "django-production-chart.specService" (dict "root" $dot "name" $name "service" . ) }}
 {{- end }}
