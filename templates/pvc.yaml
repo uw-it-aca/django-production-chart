@@ -1,38 +1,10 @@
-{{- if .Values.persistentVolume.enabled }}
 {{- $dot := . -}}
-{{- range .Values.persistentVolume.claims -}}
+{{- range $name, $map := .Values.podVolumes }}
+{{- if hasKey $map.volume "claim" }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
-spec:
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
-  accessModes:
-{{- if .accessModes }}
-{{- range .accessModes -}}
-    - {{ . | quote }}
-{{- end -}}
-{{- else }}
-    - ReadWriteMany
+{{ include "django-production-chart.pvcBase" (dict "root" $dot "name" $name "claim" $map.volume.claim ) }}
 {{- end }}
-  volumeMode: {{ default "Filesystem" .volumeMode | quote }}
-  storageClassName: {{ default "default" .storageClassName | quote }}
-  resources:
-    requests:
-      storage: {{ .storageSize | quote }}
-{{- if .selector }}
-  selector:
-{{- if .selector.matchLabels }}
-    matchLabels:
-{{ toYaml .selector.matchLabels | indent 6 }}
-      release: "stable"
-{{- end }}
-{{- if .selector.matchExpressions }}
-    matchExpressions:
-{{ toYaml .selector.matchExpressions | indent 6 }}
-{{- end }}
-{{- end }}
-{{ printf "\n" }}
-{{- end -}}
 {{- end -}}
