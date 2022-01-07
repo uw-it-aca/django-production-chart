@@ -55,21 +55,20 @@ spec:
 {{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}
 {{- include "django-production-chart.specContainerProbes" . | nindent 10 -}}
 {{- include "django-production-chart.specContainerSidecars" . | indent 6 -}}
-{{- if and .Values.persistentVolume.enabled .Values.persistentVolume.claimTemplates }}
-{{- $dot := . }}
+{{- $i := 0 }}
+{{- range $name, $map := .Values.podVolumes }}
+{{- if hasKey $map.volume "claimTemplate" }}
+{{- if eq $i 0 }}
   volumeClaimTemplates:
-{{- range .Values.persistentVolume.claimTemplates }}
+{{- end }}
+{{- $i = add1 $i }}
+{{- end }}
+{{- end }}
+{{- $dot := . }}
+{{- range $name, $map := .Values.podVolumes }}
+{{- if hasKey $map.volume "claimTemplate" }}
     - metadata:
-       name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
-      spec:
-        accessModes:
-{{- range .accessModes }}
-          - {{ . | quote }}
-{{- end }}
-        resources:
-          requests:
-            storage: {{ .storageSize | quote }}
-        storageClassName: {{ default "default" .storageClassName | quote }}
+{{ include "django-production-chart.pvcBase" (dict "root" $dot "name" $name "claim" $map.volume.claimTemplate ) | indent 6 }}
 {{- end }}
 {{- end }}
-{{- end }}
+{{- end -}}

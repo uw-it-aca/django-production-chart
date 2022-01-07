@@ -2,6 +2,7 @@
 Application container spec base
 */}}
 {{- define "django-production-chart.specContainerBase" -}}
+{{- $dot := . }}
 volumes:
 {{- if .Values.certs.mounted }}
   - name: certs-volume
@@ -26,8 +27,15 @@ volumes:
 {{- end }}
 {{- end }}
 {{- range $name, $map := .Values.podVolumes }}
-  - name: {{ $name | quote }}
-{{ toYaml $map | indent 4 }}
+{{- if not ( or ( hasKey $map.volume "claim"  ) ( hasKey $map.volume "claimTemplate" ) ) }}
+  - name: {{ $name }}
+{{- if hasKey $map.volume "configMap" }}
+    configMap:
+      name: {{ printf "%s-%s" ( include "django-production-chart.releaseIdentifier" $dot ) $map.volume.configMap.name }}
+{{- else }}
+{{ toYaml $map.volume | indent 4 }}
+{{- end }}
+{{- end }}
 {{- end }}
 containers:
   - name: {{ include "django-production-chart.releaseIdentifier" . }}
@@ -57,18 +65,16 @@ containers:
         readOnly: true
         mountPath: {{ default "/data" .Values.mountedSecrets.mountPath | quote }}
 {{- end }}
-{{- if .Values.persistentVolume.enabled }}
-{{- $dot := . }}
-{{- range .Values.persistentVolume.claims }}
-      - name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
-        mountPath: {{ .mountPath | quote }}
+{{- range $name, $map := .Values.podVolumes }}
+{{- if $map.mount }}
+{{- if or ( not ( hasKey $map "containers" ) ) ( has "base" $map.containers ) }}
+{{- if or ( hasKey $map.volume "claimTemplate" ) ( hasKey $map.volume "claim" ) }}
+      - name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) $name }}
+{{- else }}
+      - name: {{ $name }}
 {{- end }}
-{{- range .Values.persistentVolume.claimTemplates }}
-      - name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
-        mountPath: {{ .mountPath | quote }}
+{{ toYaml $map.mount | indent 8 }}
 {{- end }}
 {{- end }}
-{{- if .Values.volumeMounts }}
-{{ toYaml .Values.volumeMounts | indent 6 }}
 {{- end }}
 {{- end -}}

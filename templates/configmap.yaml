@@ -4,7 +4,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-configmap-%s" ( include "django-production-chart.releaseIdentifier" $dot ) $name }}
+  name: {{ printf "%s-%s" ( include "django-production-chart.releaseIdentifier" $dot ) $name }}
   namespace: {{ include "django-production-chart.namespaceIdentifier" $dot }}
 data:
 {{ toYaml $map | indent 2 }}

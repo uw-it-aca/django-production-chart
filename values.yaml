@@ -241,32 +241,6 @@ resources:
     cpu: 25m
     memory: 256Mi
 
-#volumeMounts:
-#  - name: my-volume-mount
-#    mountPath: /config/main.cf
-#    name: postfix-config
-
-persistentVolume:
-  enabled: false
-#  enabled: true
-#  claims:
-#    - name: my-pvc
-#      accessModes:
-#        - ReadWriteMany
-#      # this is the default, override if desired
-#      #volumeMode: Filesystem
-#      # no storage name by default, set if cluster defined
-#      #storageClassName: slow
-#      storageSize: 10Gi
-#      mountPath: /path/to/mount/in/pod
-#  claimTemplates:
-#    - name: my-pvc
-#      accessModes:
-#        - ReadWriteMany
-#      storageSize: 10Gi
-#      mountPath: /path/to/mount/in/pod
-
-
 metrics:
   enabled: true
   serviceMonitor:
@@ -324,3 +298,98 @@ affinity: {}
 ## set directly, or use shortcut below to schedule pods across nodes
 #affinity:
 #   podsSpanNodes: true
+
+## sidecarContainers defines additional containers to run within the pod.
+## Note: do not manually define volumeMounts as they are added via podVolumes
+## definitions.
+#sidecarContainers:
+#  smtpforward:
+#    image: "gcr.io/uwit-mci-axdd/uw-ssh-client:4aad3bd"
+#    env:
+#      - name: JUMPHOST_ID_KEY
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: jumphost-id-key
+#      - name: JUMPHOST_ID
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: jumphost-id
+#      - name: JUMPHOST_HOSTNAME
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: jumphost-hostname
+#      - name: SMTP_SERVER
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: smtp-server
+#    command:
+#      - "sh"
+#      - "-c"
+#      - 'mkdir -m 0700 ~/.ssh && echo "${JUMPHOST_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${JUMPHOST_ID}@${JUMPHOST_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:25:{SMP_SERVER}:25'
+
+
+## podVolumes defines each volume available to the pod and how each
+## is made available to containers within it.  each key is the name that
+## will be used within the pod to bind the volume to the volume mount.
+## each key defines a dict containing:
+## "volume" - (not optional) defines volume in the pod.  can be one of:
+##   configMap     : reference to a configmap define elswhere in the cluster.
+##                   typically defined in configMaps (below)
+##   claim         : reference to a pvc defined elsewhere in the cluster.
+##                   a PersistentVolumeClaim object is created based on this definition
+##   claimTemplate : reference to a pvc defined elsewhere in the cluster.
+##                   a volumeClaimTemplates entry is created based on this definition
+##   or yaml that will be directly added to the pod's volumes list.
+## "mount" - (not optional) defines how the volume will be mounted by containers
+## "containers"    : (options) lists containers within the pod the mount
+##                    definition applies to.  if undefined, the mount is added to
+##                    only the primary container. if defined, the mount is added to
+##                    each named container. the name "base" refers to the primary
+##                    container defined in the pod.
+#podVolumes:
+#  var-mailman:
+#    volume:
+#      claimTemplate:
+#        accessModes:
+#          - ReadWriteOnce
+#        storageClassName: standard
+#        storageSize: 10Gi
+#    mount:
+#      mountPath: /app/mailman/var
+#  var-spool-postfix:
+#    volume:
+#      claimTemplate:
+#        accessModes:
+#          - ReadWriteOnce
+#        storageClassName: standard
+#        storageSize: 3Gi
+#    mount:
+#      mountPath: /var/spool/postfix
+#    containers: [ base, postfix ]
+#  postfix-config:
+#    volume:
+#      configMap:
+#        name: postfix-main-cf
+#    mount:
+#      mountPath: /config/main.cf
+#      subPath: main.cf
+#    containers: [ postfix ]
+
+
+## configmaps defines one or more ConfigMap objects within the cluster.
+## each dict key names the ConfigMap and can be used within the values file
+## for reference.  Whatever the key defines will define the ConfigMap's data.
+#configmaps:
+#  postfix-main-cf:
+#    main.cf: |
+#      myhostname = mailman-core-prod-test
+#      mail_name = Mailman POC
+#  gunicorn-tpl:
+#    gunicorn.tpl: |
+#      [gunicorn]
+#      graceful_timeout = 30
+#      timeout = 360

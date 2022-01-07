@@ -4,5 +4,5 @@
 {{- $type := ( default "" .type ) }}
 {{- $name := ( ( empty $type ) | ternary $base_name ( printf "%s-service-%s" $base_name ( lower $type ) ) ) }}
 ---
-{{ include "django-production-chart.specService" (dict "root" $dot "name" $name "service" . ) }}
+{{ include "django-production-chart.service" (dict "root" $dot "name" $name "service" . ) }}
 {{- end }}

@@ -1,7 +1,7 @@
 {{/*
 Application service template
 */}}
-{{- define "django-production-chart.specService" -}}
+{{- define "django-production-chart.service" -}}
 apiVersion: v1
 kind: Service
 metadata:
