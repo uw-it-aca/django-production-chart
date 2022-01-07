@@ -1,8 +1,7 @@
 {{- $dot := . -}}
 {{- $base_name := ( include "django-production-chart.releaseIdentifier" . ) }}
-{{- range .Values.services -}}
-{{- $type := ( default "" .type ) }}
-{{- $name := ( ( empty $type ) | ternary $base_name ( printf "%s-service-%s" $base_name ( lower $type ) ) ) }}
+{{- range $type, $map := .Values.services }}
+{{- $name := ( ( eq $type "ClusterIP" ) | ternary $base_name ( printf "%s-service-%s" $base_name ( lower $type ) ) ) }}
 ---
-{{ include "django-production-chart.service" (dict "root" $dot "name" $name "service" . ) }}
+{{ include "django-production-chart.service" (dict "root" $dot "name" $name "type" $type "service" $map ) }}
 {{- end }}

@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .root.Release.Name }}
     app.kubernetes.io/managed-by: {{ .root.Release.Service }}
 spec:
-  type: {{ default "ClusterIP" .service.type }}
+  type: {{ default "ClusterIP" .type }}
   ports:
 {{- if .service.ports }}
 {{- range .service.ports }}

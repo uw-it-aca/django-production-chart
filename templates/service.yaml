@@ -1,6 +1,4 @@
-{{- if not .Values.services }}
 {{- if .Values.service.enabled }}
 {{- $name := ( include "django-production-chart.releaseIdentifier" . ) }}
-{{- include "django-production-chart.service" (dict "root" . "name" $name "service" .Values.service ) }}
-{{- end }}
+{{- include "django-production-chart.service" (dict "root" . "name" $name "type" "ClusterIP" "service" .Values.service ) }}
 {{- end }}

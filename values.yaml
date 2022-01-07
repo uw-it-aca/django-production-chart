@@ -28,12 +28,26 @@ containerPorts:
 #      containerPort: 25
 #      protocol: TCP
 
+## service defines a service object to expose the chart's deployment
+## or statefulset as a service.
 service:
   enabled: true
   ports:
     - port: 80
       targetPort: http
       name: http
+
+## services is a dict defining a service object of each type specified by
+## the key and associated with the chart's deployment or statefulset.
+## can be used in place of the "service" chart value, but typically
+## used to add additional services
+#services:
+#  LoadBalancer:
+#    ports:
+#      - port: 25
+#        targetPort: 25
+#        protocol: TCP
+#        name: smtp
 
 deployment:
   enabled: true
@@ -300,7 +314,9 @@ affinity: {}
 #   podsSpanNodes: true
 
 ## sidecarContainers defines additional containers to run within the pod.
-## Note: do not manually define volumeMounts as they are added via podVolumes
+## each key is the name of the sidecar container, and it's data is simply
+## toYaml'd into the pod's container list.
+## Note: do not define volumeMounts here as they are added via "podVolumes"
 ## definitions.
 #sidecarContainers:
 #  smtpforward:
@@ -332,24 +348,29 @@ affinity: {}
 #      - 'mkdir -m 0700 ~/.ssh && echo "${JUMPHOST_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${JUMPHOST_ID}@${JUMPHOST_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:25:{SMP_SERVER}:25'
 
 
-## podVolumes defines each volume available to the pod and how each
-## is made available to containers within it.  each key is the name that
-## will be used within the pod to bind the volume to the volume mount.
-## each key defines a dict containing:
-## "volume" - (not optional) defines volume in the pod.  can be one of:
-##   configMap     : reference to a configmap define elswhere in the cluster.
-##                   typically defined in configMaps (below)
-##   claim         : reference to a pvc defined elsewhere in the cluster.
-##                   a PersistentVolumeClaim object is created based on this definition
-##   claimTemplate : reference to a pvc defined elsewhere in the cluster.
-##                   a volumeClaimTemplates entry is created based on this definition
-##   or yaml that will be directly added to the pod's volumes list.
-## "mount" - (not optional) defines how the volume will be mounted by containers
-## "containers"    : (options) lists containers within the pod the mount
-##                    definition applies to.  if undefined, the mount is added to
-##                    only the primary container. if defined, the mount is added to
-##                    each named container. the name "base" refers to the primary
-##                    container defined in the pod.
+## podVolumes defines each volume available to the pod and how each volume
+## is made available to containers.  each key is the name that will be
+## used within the pod to bind the volume to the volume mount, and
+## defines a dict containing:
+##   "volume"     : (required) defines a volume in the pod.
+##                  volume can define:
+##                     configMap     : reference to a configmap define
+##                                     elswhere in the cluster. typically
+##                                     typically defined in configMaps (below)
+##                     claim         : reference to a pvc defined elsewhere in
+##                                     the cluster. a PersistentVolumeClaim object
+##                                     is automatically created based on this definition
+##                     claimTemplate : reference to a pvc defined elsewhere in
+##                                     the cluster. a volumeClaimTemplates entry
+##                                     is automatically created based on this definition
+##                     or yaml that will be directly added to the pod's volumes list.
+##   "mount"      : (requireed) defines how the volume will be mounted by containers
+##   "containers" : (optional) lists containers within the pod the mount
+##                  definition applies to.  if undefined, the mount is added to
+##                  only the primary container. if defined, the mount is added to
+##                  each named container. the name "base" refers to the primary
+##                  container defined in the pod.
+##
 #podVolumes:
 #  var-mailman:
 #    volume:
