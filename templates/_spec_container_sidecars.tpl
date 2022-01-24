@@ -6,14 +6,11 @@ Application sidecar containers
 {{- range $podName, $container := .Values.sidecarContainers }}
   - name: {{ $podName | quote }}
 {{ toYaml $container | indent 4 }}
-{{- $i := 0 }}
-{{- range $name, $map := $dot.Values.podVolumes }}
-{{- if and ( hasKey $map "mount" ) ( has $podName $map.containers ) }}
-{{- if eq $i 0 }}
     volumeMounts:
-{{- end }}
-{{- $i = add1 $i }}
-{{- end }}
+{{- if $dot.Values.certs.mounted }}
+      - name: certs-volume
+        readOnly: true
+        mountPath: "/certs"
 {{- end }}
 {{- range $name, $map := $dot.Values.podVolumes }}
 {{- if and ( hasKey $map "mount" ) ( has $podName $map.containers ) }}
