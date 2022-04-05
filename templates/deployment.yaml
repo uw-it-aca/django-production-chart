@@ -48,9 +48,9 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- include "django-production-chart.specControllerScheduling" . | nindent 6 -}}
-{{- include "django-production-chart.specContainer" . | nindent 6 -}}
-{{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}
-{{- include "django-production-chart.specContainerProbes" . | nindent 10 -}}
-{{- include "django-production-chart.specContainerSidecars" . | indent 6 -}}
-{{- end }}
+{{ include "django-production-chart.specControllerScheduling" . | indent 6 }}
+{{ include "django-production-chart.specContainer" . | indent 6 }}
+{{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
+{{ include "django-production-chart.specContainerProbes" . | indent 10 }}
+{{ include "django-production-chart.specContainerSidecars" . | indent 6 }}
+{{- end -}}
