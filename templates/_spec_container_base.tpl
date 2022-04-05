@@ -2,7 +2,7 @@
 Application container spec base
 */}}
 {{- define "django-production-chart.specContainerBase" -}}
-{{- $dot := . }}
+{{- $dot := . -}}
 volumes:
 {{- if .Values.certs.mounted }}
   - name: certs-volume
@@ -72,4 +72,4 @@ containers:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- end -}}
+{{- end }}

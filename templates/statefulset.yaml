@@ -1,12 +1,13 @@
 {{- if .Values.statefulset.enabled }}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "django-production-chart.releaseIdentifier" . }}
+  name: {{ .Values.releaseIdentifier }}
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/component: statefulset
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier}}
     helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -22,17 +23,17 @@ metadata:
 {{- end }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
-  serviceName: {{ include "django-production-chart.releaseIdentifier" . }}
+  serviceName: {{ .Values.releaseIdentifier }}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+      app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+        app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
         app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.statefulset }}
@@ -43,6 +44,10 @@ spec:
 {{- end }}
 {{- end }}
     spec:
+{{- if .Values.statefulset.affinityTemplate  }}
+      affinity:
+{{ tpl .Values.statefulset.affinityTemplate . | trim | indent 8 }}
+{{- end }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.statefulset }}
 {{- if .Values.securityPolicy.statefulset.spec }}
@@ -50,11 +55,11 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- include "django-production-chart.specControllerScheduling" . | nindent 6 -}}
-{{- include "django-production-chart.specContainer" . | nindent 6 -}}
-{{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}
-{{- include "django-production-chart.specContainerProbes" . | nindent 10 -}}
-{{- include "django-production-chart.specContainerSidecars" . | indent 6 -}}
+{{ include "django-production-chart.specControllerScheduling" . | indent 6 }}
+{{ include "django-production-chart.specContainer" . | indent 6 }}
+{{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
+{{ include "django-production-chart.specContainerProbes" . | indent 10 }}
+{{ include "django-production-chart.specContainerSidecars" . | indent 6 }}
 {{- $i := 0 }}
 {{- range $name, $map := .Values.podVolumes }}
 {{- if hasKey $map.volume "claimTemplate" }}
@@ -64,11 +69,9 @@ spec:
 {{- $i = add1 $i }}
 {{- end }}
 {{- end }}
-{{- $dot := . }}
 {{- range $name, $map := .Values.podVolumes }}
 {{- if hasKey $map.volume "claimTemplate" }}
-    - metadata:
-{{ include "django-production-chart.pvcBase" (dict "root" $dot "name" $name "claim" $map.volume.claimTemplate ) | indent 6 }}
+{{ include "django-production-chart.pvcBase" (dict "root" $ "name" $name "claim" $map.volume.claimTemplate ) | indent 4 }}
 {{- end }}
 {{- end }}
 {{- end -}}
