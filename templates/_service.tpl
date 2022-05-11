@@ -10,7 +10,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.name" .root }}
     app.kubernetes.io/instance: {{ .root.Release.Name }}
-{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" .root | nindent 4 }}
 spec:
   type: {{ default "ClusterIP" .type }}
   ports:
