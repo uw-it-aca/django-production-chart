@@ -71,7 +71,7 @@ spec:
         app.kubernetes.io/name: {{ printf "%s-pushgateway" $release_id }}
         app.kubernetes.io/instance: {{ $release_id }}
         app.kubernetes.io/component: pushgateway
-{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
       annotations:
         seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
