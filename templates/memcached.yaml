@@ -9,8 +9,9 @@ metadata:
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/component: memcached
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.serviceAnnotations -}}
   annotations:
 {{ toYaml .Values.serviceAnnotations | indent 4 }}
@@ -39,7 +40,8 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/component: memcached
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
@@ -57,7 +59,8 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/component: memcached
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
   annotations:
     checkov.io/skip1: CKV_K8S_8=Liveness probe
@@ -84,6 +87,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        app.kubernetes.io/component: memcached
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- with .Values.podLabels }}
 {{ toYaml . | indent 8 }}
 {{- end}}

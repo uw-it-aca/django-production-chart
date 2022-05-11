@@ -6,11 +6,10 @@ metadata:
   name: {{ .Values.releaseIdentifier }}
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
-    app.kubernetes.io/component: statefulset
-    app.kubernetes.io/name: {{ .Values.releaseIdentifier}}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: statefulset
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.statefulset }}
 {{- if .Values.securityPolicy.statefulset.skipCheck }}
@@ -35,6 +34,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: statefulset
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.statefulset }}
 {{- if .Values.securityPolicy.statefulset.annotations }}

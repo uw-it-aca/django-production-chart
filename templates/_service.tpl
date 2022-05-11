@@ -9,9 +9,8 @@ metadata:
   namespace: {{ include "django-production-chart.namespaceIdentifier" .root }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.name" .root }}
-    helm.sh/chart: {{ include "django-production-chart.chart" .root }}
     app.kubernetes.io/instance: {{ .root.Release.Name }}
-    app.kubernetes.io/managed-by: {{ .root.Release.Service }}
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   type: {{ default "ClusterIP" .type }}
   ports:
