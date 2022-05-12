@@ -303,6 +303,7 @@ externalSecrets:
         - name: secret-too
           property: mumble
 
+# Billing values used to apply billing-related labels to resources
 billing:
   codes:
     admissions-cohort-manager: "830"
