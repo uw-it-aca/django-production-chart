@@ -3,7 +3,7 @@ Resource labels
 */}}
 {{- define "django-production-chart.resourceLabels" -}}
 {{- $labelPrefix := "axdd.s.uw.edu" -}}
-{{- $billingcode := ( index .Values.billing.codes .Values.repo ) }}
+{{- $billingcode := index .Values.billing.codes .Values.repo | default "" }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ include "django-production-chart.chart" . }}
 {{ printf "%s/%s" $labelPrefix "billing-code"}}: {{ $billingcode | quote }}
