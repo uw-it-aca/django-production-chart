@@ -20,5 +20,5 @@ helm.sh/chart: {{ include "django-production-chart.chart" . }}
 {{- include "django-production-chart.billingLabels" . }}
 {{- range $key, $value := .Values.labels }}
 {{ printf "%s/%s" $labelPrefix $key }}: {{ $value | quote }}
-{{- end -}}
+{{- end }}
 {{- end -}}
