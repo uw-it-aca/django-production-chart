@@ -5,9 +5,9 @@ metadata:
   name: {{ include "django-production-chart.releaseIdentifier" . }}-release-job-{{ .Values.image.tag | trunc 7 }}-{{ randAlphaNum 3 | lower}}
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/name: {{ printf "%s-release-job" ( include "django-production-chart.releaseIdentifier" . ) }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
-    app.kubernetes.io/component: job
+    app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deploy }}
@@ -26,9 +26,9 @@ spec:
       name: "{{.Release.Name}}"
       namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
       labels:
-        app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-        app.kubernetes.io/instance: {{.Release.Name | quote }}
-        app.kubernetes.io/component: job
+        app.kubernetes.io/name: {{ printf "%s-release-job" ( include "django-production-chart.releaseIdentifier" . ) }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deployment }}
