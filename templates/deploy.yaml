@@ -6,9 +6,9 @@ metadata:
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
-    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/component: job
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deploy }}
 {{- if .Values.securityPolicy.deploy.skipCheck }}
@@ -26,9 +26,10 @@ spec:
       name: "{{.Release.Name}}"
       namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
       labels:
-        app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+        app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
         app.kubernetes.io/instance: {{.Release.Name | quote }}
-        helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+        app.kubernetes.io/component: job
+{{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deployment }}
 {{- if .Values.securityPolicy.deployment.annotations }}

@@ -6,9 +6,8 @@ metadata:
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
