@@ -1,31 +1,4 @@
 {{- if .Values.service.enabled }}
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "django-production-chart.releaseIdentifier" . }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
-  labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.name" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-spec:
-  type: {{ default "ClusterIP" .Values.service.type }}
-  ports:
-{{- if .Values.service.ports }}
-{{- range .Values.service.ports }}
-    - port: {{ .port }}
-      targetPort: {{ .targetPort }}
-      protocol: {{ default "TCP" .protocol }}
-      name: {{ .name }}
-{{- end }}
-{{- else }}
-    - port: {{ default 80 .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
-{{- end }}
-  selector:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- $name := ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- include "django-production-chart.service" (dict "root" . "name" $name "type" "ClusterIP" "service" .Values.service ) }}
 {{- end }}

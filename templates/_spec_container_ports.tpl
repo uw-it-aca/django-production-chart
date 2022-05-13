@@ -14,4 +14,4 @@ ports:
     containerPort: {{ .Values.containerPort }}
     protocol: TCP
 {{- end }}
-{{- end -}}
+{{- end }}

@@ -1,5 +1,6 @@
 {{- if .Values.daemon.enabled }}
 {{- $dot := . }}
+{{- $component := "management-command-daemon" }}
 {{- $release_id := ( include "django-production-chart.releaseIdentifier" . ) }}
 {{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
 {{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
@@ -11,7 +12,9 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ printf "%s-daemon" $release_id }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    role: management-command-daemon
+    app.kubernetes.io/component: {{ $component }}
+    role: {{ $component }}
+{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
 spec:
   clusterIP: None
   ports:
@@ -28,12 +31,17 @@ kind: ServiceMonitor
 metadata:
   name: {{ printf "%s-daemon" $release_id }}
   namespace: {{ $namespace }}
+  labels:
+    app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+    app.kubernetes.io/instance: {{ $release_id }}
+    app.kubernetes.io/component: {{ $component }}
+{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
 spec:
   endpoints:
     - port: metrics
   selector:
     matchLabels:
-      role: management-command-daemon
+      role: {{ $component }}
       app.kubernetes.io/instance: {{ $release_id }}
 {{- end }}
 {{- range .Values.daemon.daemons }}
@@ -46,8 +54,9 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
     app.kubernetes.io/instance: {{ $release_id }}
-    role: management-command-daemon
-    helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
+    app.kubernetes.io/component: {{ $component }}
+    role: {{ $component }}
+{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
 {{- if $dot.Values.securityPolicy.enabled }}
 {{- if $dot.Values.securityPolicy.daemon }}
 {{- if $dot.Values.securityPolicy.daemon.skipCheck }}
@@ -93,5 +102,6 @@ spec:
 {{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 10 }}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 10 }}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 }}
+{{- include "django-production-chart.specContainerSidecars" $dot | indent 6 -}}
 {{- end }}
 {{- end }}

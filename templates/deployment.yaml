@@ -6,9 +6,9 @@ metadata:
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
-    helm.sh/chart: {{ include "django-production-chart.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: deployment
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.deployment }}
 {{- if .Values.securityPolicy.deployment.skipCheck }}
@@ -48,8 +48,9 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- include "django-production-chart.specControllerScheduling" . | nindent 6 -}}
-{{- include "django-production-chart.specContainer" . | nindent 6 -}}
-{{- include "django-production-chart.specContainerLifecycle" . | nindent 10 -}}
-{{- include "django-production-chart.specContainerProbes" . | nindent 10 -}}
-{{- end }}
+{{ include "django-production-chart.specControllerScheduling" . | indent 6 }}
+{{ include "django-production-chart.specContainer" . | indent 6 }}
+{{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
+{{ include "django-production-chart.specContainerProbes" . | indent 10 }}
+{{ include "django-production-chart.specContainerSidecars" . | indent 6 }}
+{{- end -}}

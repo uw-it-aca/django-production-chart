@@ -1,7 +1,7 @@
 {{/*
 Application container contaienr lifecycle directives
 */}}
-{{- define "django-production-chart.specContainerLifecycle" -}}
+{{ define "django-production-chart.specContainerLifecycle" }}
 {{- if .Values.lifecycle.enabled -}}
 lifecycle:
 {{- if .Values.lifecycle.preStop.enabled }}

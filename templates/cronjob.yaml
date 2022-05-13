@@ -10,9 +10,8 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" $dot }}
-    helm.sh/chart: {{ include "django-production-chart.chart" $dot }}
     app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
-    app.kubernetes.io/managed-by: {{ $dot.Release.Service | quote }}
+{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
 {{- if $dot.Values.securityPolicy.enabled }}
 {{- if $dot.Values.securityPolicy.cronjob }}
 {{- if $dot.Values.securityPolicy.cronjob.skipCheck }}
@@ -61,6 +60,7 @@ spec:
 {{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 14 -}}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 14 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 14 -}}
+{{- include "django-production-chart.specContainerSidecars" $dot | indent 10 -}}
 {{ printf "\n" }}
 {{- end -}}
 {{- end -}}

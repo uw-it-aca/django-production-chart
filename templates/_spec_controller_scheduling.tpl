@@ -1,17 +1,16 @@
 {{/*
 Pod scheduling config
 */}}
-{{- define "django-production-chart.specControllerScheduling" -}}
-{{- $dot := . -}}
-{{- with .Values.nodeSelector -}}
+{{- define "django-production-chart.specControllerScheduling" }}
+{{- with .Values.nodeSelector }}
 nodeSelector:
-{{- toYaml . | trim | nindent 2}}
-{{- end -}}
-{{- with .Values.tolerations -}}
+{{ toYaml . | trim | nindent 2}}
+{{- end }}
+{{- with .Values.tolerations }}
 tolerations:
-{{- toYaml . | trim | nindent 2}}
-{{- end -}}
-{{- with .Values.affinity -}}
+{{ toYaml . | trim | nindent 2}}
+{{- end }}
+{{- with .Values.affinity }}
 affinity:
 {{- if .podsSpanNodes }}
   podAntiAffinity:
@@ -23,10 +22,10 @@ affinity:
               - key: "app.kubernetes.io/name"
                 operator: In
                 values:
-                  - "{{ include "django-production-chart.releaseIdentifier" $dot }}"
+                  - "{{ include "django-production-chart.releaseIdentifier" $ }}"
           topologyKey: kubernetes.io/hostname
 {{- else }}
-{{- toYaml . | trim | nindent 2}}
+{{ toYaml . | trim | indent 2}}
 {{- end }}
-{{- end -}}
+{{- end }}
 {{- end -}}

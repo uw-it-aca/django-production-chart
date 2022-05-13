@@ -28,12 +28,26 @@ containerPorts:
 #      containerPort: 25
 #      protocol: TCP
 
+## service defines a service object to expose the chart's deployment
+## or statefulset as a service.
 service:
   enabled: true
   ports:
     - port: 80
       targetPort: http
       name: http
+
+## services is a dict defining a service object of each type specified by
+## the key and associated with the chart's deployment or statefulset.
+## can be used in place of the "service" chart value, but typically
+## used to add additional services
+#services:
+#  LoadBalancer:
+#    ports:
+#      - port: 25
+#        targetPort: 25
+#        protocol: TCP
+#        name: smtp
 
 deployment:
   enabled: true
@@ -241,27 +255,6 @@ resources:
     cpu: 25m
     memory: 256Mi
 
-persistentVolume:
-  enabled: false
-#  enabled: true
-#  claims:
-#    - name: my-pvc
-#      accessModes:
-#        - ReadWriteMany
-#      # this is the default, override if desired
-#      #volumeMode: Filesystem
-#      # no storage name by default, set if cluster defined
-#      #storageClassName: slow
-#      storageSize: 10Gi
-#      mountPath: /path/to/mount/in/pod
-#  claimTemplates:
-#    - name: my-pvc
-#      accessModes:
-#        - ReadWriteMany
-#      storageSize: 10Gi
-#      mountPath: /path/to/mount/in/pod
-
-
 metrics:
   enabled: true
   serviceMonitor:
@@ -310,6 +303,60 @@ externalSecrets:
         - name: secret-too
           property: mumble
 
+# Billing values used to apply billing-related labels to resources
+billing:
+  codes:
+    admissions-cohort-manager: "830"
+    axdd-components: "629"
+    bridge: "788"
+    canvas: "742"
+    canvas-analytics: "786"
+    canvas-login-statics: "742"
+    catalyst: "522"
+    coda: "787"
+    compass: "786"
+    course-roster: "742"
+    course-users: "742"
+    dawgpath: "786"
+    eventcal: "517"
+    github-inventory: "629"
+    gradepage: "787"
+    grading-standards: "742"
+    infohub: "742"
+    interview-db: "787"
+    jira-webhook: "629"
+    libguides: "742"
+    linkbot: "629"
+    mailman-core: "762"
+    mailman-web: "762"
+    mdot: "629"
+    mdot-rest: "629"
+    myuw: "554"
+    prt: "629"
+    retention-dashboard: "786"
+    retention-data-pipeline: "786"
+    scheduler: "740"
+    scout: "787"
+    scout-manager: "787"
+    spotseeker: "787"
+    uw-foodalert: "787"
+    uwperson: "786"
+    vax-status-listener: "830"
+    zoom-login-statics: "629"
+  names:
+    "517": campus-events-calendar-trumba
+    "522": catalyst-tools
+    "554": enterprise-portal-myuw
+    "629": campus-technology-support
+    "740": lecture-capture-panopto
+    "742": learning-management-systems-canvas
+    "762": email-lists-mailman
+    "785": student-experience-applications
+    "786": student-instructor-success-analytics
+    "787": student-engagement-tools
+    "788": training-management-system-bridge
+    "828": research-technologies-teaching-learning
+    "830": admissions-enrollment-management-tools
 
 nodeSelector: {}
 
@@ -319,3 +366,105 @@ affinity: {}
 ## set directly, or use shortcut below to schedule pods across nodes
 #affinity:
 #   podsSpanNodes: true
+
+## sidecarContainers defines additional containers to run within the pod.
+## each key is the name of the sidecar container, and it's data is simply
+## toYaml'd into the pod's container list.
+## Note: do not define volumeMounts here as they are added via "podVolumes"
+## definitions.
+#sidecarContainers:
+#  smtpforward:
+#    image: "gcr.io/uwit-mci-axdd/uw-ssh-client:4aad3bd"
+#    env:
+#      - name: JUMPHOST_ID_KEY
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: jumphost-id-key
+#      - name: JUMPHOST_ID
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: jumphost-id
+#      - name: JUMPHOST_HOSTNAME
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: jumphost-hostname
+#      - name: SMTP_SERVER
+#        valueFrom:
+#          secretKeyRef:
+#            name: postfix-test-secrets
+#            key: smtp-server
+#    command:
+#      - "sh"
+#      - "-c"
+#      - 'mkdir -m 0700 ~/.ssh && echo "${JUMPHOST_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${JUMPHOST_ID}@${JUMPHOST_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:25:{SMP_SERVER}:25'
+
+
+## podVolumes defines each volume available to the pod and how each volume
+## is made available to containers.  each key is the name that will be
+## used within the pod to bind the volume to the volume mount, and
+## defines a dict containing:
+##   "volume"     : (required) defines a volume in the pod.
+##                  volume can define:
+##                     configMap     : reference to a configmap define
+##                                     elswhere in the cluster. typically
+##                                     typically defined in configMaps (below)
+##                     claim         : reference to a pvc defined elsewhere in
+##                                     the cluster. a PersistentVolumeClaim object
+##                                     is automatically created based on this definition
+##                     claimTemplate : reference to a pvc defined elsewhere in
+##                                     the cluster. a volumeClaimTemplates entry
+##                                     is automatically created based on this definition
+##                     or yaml that will be directly added to the pod's volumes list.
+##   "mount"      : (requireed) defines how the volume will be mounted by containers
+##   "containers" : (optional) lists containers within the pod the mount
+##                  definition applies to.  if undefined, the mount is added to
+##                  only the primary container. if defined, the mount is added to
+##                  each named container. the name "base" refers to the primary
+##                  container defined in the pod.
+##
+#podVolumes:
+#  var-mailman:
+#    volume:
+#      claimTemplate:
+#        accessModes:
+#          - ReadWriteOnce
+#        storageClassName: standard
+#        storageSize: 10Gi
+#    mount:
+#      mountPath: /app/mailman/var
+#  var-spool-postfix:
+#    volume:
+#      claimTemplate:
+#        accessModes:
+#          - ReadWriteOnce
+#        storageClassName: standard
+#        storageSize: 3Gi
+#    mount:
+#      mountPath: /var/spool/postfix
+#    containers: [ base, postfix ]
+#  postfix-config:
+#    volume:
+#      configMap:
+#        name: postfix-main-cf
+#    mount:
+#      mountPath: /config/main.cf
+#      subPath: main.cf
+#    containers: [ postfix ]
+
+
+## configmaps defines one or more ConfigMap objects within the cluster.
+## each dict key names the ConfigMap and can be used within the values file
+## for reference.  Whatever the key defines will define the ConfigMap's data.
+#configmaps:
+#  postfix-main-cf:
+#    main.cf: |
+#      myhostname = mailman-core-prod-test
+#      mail_name = Mailman POC
+#  gunicorn-tpl:
+#    gunicorn.tpl: |
+#      [gunicorn]
+#      graceful_timeout = 30
+#      timeout = 360
