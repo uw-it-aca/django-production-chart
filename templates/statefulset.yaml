@@ -35,7 +35,7 @@ spec:
         app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: statefulset
-{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.statefulset }}
 {{- if .Values.securityPolicy.statefulset.annotations }}
