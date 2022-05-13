@@ -3,7 +3,7 @@
 {{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
 {{- range .Values.cronjob.jobs -}}
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ printf "%s-cronjob-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
