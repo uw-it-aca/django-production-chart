@@ -32,7 +32,7 @@ metadata:
   name: {{ printf "%s-daemon" $release_id }}
   namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+    app.kubernetes.io/name: {{ printf "%s-daemon" $release_id }}
     app.kubernetes.io/instance: {{ $release_id }}
     app.kubernetes.io/component: {{ $component }}
 {{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
