@@ -323,12 +323,13 @@ billingCodes:
     releaseNames:
       - axdd-components
       - github-inventory
+      - handshake
+      - interview-db
       - jira-webhook
       - linkbot
       - mdot
       - mdot-rest
       - prt
-      - zoom-login-statics
   - code: "740"
     name: lecture-capture-panopto
     releaseNames:
@@ -369,11 +370,14 @@ billingCodes:
     name: student-engagement-tools
     releaseNames:
       - gradepage
-      - interview-db
   - code: "788"
     name: training-management-system-bridge
     releaseNames:
       - bridge
+  - code: "789"
+    name: zoom-video-conferencing
+    releaseNames:
+      - zoom-login-statics
   - code: "830"
     name: admissions-enrollment-management-tools
     releaseNames:
