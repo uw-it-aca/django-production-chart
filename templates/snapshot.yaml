@@ -1,0 +1,13 @@
+{{- range $name, $map := .Values.podVolumes }}
+{{- if hasKey $map.volume "snapshot" }}
+---
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: my-snapshot
+spec:
+  volumeSnapshotClassName: my-snapshotclass
+  source:
+    persistentVolumeClaimName: my-pvc
+{{- end }}
+{{- end -}}

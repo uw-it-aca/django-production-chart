@@ -468,6 +468,9 @@ affinity: {}
 #          - ReadWriteOnce
 #        storageClassName: standard
 #        storageSize: 3Gi
+#      snapshot:
+#        deletionPolicy: Delete
+#        storageLocations: us-west1
 #    mount:
 #      mountPath: /var/spool/postfix
 #    containers: [ base, postfix ]

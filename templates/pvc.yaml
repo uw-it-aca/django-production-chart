@@ -7,4 +7,17 @@ kind: PersistentVolumeClaim
 metadata:
 {{ include "django-production-chart.pvcBase" (dict "root" $dot "name" $name "claim" $map.volume.claim ) }}
 {{- end }}
+{{- if hasKey $map.volume "snapshot" }}
+---
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: {{ printf "%s-snapshotclass-%s" ( include "django-production-chart.releaseIdentifier" .root ) $name }}
+{{- if hasKey $map.volume.snapshot "storageLocations" }}
+parameters:
+  storage-locations: $map.volume.snapshot.storageLocations
+{{- end }}
+driver: pd.csi.storage.gke.io
+deletionPolicy: {{ $map.volume.snapshot.deletionPolicy | default "Delete" }}
+{{- end }}
 {{- end -}}
