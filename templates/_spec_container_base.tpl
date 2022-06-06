@@ -39,7 +39,7 @@ volumes:
 {{- end }}
 containers:
   - name: {{ include "django-production-chart.releaseIdentifier" . }}
-    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    image: {{ default ( printf "%s:%s" .Values.image.repository .Values.image.tag ) .image | quote }}
     imagePullPolicy: "Always"
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.containerBase }}
