@@ -11,6 +11,11 @@ Application sidecar containers
         readOnly: true
         mountPath: "/certs"
 {{- end }}
+{{- if $.Values.gcsCredentials.mounted }}
+      - name: gcs-volume
+        readOnly: true
+        mountPath: "/gcs"
+{{- end }}
 {{- range $name, $map := $.Values.podVolumes }}
 {{- if and ( hasKey $map "mount" ) ( has $podName $map.containers ) }}
 {{ include "django-production-chart.volumeMount" ( dict "root" $ "name" $name "map" $map ) | indent 6}}

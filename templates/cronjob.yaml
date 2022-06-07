@@ -56,7 +56,7 @@ spec:
           automountServiceAccountToken: false
 {{- end }}
           restartPolicy: {{ default "OnFailure" .restartPolicy | quote }}
-{{- include "django-production-chart.specContainerBase" ( merge $dot ( dict "image" .image )) | nindent 10 -}}
+{{- include "django-production-chart.specContainerBase" ( merge ( dict "containerImage" .image "containerName" .name ) $dot ) | nindent 10 -}}
 {{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 14 -}}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 14 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 14 -}}
