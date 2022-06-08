@@ -3,6 +3,9 @@ Application container spec base
 */}}
 {{- define "django-production-chart.specContainerBase" -}}
 {{- $dot := . -}}
+{{- $baseContainerName := ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $containerName := default $baseContainerName .containerName }}
+{{- $containerImage := default ( printf "%s:%s" .Values.image.repository .Values.image.tag ) .containerImage }}
 volumes:
 {{- if .Values.certs.mounted }}
   - name: certs-volume
@@ -38,8 +41,8 @@ volumes:
 {{- end }}
 {{- end }}
 containers:
-  - name: {{ include "django-production-chart.releaseIdentifier" . }}
-    image: {{ default ( printf "%s:%s" .Values.image.repository .Values.image.tag ) .image | quote }}
+  - name: {{ $containerName | quote }}
+    image: {{ $containerImage| quote }}
     imagePullPolicy: "Always"
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.containerBase }}
@@ -67,7 +70,7 @@ containers:
 {{- end }}
 {{- range $name, $map := .Values.podVolumes }}
 {{- if $map.mount }}
-{{- if or ( not ( hasKey $map "containers" ) ) ( has "base" $map.containers ) }}
+{{- if or ( not ( hasKey $map "containers" ) ) ( and (has "base" $map.containers ) ( eq $baseContainerName  $containerName ) ) ( has $containerName $map.containers ) }}
 {{ include "django-production-chart.volumeMount" ( dict "root" $dot "name" $name "map" $map ) | indent 6 }}
 {{- end }}
 {{- end }}
