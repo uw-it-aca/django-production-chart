@@ -35,7 +35,9 @@ Application sidecar containers
 {{- end }}
 {{- end }}
     env:
+{{- if $container.environmentVariables }}
 {{ toYaml $container.environmentVariables | indent 6 }}
+{{- end }}
 {{- if $.Values.metrics.enabled }}
       - name: PUSHGATEWAY
         value: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" $ ) }}
