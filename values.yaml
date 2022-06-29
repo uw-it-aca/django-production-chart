@@ -401,7 +401,7 @@ affinity: {}
 #sidecarContainers:
 #  smtpforward:
 #    image: "gcr.io/uwit-mci-axdd/uw-ssh-client:4aad3bd"
-#    env:
+#    environmentVariables:
 #      - name: JUMPHOST_ID_KEY
 #        valueFrom:
 #          secretKeyRef:

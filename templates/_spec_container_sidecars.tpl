@@ -7,8 +7,9 @@ Application sidecar containers
 {{- if $container.image }}
     image: {{ $container.image | quote }}
 {{- end }}
-{{- if $container.cmd }}
-    cmd: {{ toYaml $container.cmd }}
+{{- if $container.command }}
+    command:
+{{ toYaml $container.command | indent 6}}
 {{- end }}
 {{- if $container.args }}
     args:
