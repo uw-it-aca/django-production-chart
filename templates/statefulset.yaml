@@ -30,7 +30,7 @@ spec:
       app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   updateStrategy:
-    type: {{ default "rollingUpdate" .Values.statefulset.updateStrategy }}
+    type: {{ default "RollingUpdate" .Values.statefulset.updateStrategy }}
   template:
     metadata:
       labels:
