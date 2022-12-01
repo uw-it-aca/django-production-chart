@@ -102,6 +102,8 @@ spec:
 {{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 10 }}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 10 }}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 }}
+{{- if (or .includeSidecarContainers (not (hasKey . "includeSidecarContainers"))) }}
 {{- include "django-production-chart.specContainerSidecars" $dot | indent 6 -}}
+{{- end }}
 {{- end }}
 {{- end }}
