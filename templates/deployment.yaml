@@ -52,5 +52,5 @@ spec:
 {{ include "django-production-chart.specContainer" . | indent 6 }}
 {{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
 {{ include "django-production-chart.specContainerProbes" . | indent 10 }}
-{{ include "django-production-chart.specContainerSidecars" . | indent 6 }}
+{{ include "django-production-chart.specContainerSidecars" (dict "root" . "sidecars" .Values.sidecarContainers) | indent 6 }}
 {{- end -}}
