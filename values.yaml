@@ -65,6 +65,8 @@ image:
 # baseline security policy for various components
 securityPolicy:
   enabled: false
+  network:
+    enabled: false
   deploy:
     skipCheck:
       - "CKV_K8S_22=Readonly root file system too restictive"

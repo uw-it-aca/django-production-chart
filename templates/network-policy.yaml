@@ -1,0 +1,127 @@
+{{- if (and .Values.securityPolicy.enabled .Values.securityPolicy.network.enabled) -}}
+{{- $release_id := ( include "django-production-chart.releaseIdentifier" . ) }}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ $release_id }}-server
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+spec:
+  podSelector:
+{{- include "django-production-chart.netpolicy.server-pod" . | indent 4 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+{{- include "django-production-chart.netpolicy.ingress.nginx" . | indent 4 }}
+{{- include "django-production-chart.netpolicy.ingress.metrics" (dict "root" .) | indent 4 }}
+  egress:
+{{- include "django-production-chart.netpolicy.egress.database" . | indent 4 }}
+{{- include "django-production-chart.netpolicy.egress.dns" . | indent 4 }}
+{{- if and .Values.deployment.enabled .Values.deploymentInitialization.enabled }}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ $release_id }}-deploy
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+spec:
+  podSelector:
+{{- include "django-production-chart.netpolicy.release-job-pod" . | indent 4 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+{{- include "django-production-chart.netpolicy.egress.database" . | indent 4 }}
+{{- include "django-production-chart.netpolicy.egress.dns" . | indent 4 }}
+{{- end }}
+{{- if .Values.cronjob.enabled }}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ $release_id }}-cronjob
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      app.kubernetes.io/component: cronjob
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+{{- include "django-production-chart.netpolicy.egress.database" . | indent 4 }}
+{{- include "django-production-chart.netpolicy.egress.metrics" . | indent 4 }}
+{{- include "django-production-chart.netpolicy.egress.dns" . | indent 4 }}
+{{- end }}
+{{- if .Values.daemon.enabled }}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ $release_id }}-daemon
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      role: management-command-daemon
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+{{- include "django-production-chart.netpolicy.ingress.metrics" (dict "root" . "metricsPort" 9100) | indent 4 }}
+  egress:
+{{- include "django-production-chart.netpolicy.egress.database" . | indent 4 }}
+{{- include "django-production-chart.netpolicy.egress.dns" . | indent 4 }}
+{{- end }}
+{{- if .Values.memcached.enabled }}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ $release_id }}-memcached
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+spec:
+  podSelector:
+{{- include "django-production-chart.netpolicy.memcached-pod" . | indent 4 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+{{- include "django-production-chart.netpolicy.server-pod" . | indent 12 }}
+      ports:
+        - port: 11211
+          protocol: TCP
+{{- include "django-production-chart.netpolicy.ingress.metrics" (dict "root" . "metricsPort" 9150 ) | indent 4 }}
+{{- end -}}
+{{- if (and .Values.metrics.enabled .Values.metrics.pushgateway.enabled)  }}
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ $release_id }}-pushgateway
+  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+spec:
+  podSelector:
+{{- include "django-production-chart.netpolicy.pushgateway-pod" . | indent 4 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+{{- include "django-production-chart.netpolicy.server-pod" . | indent 12 }}
+      ports:
+        - port: 9091
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mci-monitoring
+      ports:
+        - port: 9150
+          protocol: TCP
+{{- end -}}
+{{- end -}}

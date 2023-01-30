@@ -1,0 +1,154 @@
+{{/*
+Network policy ingress and egress
+*/}}
+
+{{/*
+Nginx ingress
+*/}}
+{{- define "django-production-chart.netpolicy.ingress.nginx" -}}
+{{- if .Values.ingress.enabled }}
+- from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  ports:
+{{- include "django-production-chart.netpolicy.container-ports" . | indent 4 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Metrics ingress
+*/}}
+{{- define "django-production-chart.netpolicy.ingress.metrics" -}}
+{{- if .root.Values.metrics.enabled }}
+- from:
+    - namespaceSelector:
+        matchLabels:
+          name: mci-monitoring
+  ports:
+{{- if .metricsPort }}
+    - port: {{ .metricsPort }}
+      protocol: TCP
+{{- else }}
+{{- include "django-production-chart.netpolicy.container-ports" .root | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Database egress
+*/}}
+{{- define "django-production-chart.netpolicy.egress.database" -}}
+{{- if .Values.database }}
+- to:
+{{- if and .Values.externalService.enabled .Values.externalService.servicePort }}
+    - ipBlock:
+        cidr: {{ .Values.externalService.serviceAddress }}/32
+  ports:
+    - port: {{ .Values.externalService.servicePort }}
+      protocol: TCP
+    - port: {{ .Values.externalService.servicePort }}
+      protocol: UDP
+{{- else }}
+    - ipBlock:
+        cidr: 172.18.0.0/16
+  ports:
+{{- if (eq "postgres" .Values.database.engine) }}
+    - port: 5432
+      protocol: TCP
+{{- else }}
+      - port: 3306
+        protocol: TCP
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Kube DNS egress
+*/}}
+{{- define "django-production-chart.netpolicy.egress.dns" }}
+- to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+  ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+{{- end }}
+
+{{/*
+Metrics egress
+*/}}
+{{- define "django-production-chart.netpolicy.egress.metrics" }}
+{{- if .Values.metrics.enabled }}
+- to:
+    - podSelector:
+{{- include "django-production-chart.netpolicy.pushgateway-pod" . | indent 8 }}
+  ports:
+{{- if .Values.cronjob.enabled }}
+    - port: 9091
+      protocol: TCP
+{{- else }}
+{{- include "django-production-chart.netpolicy.container-ports" . }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Helper for common reference for server pod
+*/}}
+{{- define "django-production-chart.netpolicy.app-labels" }}
+matchLabels:
+  app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}{{ if eq .component "server" }}{{else}}-{{ .component }}{{ end }}
+  app.kubernetes.io/instance: {{ .root.Release.Name }}
+  app.kubernetes.io/component: {{ .component }}
+{{- end }}
+
+{{/*
+Helper for common reference for server pod
+*/}}
+{{- define "django-production-chart.netpolicy.server-pod" }}
+{{- include "django-production-chart.netpolicy.app-labels" (dict "root" . "component" "server") }}
+{{- end }}
+
+{{/*
+Helper for common reference for server pod
+*/}}
+{{- define "django-production-chart.netpolicy.release-job-pod" }}
+{{- include "django-production-chart.netpolicy.app-labels" (dict "root" . "component" "release-job")  }}
+{{- end }}
+
+{{/*
+Helper for common reference for pushgateway pod
+*/}}
+{{- define "django-production-chart.netpolicy.pushgateway-pod" }}
+{{- include "django-production-chart.netpolicy.app-labels" (dict "root" . "component" "pushgateway")  }}
+{{- end }}
+
+{{/*
+Helper for common reference for memcached pod
+*/}}
+{{- define "django-production-chart.netpolicy.memcached-pod" }}
+{{- include "django-production-chart.netpolicy.app-labels" (dict "root" . "component" "memcached")  }}
+{{- end }}
+
+{{/*
+Helper to collect exposed server ports
+*/}}
+{{- define "django-production-chart.netpolicy.container-ports" }}
+{{- if .Values.containerPorts.enabled }}
+{{- range .Values.containerPorts.ports }}
+- port: {{ .containerPort }}
+  protocol: {{ .protocol | default "TCP" }}
+{{- end }}
+{{- else }}
+- port: {{ .Values.containerPort | default 8000 }}
+  protocol: TCP
+{{- end }}
+{{- end }}
