@@ -34,6 +34,7 @@ spec:
           labels:
             app: {{ $dot.Release.Name | quote }}
             cron: {{ .name | quote }}
+            app.kubernetes.io/component: cronjob
 {{- if $dot.Values.securityPolicy.enabled }}
 {{- if $dot.Values.securityPolicy.cronjob }}
 {{- if $dot.Values.securityPolicy.cronjob.annotations }}
