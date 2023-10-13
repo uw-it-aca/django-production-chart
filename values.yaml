@@ -326,12 +326,13 @@ billingCodes:
       - axdd-components
       - github-inventory
       - handshake
-      - interview-db
+      - huskyvoices
       - jira-webhook
       - linkbot
       - mdot
       - mdot-rest
       - prt
+      - solstice-docs
   - code: "740"
     name: lecture-capture-panopto
     releaseNames:
@@ -380,11 +381,11 @@ billingCodes:
     name: zoom-video-conferencing
     releaseNames:
       - zoom-login-statics
+      - zoom-utilities
   - code: "830"
     name: admissions-enrollment-management-tools
     releaseNames:
       - admissions-cohort-manager
-      - vax-status-listener
 
 nodeSelector: {}
 
