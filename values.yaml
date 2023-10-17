@@ -291,9 +291,6 @@ environmentVariables:
   - name: "ENV"
     value: "dev"
 
-certs:
-  mounted: False
-
 externalSecrets:
   enabled: false
   secrets:
