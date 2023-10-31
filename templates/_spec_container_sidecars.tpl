@@ -36,6 +36,10 @@ Application sidecar containers
 {{ include "django-production-chart.volumeMount" ( dict "root" $root "name" $name "map" $map ) | indent 6}}
 {{- end }}
 {{- end }}
+{{- if hasKey $container "ports" }}
+    ports:
+{{ toYaml $container.ports | indent 6 }}
+{{- end }}
     env:
 {{- if $container.environmentVariables }}
 {{ toYaml $container.environmentVariables | indent 6 }}

@@ -8,11 +8,13 @@ metadata:
   name: {{ .name }}
   namespace: {{ include "django-production-chart.namespaceIdentifier" .root }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.name" .root }}
+    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}
     app.kubernetes.io/instance: {{ .root.Release.Name }}
 {{- include "django-production-chart.resourceLabels" .root | nindent 4 }}
 spec:
+{{- if or ( not .type ) ( has .type (list "ClusterIP" "NodePort" "LoadBalancer" "ExternalName")) }}
   type: {{ default "ClusterIP" .type }}
+{{- end }}
   ports:
 {{- if .service.ports }}
 {{- range .service.ports }}
