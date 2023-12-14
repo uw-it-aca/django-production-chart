@@ -14,7 +14,6 @@ metadata:
     app.kubernetes.io/component: ingress
 {{- include "django-production-chart.resourceLabels" $root | nindent 4 }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.type }}
 {{- with .Values.ingress.annotations }}
 {{ toYaml . | indent 4 }}
 {{- end }}
@@ -28,6 +27,7 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
+  ingressClassName: {{ default "nginx" .Values.ingress.type | quote }}
 {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
