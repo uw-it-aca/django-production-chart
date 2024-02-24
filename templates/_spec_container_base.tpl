@@ -45,12 +45,8 @@ containers:
     image: {{ $containerImage| quote }}
     imagePullPolicy: "Always"
 {{- if .Values.securityPolicy.enabled }}
-{{- if .Values.securityPolicy.containerBase }}
-{{- if .Values.securityPolicy.containerBase.securityContext }}
     securityContext:
-{{ toYaml .Values.securityPolicy.containerBase.securityContext | indent 6 }}
-{{- end }}
-{{- end }}
+{{ include "django-production-chart.securityPolicyContext" .Values.securityPolicy.containerBase | indent 6 }}
 {{- end }}
     volumeMounts:
 {{- if .Values.certs.mounted }}

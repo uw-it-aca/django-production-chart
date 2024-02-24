@@ -56,8 +56,7 @@ metadata:
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
   annotations:
-    checkov.io/skip1: CKV_K8S_22=Readonly root file system
-    checkov.io/skip2: CKV_K8S_31=Inexplicably failing with latest checkov version
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.pushgateway | indent 4 }}
 {{- end }}
 spec:
   replicas: {{ default 1 .Values.metrics.pushgateway.replicaCount }}

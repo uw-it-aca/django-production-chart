@@ -9,15 +9,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
-{{- if .Values.securityPolicy.enabled }}
-{{- if .Values.securityPolicy.deploy }}
-{{- if .Values.securityPolicy.deploy.skipCheck }}
   annotations:
-{{- range $index, $value:= .Values.securityPolicy.deploy.skipCheck }}
-    checkov.io/skip{{ add $index 1 }}: {{ $value | quote }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- if .Values.securityPolicy.enabled }}
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.deploy | indent 4 }}
 {{- end }}
 spec:
   backoffLimit: 1

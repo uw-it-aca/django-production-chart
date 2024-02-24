@@ -13,14 +13,8 @@ metadata:
     app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
 {{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
 {{- if $dot.Values.securityPolicy.enabled }}
-{{- if $dot.Values.securityPolicy.cronjob }}
-{{- if $dot.Values.securityPolicy.cronjob.skipCheck }}
   annotations:
-{{- range $index, $value:= $dot.Values.securityPolicy.cronjob.skipCheck }}
-    checkov.io/skip{{ add $index 1 }}: {{ $value | quote }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.cronjob | indent 4 }}
 {{- end }}
 spec:
   schedule: {{ .schedule | quote }}
@@ -36,20 +30,13 @@ spec:
             cron: {{ .name | quote }}
             app.kubernetes.io/component: cronjob
 {{- if $dot.Values.securityPolicy.enabled }}
-{{- if $dot.Values.securityPolicy.cronjob }}
-{{- if $dot.Values.securityPolicy.cronjob.annotations }}
           annotations:
-{{ toYaml $dot.Values.securityPolicy.cronjob.annotations | indent 12 }}
-{{- end }}
-{{- end }}
+{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.cronjob | indent 12 }}
 {{- end }}
         spec:
 {{- if $dot.Values.securityPolicy.enabled }}
-{{- if $dot.Values.securityPolicy.cronjob }}
-{{- if $dot.Values.securityPolicy.cronjob.template }}
-{{ toYaml $dot.Values.securityPolicy.cronjob.template | indent 10 }}
-{{- end }}
-{{- end }}
+          securityContext:
+{{ include "django-production-chart.securityPolicyContext" $dot.Values.securityPolicy.cronjob | indent 12 }}
 {{- end }}
 {{- if .serviceAccountName }}
           serviceAccountName: {{ .serviceAccountName }}

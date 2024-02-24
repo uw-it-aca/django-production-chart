@@ -18,13 +18,7 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 {{- if .Values.securityPolicy.enabled }}
-{{- if .Values.securityPolicy.ingress }}
-{{- if .Values.securityPolicy.ingress.skipCheck }}
-{{- range $index, $value:= .Values.securityPolicy.ingress.skipCheck }}
-    checkov.io/skip{{ add $index 1 }}: {{ $value | quote }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.ingress | indent 4 }}
 {{- end }}
 spec:
   ingressClassName: {{ default "nginx" .Values.ingress.type | quote }}
