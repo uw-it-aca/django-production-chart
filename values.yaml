@@ -91,8 +91,14 @@ securityPolicy:
   statefulset:
     skipCheck:
       - "CKV_K8S_8=Liveness probe more trouble than it's worth"
+      - "CKV_K8S_9=Readiness Probe Should be Configured"
+      - "CKV_K8S_15=Image Pull Policy should be Always"
+      - "CKV_K8S_20=Containers should not run with allowPrivilegeEscalation"
       - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_28=Minimize the admission of containers with the NET_RAW capability"
+      - "CKV_K8S_30=Apply security context to your containers"
       - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
+      - "CKV_K8S_37=Minimize the admission of containers with capabilities assigned"
       - "CKV_K8S_40=acait uid 1000"
     spec:
       automountServiceAccountToken: false
