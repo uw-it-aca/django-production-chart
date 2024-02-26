@@ -30,7 +30,7 @@ metadata:
   name: {{ $name }}
   namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-nfsd-%s" ( include "django-production-chart.releaseIdentifier" . ) .Values.nfsServer.name }}
+    app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: nfs-server
     role: {{ $role }}
