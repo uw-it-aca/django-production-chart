@@ -11,7 +11,7 @@ metadata:
   name: {{ $pvc_name }}
   namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/name: {{ $pvc_name }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: nfs-server
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
