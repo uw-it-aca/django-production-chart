@@ -22,7 +22,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.nfsServer.capacity }}
-  volumeName: {{ $name }}
+  volumeName: {{ $pvc_name }}
 ---
 apiVersion: apps/v1
 kind: Deployment
