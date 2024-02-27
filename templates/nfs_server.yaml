@@ -4,23 +4,33 @@
 {{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
 {{- $instance := .Release.Name | quote -}}
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: Service
 metadata:
-  name: {{ $pvc_name }}
+  name: {{ $name }}
   namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ $pvc_name }}
+    app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: nfs-server
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+{{- if .Values.serviceAnnotations -}}
+  annotations:
+{{ toYaml .Values.serviceAnnotations | indent 4 }}
+{{- end }}
 spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: {{ .Values.nfsServer.storageClassName | default "standard" | quote }}
-  resources:
-    requests:
-      storage: {{ .Values.nfsServer.capacity }}
+  clusterIP: None
+  ports:
+    - name: nfs
+      port: 2049
+    - name: mountd
+      port: 20048
+    - name: rpcbind
+      port: 111
+  selector:
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/instance: {{ $instance }}
+    role: "nfs-server"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -83,33 +93,23 @@ spec:
           persistentVolumeClaim:
             claimName: {{ $pvc_name }}
 ---
+kind: PersistentVolumeClaim
 apiVersion: v1
-kind: Service
 metadata:
-  name: {{ $name }}
+  name: {{ $pvc_name }}
   namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/name: {{ $pvc_name }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: nfs-server
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
-{{- if .Values.serviceAnnotations -}}
-  annotations:
-{{ toYaml .Values.serviceAnnotations | indent 4 }}
-{{- end }}
 spec:
-  clusterIP: None
-  ports:
-    - name: nfs
-      port: 2049
-    - name: mountd
-      port: 20048
-    - name: rpcbind
-      port: 111
-  selector:
-    app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/instance: {{ $instance }}
-    role: "nfs-server"
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.nfsServer.storageClassName | default "standard" | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.nfsServer.capacity }}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -129,4 +129,23 @@ spec:
   nfs:
     server: {{ $name }}.{{ $namespace }}.svc.cluster.local
     path: "/"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/instance: {{ $instance }}
+    app.kubernetes.io/component: nfs-server
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: {{ .Values.nfsServer.capacity }}
+  volumeName: {{ $name }}
 {{- end }}
