@@ -30,7 +30,7 @@ spec:
 {{- end }}
     spec:
 {{- if .Values.securityPolicy.enabled }}
-{{- include "django-production-chart.securityPolicySpec" .Values.securityPolicy.deployment | indent 8 }}
+{{- include "django-production-chart.securityPolicySpec" .Values.securityPolicy.deployment | indent 6 }}
 {{- end }}
       restartPolicy: "Never"
 {{- include "django-production-chart.specContainerBase" . | nindent 6 -}}
