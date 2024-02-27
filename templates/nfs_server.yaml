@@ -3,7 +3,6 @@
 {{- $pvc_name := printf "%s-pvc" $name -}}
 {{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
 {{- $instance := .Release.Name | quote -}}
-{{- $role := printf "%s-nfs-server" ( include "django-production-chart.releaseIdentifier" . ) -}}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -33,7 +32,7 @@ metadata:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: nfs-server
-    role: {{ $role }}
+    role: "nfs-server"
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
   annotations:
@@ -45,12 +44,13 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ $name }}
       app.kubernetes.io/instance: {{ $instance }}
-      role: {{ $role }}
+      role: "nfs-server"
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ $name }}
         app.kubernetes.io/instance: {{ $instance }}
+        role: "nfs-server"
 {{- if .Values.securityPolicy.enabled }}
 {{- if .Values.securityPolicy.nfsServer }}
 {{- if .Values.securityPolicy.nfsServer.annotations }}
@@ -110,7 +110,7 @@ spec:
   selector:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
-    role: {{ $role }}
+    role: "nfs-server"
 ---
 apiVersion: v1
 kind: PersistentVolume
