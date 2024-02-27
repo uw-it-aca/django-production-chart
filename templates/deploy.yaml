@@ -9,8 +9,8 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
-  annotations:
 {{- if .Values.securityPolicy.enabled }}
+  annotations:
 {{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.deploy | indent 4 }}
 {{- end }}
 spec:
@@ -25,20 +25,12 @@ spec:
         app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}
-{{- if .Values.securityPolicy.deployment }}
-{{- if .Values.securityPolicy.deployment.annotations }}
       annotations:
-{{ toYaml .Values.securityPolicy.deployment.annotations | indent 8 }}
-{{- end }}
-{{- end }}
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.deployment | indent 8 }}
 {{- end }}
     spec:
 {{- if .Values.securityPolicy.enabled }}
-{{- if .Values.securityPolicy.deployment }}
-{{- if .Values.securityPolicy.deployment.spec }}
-{{ toYaml .Values.securityPolicy.deployment.spec | indent 6 }}
-{{- end }}
-{{- end }}
+{{- include "django-production-chart.securityPolicySpec" .Values.securityPolicy.deployment | indent 8 }}
 {{- end }}
       restartPolicy: "Never"
 {{- include "django-production-chart.specContainerBase" . | nindent 6 -}}

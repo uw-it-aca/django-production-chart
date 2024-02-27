@@ -61,12 +61,8 @@ spec:
         app.kubernetes.io/instance: {{ $instance }}
         role: "nfs-server"
 {{- if .Values.securityPolicy.enabled }}
-{{- if .Values.securityPolicy.nfsServer }}
-{{- if .Values.securityPolicy.nfsServer.annotations }}
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.nfsServer | indent 8 }}
       annotations:
-{{ toYaml .Values.securityPolicy.nfsServer.annotations | indent 8 }}
-{{- end }}
-{{- end }}
 {{- end }}
     spec:
       containers:
