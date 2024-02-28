@@ -58,14 +58,8 @@ metadata:
     role: {{ $component }}
 {{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
 {{- if $dot.Values.securityPolicy.enabled }}
-{{- if $dot.Values.securityPolicy.daemon }}
-{{- if $dot.Values.securityPolicy.daemon.skipCheck }}
   annotations:
-{{- range $index, $value:= $dot.Values.securityPolicy.daemon.skipCheck }}
-    checkov.io/skip{{ add $index 1 }}: {{ $value | quote }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.daemon | indent 4 }}
 {{- end }}
 spec:
   replicas: {{ default 1 .replicaCount }}
@@ -80,20 +74,12 @@ spec:
         app.kubernetes.io/instance: {{ $.Release.Name }}
         role: management-command-daemon
 {{- if $dot.Values.securityPolicy.enabled }}
-{{- if $dot.Values.securityPolicy.daemon }}
-{{- if $dot.Values.securityPolicy.daemon.annotations }}
       annotations:
-{{ toYaml $dot.Values.securityPolicy.daemon.annotations | indent 8 }}
-{{- end }}
-{{- end }}
+{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.daemon | indent 8 }}
 {{- end }}
     spec:
 {{- if $dot.Values.securityPolicy.enabled }}
-{{- if $dot.Values.securityPolicy.daemon }}
-{{- if $dot.Values.securityPolicy.daemon.spec }}
-{{ toYaml $dot.Values.securityPolicy.daemon.spec | indent 6 }}
-{{- end }}
-{{- end }}
+{{ "django-production-chart.securityPolicySpec" $dot.Values.securityPolicy.daemon | indent 6 }}
 {{- end }}
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 }}
           ports:

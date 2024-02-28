@@ -1,15 +1,18 @@
 {{- if .Values.memcached.enabled }}
 {{- $command := .Values.memcached.command -}}
 {{- $extraArgs := .Values.memcached.extraArgs | default "" -}}
+{{- $name := printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
+{{- $instance := .Release.Name | quote -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $name }}
+  namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.serviceAnnotations -}}
@@ -28,24 +31,24 @@ spec:
       targetPort: metrics
 {{- end }}
   selector:
-    app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/instance: {{ $instance }}
 {{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $name }}
+  namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+      app.kubernetes.io/name: {{ $name }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   endpoints:
     - port: metrics
@@ -54,39 +57,29 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $name }}
+  namespace: {{ $namespace }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
   annotations:
-    checkov.io/skip1: CKV_K8S_8=Liveness probe
-    checkov.io/skip2: CKV_K8S_9=Prom memcached exporter readiness
-    checkov.io/skip3: CKV_K8S_10=Prom memcached exporter cpu requests
-    checkov.io/skip4: CKV_K8S_11=Prom memcached exporter cpu limits
-    checkov.io/skip5: CKV_K8S_12=Prom memcached exporter memory requests
-    checkov.io/skip6: CKV_K8S_13=Prom memcached exporter memory limits
-    checkov.io/skip7: CKV_K8S_14=Prom memcached exporter image tag latest
-    checkov.io/skip8: CKV_K8S_22=Readonly root file system
-    checkov.io/skip9: CKV_K8S_23=Memcached run as specfic user
-    checkov.io/skip10: CKV_K8S_31=Inexplicably failing with latest checkov version
-    checkov.io/skip11: CKV_K8S_40=Memcached run as high uid
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.memcached | indent 4 }}
 {{- end }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-      app.kubernetes.io/instance: {{ .Release.Name | quote }}
-  serviceName: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+      app.kubernetes.io/name: {{ $name }}
+      app.kubernetes.io/instance: {{ $instance }}
+  serviceName: {{ $name }}
   replicas: {{ .Values.memcached.replicaCount }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
-        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        app.kubernetes.io/name: {{ $name }}
+        app.kubernetes.io/instance: {{ $instance }}
         app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- with .Values.podLabels }}
@@ -109,7 +102,7 @@ spec:
         fsGroup: 11211
 {{- end }}
       containers:
-        - name: {{ printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) }}
+        - name: {{ $name }}
           image: {{ .Values.memcached.image | quote }}
           imagePullPolicy: {{ default "Always" .Values.imagePullPolicy | quote }}
 {{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" $extraArgs) | indent 10}}

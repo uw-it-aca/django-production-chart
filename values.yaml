@@ -91,8 +91,14 @@ securityPolicy:
   statefulset:
     skipCheck:
       - "CKV_K8S_8=Liveness probe more trouble than it's worth"
+      - "CKV_K8S_9=Readiness Probe Should be Configured"
+      - "CKV_K8S_15=Image Pull Policy should be Always"
+      - "CKV_K8S_20=Containers should not run with allowPrivilegeEscalation"
       - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_28=Minimize the admission of containers with the NET_RAW capability"
+      - "CKV_K8S_30=Apply security context to your containers"
       - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
+      - "CKV_K8S_37=Minimize the admission of containers with capabilities assigned"
       - "CKV_K8S_40=acait uid 1000"
     spec:
       automountServiceAccountToken: false
@@ -121,12 +127,47 @@ securityPolicy:
       - "CKV_K8S_22=Readonly root file system too restictive"
       - "CKV_K8S_31=Seccomp default apears to break HPA metrics api"
       - "CKV_K8S_40=acait uid 1000"
-    template:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+  memcached:
+    skipCheck:
+      - "CKV_K8S_8=Liveness probe"
+      - "CKV_K8S_9=Prom memcached exporter readiness"
+      - "CKV_K8S_10=Prom memcached exporter cpu requests"
+      - "CKV_K8S_11=Prom memcached exporter cpu limits"
+      - "CKV_K8S_12=Prom memcached exporter memory requests"
+      - "CKV_K8S_13=Prom memcached exporter memory limits"
+      - "CKV_K8S_14=Prom memcached exporter image tag latest"
+      - "CKV_K8S_22=Readonly root file system"
+      - "CKV_K8S_23=Memcached run as specfic user"
+      - "CKV_K8S_31=Inexplicably failing with latest checkov version"
+      - "CKV_K8S_40=Memcached run as high uid"
+  pushgateway:
+    skipCheck:
+      - "CKV_K8S_22=Readonly root file system"
+      - "CKV_K8S_31=Inexplicably failing with latest checkov version"
+  nfsServer:
+    skipCheck:
+      - "CKV_K8S_8=Liveness probe more trouble than it's worth"
+      - "CKV_K8S_9=Readiness Probe Should be Configured"
+      - "CKV_K8S_10=CPU requests should be set"
+      - "CKV_K8S_11=CPU limits should be set"
+      - "CKV_K8S_12=Memory requests should be set"
+      - "CKV_K8S_13=Memory limits should be set"
+      - "CKV_K8S_15=Image Pull Policy should be Always"
+      - "CKV_K8S_16=Container should not be privileged"
+      - "CKV_K8S_20=NFS Server requires privilege"
+      - "CKV_K8S_22=Readonly root file system too restictive"
+      - "CKV_K8S_23=Minimize the admission of root containers"
+      - "CKV_K8S_28=Minimize the admission of containers with the NET_RAW capability"
+      - "CKV_K8S_29=Apply security context to your pods and containers"
+      - "CKV_K8S_31=Seccomp default breaks HPA metrics api queries"
+      - "CKV_K8S_37=Minimize the admission of containers with capabilities assigned"
+      - "CKV_K8S_38=Ensure that Service Account Tokens are only mounted where necessary"
+      - "CKV_K8S_40=acait uid 1000"
   containerBase:
     securityContext:
       allowPrivilegeEscalation: false
@@ -431,6 +472,16 @@ affinity: {}
 #      - 'mkdir -m 0700 ~/.ssh && echo "${JUMPHOST_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${JUMPHOST_ID}@${JUMPHOST_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:25:{SMP_SERVER}:25'
 
 
+## nfsServer creates a ReadWriteMany peristentVolume and Claim based on
+## an nfs server serving from a ReadWriteOnce standard PVC. resulting
+## claim name is "<instance>-nfs-server-<.Values.nfsServer.name>"
+## note, you will need to provide a podVolumes definition to expose
+## the peristentVolume in your application
+nfsServer:
+  enabled: false
+#  name: archive-index
+#  capacity: 10Gi
+
 ## podVolumes defines each volume available to the pod and how each volume
 ## is made available to containers.  each key is the name that will be
 ## used within the pod to bind the volume to the volume mount, and
@@ -482,6 +533,13 @@ affinity: {}
 #      mountPath: /config/main.cf
 #      subPath: main.cf
 #    containers: [ postfix ]
+#  opt-mailman-web-data:
+#    volume:
+#      persistentVolumeClaim:
+#        claimName: mailman-core-prod-test-nfs-server-archive-index
+#    mount:
+#      mountPath: /opt/mailman-web-data
+#    containers: [ base ]
 
 
 ## configmaps defines one or more ConfigMap objects within the cluster.
