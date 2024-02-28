@@ -76,7 +76,9 @@ spec:
 {{- if $dot.Values.securityPolicy.enabled }}
       annotations:
 {{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.daemon | indent 8 }}
+{{- end }}
     spec:
+{{- if $dot.Values.securityPolicy.enabled }}
 {{ "django-production-chart.securityPolicySpec" $dot.Values.securityPolicy.daemon | indent 6 }}
 {{- end }}
 {{- include "django-production-chart.specContainerBase" $dot | nindent 6 }}

@@ -29,7 +29,9 @@ spec:
 {{- if .Values.securityPolicy.enabled }}
       annotations:
 {{ include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.deployment | indent 8 }}
+{{- end }}
     spec:
+{{- if .Values.securityPolicy.enabled }}
 {{ include "django-production-chart.securityPolicySpec" .Values.securityPolicy.deployment | indent 6 }}
 {{- end }}
 {{ include "django-production-chart.specControllerScheduling" . | indent 6 }}
