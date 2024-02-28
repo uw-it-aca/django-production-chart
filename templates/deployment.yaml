@@ -35,8 +35,10 @@ spec:
 {{ include "django-production-chart.securityPolicySpec" .Values.securityPolicy.deployment | indent 6 }}
 {{- end }}
 {{ include "django-production-chart.specControllerScheduling" . | indent 6 }}
-{{ include "django-production-chart.specContainerContainers" (dict "root" . "containers" .Values.sidecarContainers) | indent 6 }}{{ include "django-production-chart.specContainer" . | indent 6 }}
+{{ include "django-production-chart.specVolumes" . | indent 6 }}
+{{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .Values.initContainers) | indent 6 }}
+{{ include "django-production-chart.specContainer" . | indent 6 }}
 {{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
 {{ include "django-production-chart.specContainerProbes" . | indent 10 }}
-{{ include "django-production-chart.specContainerContainers" (dict "root" . "type" "initContainers" "containers" .Values.initContainers) | indent 6 }}
+{{ include "django-production-chart.specContainers" (dict "root" . "containers" .Values.sidecarContainers) | indent 6 }}
 {{- end -}}

@@ -1,7 +1,7 @@
 {{/*
 Application initialization containers
 */}}
-{{ define "django-production-chart.specContainerContainers" }}
+{{ define "django-production-chart.specContainers" }}
 {{- $root := .root }}
 {{- if (and $.type .containers) }}
 {{ $.type }}:

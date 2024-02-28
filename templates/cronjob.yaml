@@ -44,12 +44,13 @@ spec:
           automountServiceAccountToken: false
 {{- end }}
           restartPolicy: {{ default "OnFailure" .restartPolicy | quote }}
-{{ include "django-production-chart.specContainerContainers" (dict "root" . "type" "initContainers" "containers" .initContainers) | indent 10 }}
+{{ include "django-production-chart.specVolumes" $dot | indent 10 }}
+{{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .initContainers) | indent 10 }}
 {{- include "django-production-chart.specContainerBase" ( merge ( dict "containerImage" .image "containerName" .name ) $dot ) | nindent 10 -}}
 {{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 14 -}}
 {{- include "django-production-chart.specContainerEnv" $dot | nindent 14 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 14 -}}
-{{- include "django-production-chart.specContainerContainers" (dict "root" $dot "containers" .sidecarContainers) | indent 10 -}}
+{{- include "django-production-chart.specContainers" (dict "root" $dot "containers" .sidecarContainers) | indent 10 -}}
 {{ printf "\n" }}
 {{- end -}}
 {{- end -}}
