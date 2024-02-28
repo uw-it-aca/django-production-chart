@@ -3,7 +3,7 @@ Application initialization containers
 */}}
 {{ define "django-production-chart.specContainerContainers" }}
 {{- $root := .root }}
-{{- if $.type }}
+{{- if (and $.type .containers) }}
 {{ $.type }}:
 {{- end }}
 {{- range $podName, $container := .containers }}
