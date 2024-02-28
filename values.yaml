@@ -475,7 +475,7 @@ affinity: {}
 ## each key is the name of the init container, and it's data is simply
 ## toYaml'd into the pod's initContainer list.
 ## Note: do not define volumeMounts here as they are added via "podVolumes"
-## definitions.
+## by including the init container's name in podVolumes "containers" list.
 #initContainers:
 #  share-drive-permissions:
 #    image: alpine
