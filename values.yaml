@@ -471,6 +471,20 @@ affinity: {}
 #      - "-c"
 #      - 'mkdir -m 0700 ~/.ssh && echo "${JUMPHOST_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${JUMPHOST_ID}@${JUMPHOST_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:25:{SMP_SERVER}:25'
 
+## initContainers defines additional containers to run during pod initialization
+## each key is the name of the init container, and it's data is simply
+## toYaml'd into the pod's initContainer list.
+## Note: do not define volumeMounts here as they are added via "podVolumes"
+## definitions.
+#initContainers:
+#  share-drive-permissions:
+#    image: alpine
+#    securityContext:
+#      runAsUser: 0
+#    command:
+#      - "sh"
+#      - "-c"
+#      - "/scripts/initialize.sh"
 
 ## nfsServer creates a ReadWriteMany peristentVolume and Claim based on
 ## an nfs server serving from a ReadWriteOnce standard PVC. resulting
