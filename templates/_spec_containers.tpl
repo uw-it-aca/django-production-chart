@@ -1,12 +1,19 @@
 {{/*
-Application sidecar containers
+Application initialization containers
 */}}
-{{ define "django-production-chart.specContainerSidecars" }}
+{{ define "django-production-chart.specContainers" }}
 {{- $root := .root }}
-{{- range $podName, $container := .sidecars }}
+{{- if (and $.type .containers) }}
+{{ $.type }}:
+{{- end }}
+{{- range $podName, $container := .containers }}
   - name: {{ $podName | quote }}
 {{- if $container.image }}
     image: {{ $container.image | quote }}
+{{- end }}
+{{- if $container.securityContext }}
+    securityContext:
+{{ toYaml $container.securityContext | indent 6}}
 {{- end }}
 {{- if $container.command }}
     command:
@@ -43,10 +50,6 @@ Application sidecar containers
     env:
 {{- if $container.environmentVariables }}
 {{ toYaml $container.environmentVariables | indent 6 }}
-{{- end }}
-{{- if $root.Values.metrics.enabled }}
-      - name: PUSHGATEWAY
-        value: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" $root ) }}
 {{- end }}
 {{- end }}
 {{- end -}}
