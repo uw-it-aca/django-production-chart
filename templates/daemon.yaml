@@ -79,7 +79,7 @@ spec:
 {{- end }}
     spec:
 {{- if $dot.Values.securityPolicy.enabled }}
-{{ "django-production-chart.securityPolicySpec" $dot.Values.securityPolicy.daemon | indent 6 }}
+{{ include "django-production-chart.securityPolicySpec" $dot.Values.securityPolicy.daemon | indent 6 }}
 {{- end }}
 {{ include "django-production-chart.specVolumes" $dot | indent 6 }}
 {{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .initContainers) | indent 6 }}
