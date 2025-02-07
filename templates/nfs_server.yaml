@@ -67,7 +67,7 @@ spec:
     spec:
       containers:
       - name: nfs-server
-        image: k8s.gcr.io/volume-nfs:0.8
+        image: {{ .Values.nfsServer.image | default "us-west1-docker.pkg.dev/uwit-mci-axdd/rttl-images/nfs-server:latest" | quote }}
 {{- if .Values.nfsServer.resources }}
         resources:
 {{ toYaml .Values.nfsServer.resources | indent 10 }}

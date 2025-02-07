@@ -491,10 +491,12 @@ affinity: {}
 ## claim name is "<instance>-nfs-server-<.Values.nfsServer.name>"
 ## note, you will need to provide a podVolumes definition to expose
 ## the peristentVolume in your application
+## optional "image" key specifies docker image to use for NFS server
 nfsServer:
   enabled: false
 #  name: archive-index
 #  capacity: 10Gi
+#  image: <image to pull>
 
 ## podVolumes defines each volume available to the pod and how each volume
 ## is made available to containers.  each key is the name that will be
