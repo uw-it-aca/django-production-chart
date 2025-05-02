@@ -1,11 +1,13 @@
 {{- if .Values.deployment.enabled }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "django-production-chart.releaseIdentifier" . }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: deployment
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -19,12 +21,12 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+      app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+        app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
         app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Values.securityPolicy.enabled }}
       annotations:

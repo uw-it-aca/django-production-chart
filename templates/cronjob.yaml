@@ -1,20 +1,20 @@
 {{- if .Values.cronjob.enabled }}
-{{- $dot := . -}}
-{{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 {{- range .Values.cronjob.jobs -}}
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ printf "%s-cronjob-%s" ( include "django-production-chart.releaseIdentifier" $dot ) .name }}
-  namespace: {{ $namespace }}
+  name: {{  $.Values.releaseIdentifier }}-cronjob-{{ .name }}
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" $dot }}
-    app.kubernetes.io/instance: {{ $dot.Release.Name | quote }}
-{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
-{{- if $dot.Values.securityPolicy.enabled }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Release.Name | quote }}
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+{{- if $.Values.securityPolicy.enabled }}
   annotations:
-{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.cronjob | indent 4 }}
+{{ include "django-production-chart.securityPolicyAnnotations" $.Values.securityPolicy.cronjob | indent 4 }}
 {{- end }}
 spec:
   schedule: {{ .schedule | quote }}
@@ -26,17 +26,17 @@ spec:
       template:
         metadata:
           labels:
-            app: {{ $dot.Release.Name | quote }}
+            app: {{ $.Release.Name | quote }}
             cron: {{ .name | quote }}
             app.kubernetes.io/component: cronjob
-{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $.Values.securityPolicy.enabled }}
           annotations:
-{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.cronjob | indent 12 }}
+{{ include "django-production-chart.securityPolicyAnnotations" $.Values.securityPolicy.cronjob | indent 12 }}
 {{- end }}
         spec:
-{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $.Values.securityPolicy.enabled }}
           securityContext:
-{{ include "django-production-chart.securityPolicyContext" $dot.Values.securityPolicy.cronjob | indent 12 }}
+{{ include "django-production-chart.securityPolicyContext" $.Values.securityPolicy.cronjob | indent 12 }}
 {{- end }}
 {{- if .serviceAccountName }}
           serviceAccountName: {{ .serviceAccountName }}
@@ -44,13 +44,13 @@ spec:
           automountServiceAccountToken: false
 {{- end }}
           restartPolicy: {{ default "OnFailure" .restartPolicy | quote }}
-{{ include "django-production-chart.specVolumes" $dot | indent 10 }}
+{{ include "django-production-chart.specVolumes" $ | indent 10 }}
 {{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .initContainers) | indent 10 }}
-{{- include "django-production-chart.specContainerBase" ( merge ( dict "containerImage" .image "containerName" .name ) $dot ) | nindent 10 -}}
-{{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 14 -}}
-{{- include "django-production-chart.specContainerEnv" $dot | nindent 14 -}}
+{{- include "django-production-chart.specContainerBase" ( merge ( dict "containerImage" .image "containerName" .name ) $ ) | nindent 10 -}}
+{{- include "django-production-chart.specContainerResources" (or .resources $.Values.resources) | nindent 14 -}}
+{{- include "django-production-chart.specContainerEnv" $ | nindent 14 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 14 -}}
-{{- include "django-production-chart.specContainers" (dict "root" $dot "containers" .sidecarContainers) | indent 10 -}}
+{{- include "django-production-chart.specContainers" (dict "root" $ "containers" .sidecarContainers) | indent 10 -}}
 {{ printf "\n" }}
 {{- end -}}
 {{- end -}}

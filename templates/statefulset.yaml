@@ -1,6 +1,7 @@
 {{- if .Values.statefulset.enabled }}
-{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
-apiVersion: apps/v1
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
+GapiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Values.releaseIdentifier }}

@@ -1,18 +1,20 @@
 {{- if and .Values.deployment.enabled .Values.autoscaling.enabled }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "django-production-chart.releaseIdentifier" . }}-autoscaler
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ .Values.releaseIdentifier }}-autoscaler
+  namespace: {{ .Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" . }}
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "django-production-chart.releaseIdentifier" . }}
+    name: {{ .Values.releaseIdentifier }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
