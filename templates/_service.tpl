@@ -6,7 +6,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .name }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" .root }}
+  namespace: {{ .root.Values.namespaceIdentifier  }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}
     app.kubernetes.io/instance: {{ .root.Release.Name }}
@@ -32,6 +32,7 @@ spec:
       name: http
 {{- end }}
   selector:
-    app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}
+    app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}
+    app.kubernetes.io/namespace: {{ .root.Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ .root.Release.Name }}
 {{- end }}

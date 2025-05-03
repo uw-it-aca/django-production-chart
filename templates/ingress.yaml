@@ -10,7 +10,8 @@ metadata:
   name: {{ $fullName }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ include "django-production-chart.name" . }}
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: ingress
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}

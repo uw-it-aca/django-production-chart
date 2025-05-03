@@ -8,6 +8,7 @@ metadata:
   namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
   labels:
     app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: statefulset
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -23,6 +24,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+      app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   updateStrategy:
     type: {{ default "RollingUpdate" .Values.statefulset.updateStrategy }}
@@ -30,6 +32,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+        app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: statefulset
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}

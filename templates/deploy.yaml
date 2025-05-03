@@ -8,6 +8,7 @@ metadata:
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-release-job
+    app.kubernetes.io/namespace: {{ $.Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -23,6 +24,7 @@ spec:
       namespace: {{ $.Values.namespaceIdentifier }}
       labels:
         app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-release-job
+        app.kubernetes.io/namespace: {{ $.Values.namespaceIdentifier }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}
