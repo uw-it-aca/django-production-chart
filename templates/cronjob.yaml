@@ -10,7 +10,6 @@ metadata:
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
-    app.kubernetes.io/namespace: {{ $.Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ $.Release.Name | quote }}
 {{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
 {{- if $.Values.securityPolicy.enabled }}

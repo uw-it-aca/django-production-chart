@@ -13,7 +13,6 @@ metadata:
   namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -34,7 +33,6 @@ spec:
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ $instance }}
 {{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
 ---
@@ -45,7 +43,6 @@ metadata:
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -53,7 +50,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ $name }}
-      app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   endpoints:
     - port: metrics
@@ -66,7 +62,6 @@ metadata:
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -78,7 +73,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ $name }}
-      app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
       app.kubernetes.io/instance: {{ $instance }}
   serviceName: {{ $name }}
   replicas: {{ .Values.memcached.replicaCount }}
@@ -86,7 +80,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: {{ $name }}
-        app.kubernetes.io/namespace: {{ .Values.namespaceIdentifier }}
         app.kubernetes.io/instance: {{ $instance }}
         app.kubernetes.io/component: memcached
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}
