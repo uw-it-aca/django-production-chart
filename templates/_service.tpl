@@ -33,6 +33,5 @@ spec:
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}
-    app.kubernetes.io/namespace: {{ .root.Values.namespaceIdentifier }}
     app.kubernetes.io/instance: {{ .root.Release.Name }}
 {{- end }}
