@@ -1,15 +1,16 @@
 {{- if .Values.memcached.enabled }}
 {{- $command := .Values.memcached.command -}}
 {{- $extraArgs := .Values.memcached.extraArgs | default "" -}}
-{{- $name := printf "%s-memcached" ( include "django-production-chart.releaseIdentifier" . ) -}}
-{{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $name := printf "%s-memcached" .Values.releaseIdentifier -}}
 {{- $instance := .Release.Name | quote -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $name }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
@@ -39,7 +40,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ $name }}
-  namespace: {{ $namespace }}
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
@@ -58,7 +59,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ $name }}
-  namespace: {{ $namespace }}
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}

@@ -1,11 +1,13 @@
 {{- if and .Values.deployment.enabled .Values.deploymentInitialization.enabled }}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "django-production-chart.releaseIdentifier" . }}-release-job-{{ .Values.image.tag | trunc 7 }}-{{ randAlphaNum 3 | lower}}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}-release-job-{{ .Values.image.tag | trunc 7 }}-{{ randAlphaNum 3 | lower}}
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-release-job" ( include "django-production-chart.releaseIdentifier" . ) }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-release-job
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -17,10 +19,10 @@ spec:
   backoffLimit: 1
   template:
     metadata:
-      name: "{{.Release.Name}}"
-      namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+      name: {{ .Release.Name | quote }}
+      namespace: {{ $.Values.namespaceIdentifier }}
       labels:
-        app.kubernetes.io/name: {{ printf "%s-release-job" ( include "django-production-chart.releaseIdentifier" . ) }}
+        app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-release-job
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         app.kubernetes.io/component: release-job
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}

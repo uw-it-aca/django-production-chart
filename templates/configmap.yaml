@@ -1,11 +1,12 @@
-{{- $dot := . }}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 {{- range $name, $map := .Values.configmaps }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-%s" ( include "django-production-chart.releaseIdentifier" $dot ) $name }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" $dot }}
+  name: {{ $.Values.releaseIdentifier }}-{{ $name }}
+  namespace: {{ $.Values.namespaceIdentifier }}
 data:
 {{ toYaml $map | indent 2 }}
 {{- end -}}

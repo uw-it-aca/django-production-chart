@@ -1,9 +1,11 @@
 {{- if and ( or .Values.service.enabled (hasKey .Values "services" )) .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "django-production-chart.releaseIdentifier" . }}
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/component: servicemonitor
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
@@ -12,5 +14,5 @@ spec:
     - port: {{ default "http" .Values.metrics.serviceMonitor.port }}
   selector:
     matchLabels:
-      app.kubernetes.io/instance: {{ include "django-production-chart.releaseIdentifier" . }}
+      app.kubernetes.io/instance: {{ $.Values.releaseIdentifier }}
 {{- end }}

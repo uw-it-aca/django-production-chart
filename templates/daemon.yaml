@@ -1,20 +1,19 @@
 {{- if .Values.daemon.enabled }}
-{{- $dot := . }}
 {{- $component := "management-command-daemon" }}
-{{- $release_id := ( include "django-production-chart.releaseIdentifier" . ) }}
-{{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 {{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ printf "%s-daemon" $release_id }}
-  namespace: {{ $namespace }}
+  name: {{ $.Values.releaseIdentifier }}-daemon
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon" $release_id }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: {{ $component }}
     role: {{ $component }}
-{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
 spec:
   clusterIP: None
   ports:
@@ -29,13 +28,13 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ printf "%s-daemon" $release_id }}
-  namespace: {{ $namespace }}
+  name: {{ $.Values.releaseIdentifier }}-daemon
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon" $release_id }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: {{ $component }}
-{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
 spec:
   endpoints:
     - port: metrics
@@ -49,47 +48,47 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ printf "%s-daemon-%s" $release_id .name }}
-  namespace: {{ $namespace }}
+  name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
+  namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/component: {{ $component }}
     role: {{ $component }}
-{{- include "django-production-chart.resourceLabels" $dot | nindent 4 }}
-{{- if $dot.Values.securityPolicy.enabled }}
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+{{- if $.Values.securityPolicy.enabled }}
   annotations:
-{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.daemon | indent 4 }}
+{{ include "django-production-chart.securityPolicyAnnotations" $.Values.securityPolicy.daemon | indent 4 }}
 {{- end }}
 spec:
   replicas: {{ default 1 .replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+      app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
       app.kubernetes.io/instance: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ printf "%s-daemon-%s" $release_id .name }}
+        app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
         app.kubernetes.io/instance: {{ $.Release.Name }}
         role: management-command-daemon
-{{- if $dot.Values.securityPolicy.enabled }}
+{{- if $.Values.securityPolicy.enabled }}
       annotations:
-{{ include "django-production-chart.securityPolicyAnnotations" $dot.Values.securityPolicy.daemon | indent 8 }}
+{{ include "django-production-chart.securityPolicyAnnotations" $.Values.securityPolicy.daemon | indent 8 }}
 {{- end }}
     spec:
-{{- if $dot.Values.securityPolicy.enabled }}
-{{ include "django-production-chart.securityPolicySpec" $dot.Values.securityPolicy.daemon | indent 6 }}
+{{- if $.Values.securityPolicy.enabled }}
+{{ include "django-production-chart.securityPolicySpec" $.Values.securityPolicy.daemon | indent 6 }}
 {{- end }}
-{{ include "django-production-chart.specVolumes" $dot | indent 6 }}
+{{ include "django-production-chart.specVolumes" $ | indent 6 }}
 {{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .initContainers) | indent 6 }}
-{{- include "django-production-chart.specContainerBase" $dot | nindent 6 }}
+{{- include "django-production-chart.specContainerBase" $ | nindent 6 }}
           ports:
             - name: metrics
               containerPort: 9100
-{{- include "django-production-chart.specContainerResources" (or .resources $dot.Values.resources) | nindent 10 }}
-{{- include "django-production-chart.specContainerEnv" $dot | nindent 10 }}
+{{- include "django-production-chart.specContainerResources" (or .resources $.Values.resources) | nindent 10 }}
+{{- include "django-production-chart.specContainerEnv" $ | nindent 10 }}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 }}
-{{- include "django-production-chart.specContainers" (dict "root" $dot "containers" .sidecarContainers) | indent 6 -}}
+{{- include "django-production-chart.specContainers" (dict "root" $ "containers" .sidecarContainers) | indent 6 -}}
 {{- end }}
 {{- end }}

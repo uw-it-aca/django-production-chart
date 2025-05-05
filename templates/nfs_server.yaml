@@ -1,14 +1,15 @@
 {{- if .Values.nfsServer.enabled }}
-{{- $name := printf "%s-nfs-server-%s" ( include "django-production-chart.releaseIdentifier" . ) .Values.nfsServer.name -}}
-{{- $pvc_name := printf "%s-nfs-pvc-%s" ( include "django-production-chart.releaseIdentifier" . ) .Values.nfsServer.name -}}
-{{- $namespace := include "django-production-chart.namespaceIdentifier" . -}}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
+{{- $name := printf "%s-nfs-server-%s" .Values.releaseIdentifier .root.Values.nfsServer.name -}}
+{{- $pvc_name := printf "%s-nfs-pvc-%s" .Values.releaseIdentifier .Values.nfsServer.name -}}
 {{- $instance := .Release.Name | quote -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $name }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
@@ -36,7 +37,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $name }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
@@ -93,7 +94,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: {{ $pvc_name }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $pvc_name }}
     app.kubernetes.io/instance: {{ $instance }}
@@ -111,7 +112,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $name }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}
@@ -123,14 +124,14 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    server: {{ $name }}.{{ $namespace }}.svc.cluster.local
+    server: {{ $name }}.{{ $.Values.namespaceIdentifier }}.svc.cluster.local
     path: "/"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ $name }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ $instance }}

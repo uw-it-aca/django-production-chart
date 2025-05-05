@@ -1,11 +1,12 @@
 {{- if (and .Values.securityPolicy.enabled .Values.securityPolicy.network.enabled) -}}
-{{- $release_id := ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 ---
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ $release_id }}-server
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}-server
+  namespace: {{ $.Values.namespaceIdentifier }}
 spec:
   podSelector:
 {{- include "django-production-chart.netpolicy.server-pod" . | indent 4 }}
@@ -23,8 +24,8 @@ spec:
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ $release_id }}-deploy
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}-deploy
+  namespace: {{ $.Values.namespaceIdentifier }}
 spec:
   podSelector:
 {{- include "django-production-chart.netpolicy.release-job-pod" . | indent 4 }}
@@ -40,8 +41,8 @@ spec:
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ $release_id }}-cronjob
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}-cronjob
+  namespace: {{ $.Values.namespaceIdentifier }}
 spec:
   podSelector:
     matchLabels:
@@ -60,8 +61,8 @@ spec:
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ $release_id }}-daemon
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}-daemon
+  namespace: {{ $.Values.namespaceIdentifier }}
 spec:
   podSelector:
     matchLabels:
@@ -81,8 +82,8 @@ spec:
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ $release_id }}-memcached
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}-memcached
+  namespace: {{ $.Values.namespaceIdentifier }}
 spec:
   podSelector:
 {{- include "django-production-chart.netpolicy.memcached-pod" . | indent 4 }}
@@ -102,8 +103,8 @@ spec:
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: {{ $release_id }}-pushgateway
-  namespace: {{ include "django-production-chart.namespaceIdentifier" . }}
+  name: {{ $.Values.releaseIdentifier }}-pushgateway
+  namespace: {{ $.Values.namespaceIdentifier }}
 spec:
   podSelector:
 {{- include "django-production-chart.netpolicy.pushgateway-pod" . | indent 4 }}

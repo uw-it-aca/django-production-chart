@@ -1,6 +1,7 @@
 {{/*
 Network policy ingress and egress
 */}}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
 
 {{/*
 Nginx ingress
@@ -105,7 +106,7 @@ Helper for common reference for server pod
 */}}
 {{- define "django-production-chart.netpolicy.app-labels" }}
 matchLabels:
-  app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}{{ if eq .component "server" }}{{else}}-{{ .component }}{{ end }}
+  app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}{{ if eq .component "server" }}{{else}}-{{ .component }}{{ end }}
   app.kubernetes.io/instance: {{ .root.Release.Name }}
   app.kubernetes.io/component: {{ .component }}
 {{- end }}
