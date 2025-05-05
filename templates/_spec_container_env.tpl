@@ -1,6 +1,8 @@
 {{/*
 Application container base spec environment variables
 */}}
+{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 {{- define "django-production-chart.specContainerEnv" -}}
 env:
   - name: PORT
@@ -39,13 +41,13 @@ env:
 {{- end }}
 {{- if and .Values.cronjob.enabled .Values.metrics.enabled }}
   - name: PUSHGATEWAY
-    value: {{ printf "%s-pushgateway" ( include "django-production-chart.releaseIdentifier" . ) }}
+    value: {{ .Values.releaseIdentifier }}-pushgateway
 {{- end }}
 {{- if .Values.memcached.enabled }}
   - name: MEMCACHED_SERVER_COUNT
     value: {{ .Values.memcached.replicaCount | quote }}
   - name: MEMCACHED_SERVER_SPEC
-    value: {{ ( include "django-production-chart.releaseIdentifier" . ) }}-memcached-{{ "{}" }}.{{ ( include "django-production-chart.releaseIdentifier" .) }}-memcached.{{ .Release.Namespace }}.svc.cluster.local
+    value: {{ .Values.releaseIdentifier }}-memcached-{{ "{}" }}.{{ .Values.releaseIdentifier }}-memcached.{{ .Values.namespaceIdentifier }}.svc.cluster.local
 {{- end }}
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}
