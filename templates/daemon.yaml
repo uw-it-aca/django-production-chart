@@ -1,15 +1,20 @@
 {{- if .Values.daemon.enabled }}
 {{- $component := "management-command-daemon" }}
-{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
-{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 {{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+{{- $name := printf "%s-daemon" $.Values.releaseIdentifier }}
+{{- if and .Values.namespace .Values.namespace.enabled }}
+{{- $name = "daemon" }}
+{{- end }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $.Values.releaseIdentifier }}-daemon
+  name: {{ $name }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon
+    app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: {{ $component }}
     role: {{ $component }}
@@ -28,10 +33,10 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ $.Values.releaseIdentifier }}-daemon
+  name: {{ $name }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon
+    app.kubernetes.io/name: {{ $name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: {{ $component }}
 {{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
@@ -44,14 +49,18 @@ spec:
       app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- range .Values.daemon.daemons }}
+{{- $daemonName := printf "%s-daemon-%s" $.Values.releaseIdentifier .name }}
+{{- if and $.Values.metrics.enabled $.Values.metrics.serviceMonitor.enabled }}
+{{- $daemonName = .name }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
+  name: {{ $daemonName }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
+    app.kubernetes.io/name: {{ $daemonName }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/component: {{ $component }}
     role: {{ $component }}
@@ -64,12 +73,12 @@ spec:
   replicas: {{ default 1 .replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
+      app.kubernetes.io/name: {{ $daemonName }}
       app.kubernetes.io/instance: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}-daemon-{{ .name }}
+        app.kubernetes.io/name: {{ $daemonName }}
         app.kubernetes.io/instance: {{ $.Release.Name }}
         role: management-command-daemon
 {{- if $.Values.securityPolicy.enabled }}

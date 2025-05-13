@@ -6,7 +6,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{  $.Values.releaseIdentifier }}-cronjob-{{ .name }}
+  name: {{ if and $.Values.namespace $.Values.namespace.enabled }}{{ else }}{{  $.Values.releaseIdentifier }}-cronjob-{{ end }}{{ .name }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}

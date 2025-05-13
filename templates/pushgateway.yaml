@@ -2,6 +2,9 @@
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 {{- $name := printf "%s-pushgateway" $.Values.releaseIdentifier -}}
+{{- if and .Values.namespace .Values.namespace.enabled -}}
+{{- $name = "pushgateway" -}}
+{{- end -}}
 ---
 apiVersion: v1
 kind: Service
