@@ -50,7 +50,7 @@ env:
 {{- $memcachedName := printf "%s-memcached" .Values.releaseIdentifier }}
 {{- if and .Values.namespace .Values.namespace.enabled }}
 {{- $memcachedName = "memcached" }}
-{{- end -}}
+{{- end }}
     value: {{ $memcachedName }}-{{ "{}" }}.{{ .Values.releaseIdentifier }}-memcached.{{ .Values.namespaceIdentifier }}.svc.cluster.local
 {{- end }}
 {{- range .Values.environmentVariablesSecrets }}
