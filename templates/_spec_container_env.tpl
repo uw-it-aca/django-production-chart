@@ -47,7 +47,11 @@ env:
   - name: MEMCACHED_SERVER_COUNT
     value: {{ .Values.memcached.replicaCount | quote }}
   - name: MEMCACHED_SERVER_SPEC
-    value: {{ .Values.releaseIdentifier }}-memcached-{{ "{}" }}.{{ .Values.releaseIdentifier }}-memcached.{{ .Values.namespaceIdentifier }}.svc.cluster.local
+{{- $memcachedName := printf "%s-memcached" .Values.releaseIdentifier }}
+{{- if and .Values.namespace .Values.namespace.enabled }}
+{{- $memcachedName = "memcached" }}
+{{- end -}}
+    value: {{ $memcachedName }}-{{ "{}" }}.{{ .Values.releaseIdentifier }}-memcached.{{ .Values.namespaceIdentifier }}.svc.cluster.local
 {{- end }}
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}
