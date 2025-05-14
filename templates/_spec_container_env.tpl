@@ -51,7 +51,7 @@ env:
 {{- if and .Values.namespace .Values.namespace.enabled }}
 {{- $memcachedName = "memcached" }}
 {{- end }}
-    value: {{ $memcachedName }}-{{ "{}" }}.{{ .Values.releaseIdentifier }}-memcached.{{ .Values.namespaceIdentifier }}.svc.cluster.local
+    value: {{ $memcachedName }}-{{ "{}" }}.{{ $memcachedName }}.{{ .Values.namespaceIdentifier }}.svc.cluster.local
 {{- end }}
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}
