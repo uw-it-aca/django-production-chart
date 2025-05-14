@@ -41,13 +41,21 @@ env:
 {{- end }}
 {{- if and .Values.cronjob.enabled .Values.metrics.enabled }}
   - name: PUSHGATEWAY
-    value: {{ .Values.releaseIdentifier }}-pushgateway
+{{- $pushgatewayName := printf "%s-pushgateway" .Values.releaseIdentifier }}
+{{- if and .Values.namespace .Values.namespace.enabled }}
+{{- $pushgatewayName = "pushgateway" }}
+{{- end }}
+    value: {{ $pushgatewayName }}
 {{- end }}
 {{- if .Values.memcached.enabled }}
   - name: MEMCACHED_SERVER_COUNT
     value: {{ .Values.memcached.replicaCount | quote }}
   - name: MEMCACHED_SERVER_SPEC
-    value: {{ .Values.releaseIdentifier }}-memcached-{{ "{}" }}.{{ .Values.releaseIdentifier }}-memcached.{{ .Values.namespaceIdentifier }}.svc.cluster.local
+{{- $memcachedName := printf "%s-memcached" .Values.releaseIdentifier }}
+{{- if and .Values.namespace .Values.namespace.enabled }}
+{{- $memcachedName = "memcached" }}
+{{- end }}
+    value: {{ $memcachedName }}-{{ "{}" }}.{{ $memcachedName }}.{{ .Values.namespaceIdentifier }}.svc.cluster.local
 {{- end }}
 {{- range .Values.environmentVariablesSecrets }}
   - name: {{ .name }}

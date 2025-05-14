@@ -1,9 +1,12 @@
 {{- if .Values.memcached.enabled }}
 {{- $command := .Values.memcached.command -}}
 {{- $extraArgs := .Values.memcached.extraArgs | default "" -}}
-{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
-{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 {{- $name := printf "%s-memcached" .Values.releaseIdentifier -}}
+{{- if and .Values.namespace .Values.namespace.enabled -}}
+{{- $name = "memcached" -}}
+{{- end -}}
 {{- $instance := .Release.Name | quote -}}
 ---
 apiVersion: v1
