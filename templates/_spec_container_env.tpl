@@ -41,7 +41,11 @@ env:
 {{- end }}
 {{- if and .Values.cronjob.enabled .Values.metrics.enabled }}
   - name: PUSHGATEWAY
-    value: {{ .Values.releaseIdentifier }}-pushgateway
+{{- $pushgatewayName := printf "%s-pushgateway" .Values.releaseIdentifier }}
+{{- if and .Values.namespace .Values.namespace.enabled }}
+{{- $pushgatewayName = "pushgateway" }}
+{{- end }}
+    value: {{ $pushgatewayName }}
 {{- end }}
 {{- if .Values.memcached.enabled }}
   - name: MEMCACHED_SERVER_COUNT
