@@ -1,5 +1,6 @@
 {{- if and .Values.namespace .Values.namespace.enabled -}}
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 ---
 apiVersion: v1
 kind: Namespace
