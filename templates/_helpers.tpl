@@ -47,6 +47,14 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 {{- end -}}
 
+{{ define "django-production-chart.instanceIdentifier" -}}
+{{- if and .Values.namespace .Values.namespace.enabled -}}
+{{- printf "%s-%s" .Values.repo .Values.instance -}}
+{{- else -}}
+{{- printf "%s-prod-%s" .Values.repo .Values.instance -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "daemonset.apiVersion" -}}
 {{- if semverCompare "<1.9-0" .Capabilities.KubeVersion.GitVersion -}}
 {{- print "extensions/v1beta1" -}}

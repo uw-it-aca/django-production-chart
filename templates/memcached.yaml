@@ -3,11 +3,12 @@
 {{- $extraArgs := .Values.memcached.extraArgs | default "" -}}
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
 {{- $name := printf "%s-memcached" .Values.releaseIdentifier -}}
 {{- if and .Values.namespace .Values.namespace.enabled -}}
 {{- $name = "memcached" -}}
 {{- end -}}
-{{- $instance := .Release.Name | quote -}}
+{{- $instance := .Values.instanceIdentifier }}
 ---
 apiVersion: v1
 kind: Service
@@ -53,7 +54,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ $name }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/instance: {{ $instance }}
   endpoints:
     - port: metrics
 {{- end }}

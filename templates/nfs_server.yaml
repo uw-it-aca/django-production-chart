@@ -1,9 +1,10 @@
 {{- if .Values.nfsServer.enabled }}
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
 {{- $name := printf "%s-nfs-server-%s" .Values.releaseIdentifier .root.Values.nfsServer.name -}}
 {{- $pvc_name := printf "%s-nfs-pvc-%s" .Values.releaseIdentifier .Values.nfsServer.name -}}
-{{- $instance := .Release.Name | quote -}}
+{{- $instance :=  .Values.instanceIdentifier }}
 ---
 apiVersion: v1
 kind: Service

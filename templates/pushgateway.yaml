@@ -1,7 +1,9 @@
 {{- if and .Values.cronjob.enabled .Values.metrics.enabled }}
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
 {{- $name := printf "%s-pushgateway" $.Values.releaseIdentifier -}}
+{{- $instance :=  .Values.instanceIdentifier -}}
 {{- if and .Values.namespace .Values.namespace.enabled -}}
 {{- $name = "pushgateway" -}}
 {{- end -}}
@@ -13,7 +15,7 @@ metadata:
   namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: pushgateway
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.serviceAnnotations -}}
@@ -28,7 +30,7 @@ spec:
       targetPort: metrics
   selector:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ $instance }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -37,14 +39,14 @@ metadata:
   namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: pushgateway
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ $name }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/instance: {{ $instance }}
   endpoints:
     - port: metrics
 ---
@@ -55,7 +57,7 @@ metadata:
   namespace: {{ .Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ $instance }}
     app.kubernetes.io/component: pushgateway
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
 {{- if .Values.securityPolicy.enabled }}
@@ -67,12 +69,12 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ $name }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/instance: {{ $instance }}
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ $name }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/instance: {{ $instance }}
         app.kubernetes.io/component: pushgateway
 {{- include "django-production-chart.resourceLabels" . | nindent 8 }}
 {{- if .Values.securityPolicy.enabled }}

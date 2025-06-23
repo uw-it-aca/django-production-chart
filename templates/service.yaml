@@ -1,5 +1,6 @@
 {{- if .Values.service.enabled }}
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
 {{- include "django-production-chart.service" (dict "root" . "name" $.Values.releaseIdentifier "type" "ClusterIP" "service" .Values.service ) }}
 {{- end }}

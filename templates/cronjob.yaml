@@ -1,6 +1,7 @@
 {{- if .Values.cronjob.enabled }}
-{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
-{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) }}
 {{- range .Values.cronjob.jobs -}}
 ---
 apiVersion: batch/v1
@@ -10,7 +11,7 @@ metadata:
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
-    app.kubernetes.io/instance: {{ $.Release.Name | quote }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
 {{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
 {{- if $.Values.securityPolicy.enabled }}
   annotations:
