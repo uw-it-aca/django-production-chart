@@ -1,12 +1,13 @@
 {{- if and .Values.namespace .Values.namespace.enabled -}}
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ .Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ .Values.instanceIdentifier }}
 {{- end -}}

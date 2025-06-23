@@ -9,7 +9,7 @@ metadata:
   namespace: {{ .root.Values.namespaceIdentifier  }}
   labels:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}
-    app.kubernetes.io/instance: {{ .root.Release.Name }}
+    app.kubernetes.io/instance: {{ include "django-production-chart.instanceIdentifier" .root }}
 {{- include "django-production-chart.resourceLabels" .root | nindent 4 }}
 spec:
 {{- if or ( not .type ) ( has .type (list "ClusterIP" "NodePort" "LoadBalancer" "ExternalName")) }}
@@ -33,5 +33,5 @@ spec:
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}
-    app.kubernetes.io/instance: {{ .root.Release.Name }}
+    app.kubernetes.io/instance: {{ .root.Values.instanceIdentifier }}
 {{- end }}

@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled }}
-{{ $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
-{{ $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) }}
 {{- $fullName := include "django-production-chart.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $branch := .Values.branch}}
@@ -11,7 +12,7 @@ metadata:
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
     app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
     app.kubernetes.io/component: ingress
 {{- include "django-production-chart.resourceLabels" . | nindent 4 }}
   annotations:
