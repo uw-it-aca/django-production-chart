@@ -91,7 +91,6 @@ spec:
 {{ include "django-production-chart.securityPolicySpec" $.Values.securityPolicy.daemon | indent 6 }}
 {{- end }}
 {{ include "django-production-chart.specVolumes" $ | indent 6 }}
-{{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .initContainers) | indent 6 }}
 {{- include "django-production-chart.specContainerBase" $ | nindent 6 }}
           ports:
             - name: metrics
@@ -99,6 +98,6 @@ spec:
 {{- include "django-production-chart.specContainerResources" (or .resources $.Values.resources) | nindent 10 }}
 {{- include "django-production-chart.specContainerEnv" $ | nindent 10 }}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 10 }}
-{{- include "django-production-chart.specContainers" (dict "root" $ "containers" .sidecarContainers) | indent 6 -}}
+{{ include "django-production-chart.specContainers" (dict "root" $ "type" "initContainers" "containers" .sidecarContainers) | indent 6 -}}
 {{- end }}
 {{- end }}

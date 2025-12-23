@@ -11,6 +11,9 @@ Application initialization containers
 {{- if $container.image }}
     image: {{ $container.image | quote }}
 {{- end }}
+{{- if (and $.type (eq $.type "initContainers")) }}
+    restartPolicy: {{ $container.restartPolicy | default "Always" }}
+{{- end }}
 {{- if $container.securityContext }}
     securityContext:
 {{ toYaml $container.securityContext | indent 6}}
@@ -47,8 +50,8 @@ Application initialization containers
     ports:
 {{ toYaml $container.ports | indent 6 }}
 {{- end }}
-    env:
 {{- if $container.environmentVariables }}
+    env:
 {{ toYaml $container.environmentVariables | indent 6 }}
 {{- end }}
 {{- end }}

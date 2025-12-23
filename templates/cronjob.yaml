@@ -46,12 +46,11 @@ spec:
 {{- end }}
           restartPolicy: {{ default "OnFailure" .restartPolicy | quote }}
 {{ include "django-production-chart.specVolumes" $ | indent 10 }}
-{{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .initContainers) | indent 10 }}
 {{- include "django-production-chart.specContainerBase" ( merge ( dict "containerImage" .image "containerName" .name ) $ ) | nindent 10 -}}
 {{- include "django-production-chart.specContainerResources" (or .resources $.Values.resources) | nindent 14 -}}
 {{- include "django-production-chart.specContainerEnv" $ | nindent 14 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 14 -}}
-{{- include "django-production-chart.specContainers" (dict "root" $ "containers" .sidecarContainers) | indent 10 -}}
+{{ include "django-production-chart.specContainers" (dict "root" $ "type" "initContainers" "containers" .sidecarContainers) | indent 10 -}}
 {{ printf "\n" }}
 {{- end -}}
 {{- end -}}
