@@ -361,7 +361,10 @@ affinity: {}
 
 ## sidecarContainers defines additional containers to run within the pod.
 ## each key is the name of the sidecar container, and it's data is simply
-## toYaml'd into the pod's container list.
+## toYaml'd into the pod's container list.  the mapping is rendered as
+## kubernetes initContainers in mapping key alphabetical order.  if
+## order is important to your deployment, assign key names such that
+## they are in alphabetical order.
 ## Note: do not define volumeMounts here as they are added via "podVolumes"
 ## definitions.
 #sidecarContainers:
