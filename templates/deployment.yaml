@@ -39,7 +39,6 @@ spec:
 {{- end }}
 {{ include "django-production-chart.specControllerScheduling" . | indent 6 }}
 {{ include "django-production-chart.specVolumes" . | indent 6 }}
-{{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .Values.initContainers) | indent 6 }}
 {{ include "django-production-chart.specContainer" . | indent 6 }}
 {{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
 {{ include "django-production-chart.specContainerProbes" . | indent 10 }}
