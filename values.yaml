@@ -9,15 +9,24 @@ maxReplicas: 75
 
 targetAverageUtilization: 100
 
+# release identifier
 repo: "prereq"
 
+# release intance
+instance: test
+
+# ID used to identify specific release to support multiple
+# instances of the same release
+#repoIdentifier: "01"
+
+# apply namespace to deployed objects
 namespace:
   enabled: false
-
 
 nameOverride: ""
 fullnameOverride: ""
 
+# project github reposistory branch to deploy
 branch: "master"
 
 containerPort: 8000
