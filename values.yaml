@@ -19,9 +19,12 @@ instance: test
 # instances of the same release
 #repoIdentifier: "01"
 
-# apply namespace to deployed objects
+# apply namespace to deployed objects.
+# by default, namespace is derived from Values.repo and Values.instance.
+# The "name" key will override this default.
 namespace:
   enabled: false
+#  name: my-specific-namespace-test
 
 nameOverride: ""
 fullnameOverride: ""
