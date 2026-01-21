@@ -22,9 +22,11 @@ instance: test
 # apply namespace to deployed objects.
 # by default, namespace is derived from Values.repo and Values.instance.
 # The "name" key will override this default.
+# The "suppressDefinition" key prevents Namespace object creation
 namespace:
   enabled: false
 #  name: my-specific-namespace-test
+#  suppressDefinition: true
 
 nameOverride: ""
 fullnameOverride: ""

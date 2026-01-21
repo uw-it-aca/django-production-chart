@@ -1,4 +1,4 @@
-{{- if and .Values.namespace .Values.namespace.enabled -}}
+{{- if and .Values.namespace .Values.namespace.enabled (not .Values.namespace.suppressDefinition) -}}
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 {{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
