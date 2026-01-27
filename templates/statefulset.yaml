@@ -63,7 +63,8 @@ spec:
 {{- end }}
 {{- range $name, $map := .Values.podVolumes }}
 {{- if hasKey $map.volume "claimTemplate" }}
-{{ include "django-production-chart.pvcBase" (dict "root" $ "name" $name "claim" $map.volume.claimTemplate ) | indent 4 }}
+    - metadata:
+{{ include "django-production-chart.pvcBase" (dict "root" $ "name" $name "claim" $map.volume.claimTemplate ) | indent 6 }}
 {{- end }}
 {{- end }}
 {{- end -}}
