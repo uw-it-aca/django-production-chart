@@ -28,12 +28,14 @@ volumes:
 {{- end }}
 {{- range $name, $map := .Values.podVolumes }}
 {{- if not ( or ( hasKey $map.volume "claim"  ) ( hasKey $map.volume "claimTemplate" ) ) }}
-  - name: {{ $name }}
 {{- if hasKey $map.volume "configMap" }}
+  - name: {{ $name }}
     configMap:
       name: {{ printf "%s-%s" ( include "django-production-chart.releaseIdentifier" $dot ) $map.volume.configMap.name }}
 {{- else }}
+{{- if ( or ( hasKey $map.volume "claim"  ) ( hasKey $map.volume "claimTemplate" ) ) }}
 {{ toYaml $map.volume | indent 4 }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
