@@ -1,6 +1,6 @@
 {{- $dot := . -}}
 {{- range $name, $map := .Values.podVolumes }}
-{{- if hasKey $map.volume "claim" }}
+{{- if and ( hasKey $map "volume" ) ( hasKey $map.volume "claim" ) }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
