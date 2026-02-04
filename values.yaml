@@ -72,6 +72,8 @@ deployment:
 
 deploymentInitialization:
   enabled: true
+# number of seconds before deploy job is deleted after exiting
+#  finishedJobTTL: 300
 
 statefulset:
   enabled: false
