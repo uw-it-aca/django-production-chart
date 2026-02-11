@@ -32,16 +32,22 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{ define "django-production-chart.releaseIdentifier" -}}
+{{- $repo := printf "%s%s" .Values.repo ((hasKey .Values "repoIdentifier") | ternary (printf "-%s" .Values.repoIdentifier) "") -}}
 {{- if and .Values.namespace .Values.namespace.enabled -}}
-{{- printf .Values.repo -}}
+{{- printf $repo -}}
 {{- else -}}
-{{- printf "%s-prod-%s" .Values.repo .Values.instance -}}
+{{- printf "%s-prod-%s" $repo .Values.instance -}}
 {{- end -}}
 {{- end -}}
 
 {{ define "django-production-chart.namespaceIdentifier" -}}
 {{- if and .Values.namespace .Values.namespace.enabled -}}
+
+{{- if and .Values.namespace .Values.namespace.name -}}
+{{- printf .Values.namespace.name -}}
+{{- else -}}
 {{- printf "%s-%s" .Values.repo .Values.instance -}}
+{{- end -}}
 {{- else -}}
 {{- printf (default .Release.Namespace "default") -}}
 {{- end -}}

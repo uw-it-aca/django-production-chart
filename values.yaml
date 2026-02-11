@@ -9,15 +9,29 @@ maxReplicas: 75
 
 targetAverageUtilization: 100
 
+# release identifier
 repo: "prereq"
 
+# release intance
+instance: test
+
+# ID used to identify specific release to support multiple
+# instances of the same release
+#repoIdentifier: "01"
+
+# apply namespace to deployed objects.
+# by default, namespace is derived from Values.repo and Values.instance.
+# The "name" key will override this default.
+# The "suppressDefinition" key prevents Namespace object creation
 namespace:
   enabled: false
-
+#  name: my-specific-namespace-test
+#  suppressDefinition: true
 
 nameOverride: ""
 fullnameOverride: ""
 
+# project github reposistory branch to deploy
 branch: "master"
 
 containerPort: 8000
@@ -58,6 +72,8 @@ deployment:
 
 deploymentInitialization:
   enabled: true
+# number of seconds before deploy job is deleted after exiting
+#  finishedJobTTL: 300
 
 statefulset:
   enabled: false

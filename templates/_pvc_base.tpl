@@ -2,34 +2,33 @@
 Persistent Volume Claim template
 */}}
 {{- define "django-production-chart.pvcBase" }}
-- metadata:
-    name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" .root ) .name }}
-    namespace: {{ include "django-production-chart.namespaceIdentifier" .root }}
-  spec:
-    accessModes:
+  name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" .root ) .name }}
+  namespace: {{ include "django-production-chart.namespaceIdentifier" .root }}
+spec:
+  accessModes:
 {{- if .claim.accessModes }}
 {{- range .claim.accessModes }}
-      - {{ . | quote }}
+    - {{ . | quote }}
 {{- end }}
 {{- else }}
-      - ReadWriteMany
+    - ReadWriteMany
 {{- end }}
 {{- if .claim.volumeMode }}
-    volumeMode: {{ .claim.volumeMode | quote }}
+  volumeMode: {{ .claim.volumeMode | quote }}
 {{- end }}
-    storageClassName: {{ default "default" .claim.storageClassName | quote }}
-    resources:
-      requests:
-        storage: {{ .claim.storageSize | quote }}
+  storageClassName: {{ default "default" .claim.storageClassName | quote }}
+  resources:
+    requests:
+      storage: {{ .claim.storageSize | quote }}
 {{- if .claim.selector }}
-    selector:
+  selector:
 {{- if .claim.selector.matchLabels }}
-      matchLabels:
+    matchLabels:
 {{ toYaml .claim.selector.matchLabels | indent 8 }}
-        release: "stable"
+      release: "stable"
 {{- end }}
 {{- if .claim.selector.matchExpressions }}
-      matchExpressions:
+    matchExpressions:
 {{ toYaml .claim.selector.matchExpressions | indent 8 }}
 {{- end }}
 {{- end }}

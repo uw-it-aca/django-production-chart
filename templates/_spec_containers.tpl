@@ -11,8 +11,8 @@ Application initialization containers
 {{- if $container.image }}
     image: {{ $container.image | quote }}
 {{- end }}
-{{- if (and $.type (eq $.type "initContainers")) }}
-    restartPolicy: {{ $container.restartPolicy | default "Always" }}
+{{- if (and $.type (eq $.type "initContainers") (or (not $container.restartPolicy) (eq $container.restartPolicy "Always"))) }}
+    restartPolicy: Always
 {{- end }}
 {{- if $container.securityContext }}
     securityContext:
