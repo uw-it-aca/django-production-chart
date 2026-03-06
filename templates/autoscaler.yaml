@@ -18,11 +18,19 @@ spec:
     name: {{ .Values.releaseIdentifier }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+{{- if .Values.autoscaling.behavior }}
+  behavior:
+{{ toYaml .Values.autoscaling.behavior | indent 4 }}
+{{- end }}
   metrics:
+{{- if .Values.autoscaling.metrics }}
+{{ toYaml .Values.autoscaling.metrics | indent 4 }}
+{{- else }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
           averageUtilization: {{ .Values.targetAverageUtilization }}
+{{- end }}
 {{- end }}
