@@ -1,4 +1,4 @@
-{{/*
+{{- /*
 volumeMount helper template
 */}}
 {{- define "django-production-chart.volumeMount" -}}

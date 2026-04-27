@@ -60,9 +60,6 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 {{- end -}}
 
-{{/*
-PVC name is either explicitly defined or assembled from release name
-*/}}
 {{- define "django-production-chart.pvcName" -}}
 {{- printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" .root ) .name  -}}
 {{- end -}}
