@@ -42,7 +42,6 @@ Create chart name and version as used by the chart label.
 
 {{ define "django-production-chart.namespaceIdentifier" -}}
 {{- if and .Values.namespace .Values.namespace.enabled -}}
-
 {{- if and .Values.namespace .Values.namespace.name -}}
 {{- printf .Values.namespace.name -}}
 {{- else -}}
@@ -59,6 +58,13 @@ Create chart name and version as used by the chart label.
 {{- else -}}
 {{- printf "%s-prod-%s" .Values.repo .Values.instance -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+PVC name is either explicitly defined or assembled from release name
+*/}}
+{{- define "django-production-chart.pvcName" -}}
+{{- printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" .root ) .name  -}}
 {{- end -}}
 
 {{- define "daemonset.apiVersion" -}}

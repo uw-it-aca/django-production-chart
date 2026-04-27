@@ -43,7 +43,7 @@ Application initialization containers
 {{- end }}
 {{- range $name, $map := $root.Values.podVolumes }}
 {{- if and ( hasKey $map "mount" ) ( has $podName $map.containers ) }}
-{{ include "django-production-chart.volumeMount" ( dict "root" $root "name" $name "map" $map ) | indent 6}}
+{{ include "django-production-chart.volumeMount" (dict "root" $root "name" $name "map" $map ) | indent 6}}
 {{- end }}
 {{- end }}
 {{- if hasKey $container "ports" }}

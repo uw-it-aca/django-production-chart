@@ -441,6 +441,7 @@ nfsServer:
 ##                                     is automatically created based on this definition
 ##                     or yaml that will be directly added to the pod's volumes list.
 ##   "mount"      : (requireed) defines how the volume will be mounted by containers
+##   "claimName"  : (optional) full name for pvc, overriding template-generaged name
 ##   "containers" : (optional) lists containers within the pod the mount
 ##                  definition applies to.  if undefined, the mount is added to
 ##                  only the primary container. if defined, the mount is added to
