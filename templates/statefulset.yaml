@@ -61,7 +61,8 @@ spec:
 {{- $i = add1 $i }}
 {{- end }}
     - metadata:
-{{ include "django-production-chart.pvcBase" (dict "root" $ "name" $name "claim" $map.volume.claimTemplate ) | indent 6 }}
+{{- $claimName := ( $map.claimName | default ( include "django-production-chart.pvcName" (dict "root" $ "name" $name ) ) ) -}}
+{{ include "django-production-chart.pvcBase" ( dict "root" $ "name" $claimName "claim" $map.volume.claimTemplate ) | indent 6 }}
 {{- end }}
 {{- end }}
 {{- end }}

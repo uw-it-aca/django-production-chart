@@ -2,7 +2,7 @@
 Application container spec base
 */}}
 {{- define "django-production-chart.specContainerBase" -}}
-{{- $dot := . -}}
+{{- $root := . -}}
 {{- $baseContainerName := ( include "django-production-chart.releaseIdentifier" . ) }}
 {{- $containerName := default $baseContainerName .containerName }}
 {{- $containerImage := default ( printf "%s:%s" .Values.image.repository .Values.image.tag ) .containerImage }}
@@ -33,7 +33,7 @@ containers:
 {{- range $name, $map := .Values.podVolumes }}
 {{- if $map.mount }}
 {{- if or ( not ( hasKey $map "containers" ) ) ( and (has "base" $map.containers ) ( eq $baseContainerName  $containerName ) ) ( has $containerName $map.containers ) }}
-{{ include "django-production-chart.volumeMount" ( dict "root" $dot "name" $name "map" $map ) | indent 6 }}
+{{ include "django-production-chart.volumeMount" (dict "root" $root "name" $name "map" $map ) | indent 6 }}
 {{- end }}
 {{- end }}
 {{- end }}

@@ -2,7 +2,7 @@
 Persistent Volume Claim template
 */}}
 {{- define "django-production-chart.pvcBase" }}
-  name: {{ printf "%s-pvc-%s" ( include "django-production-chart.releaseIdentifier" .root ) .name }}
+  name: {{ .name }}
   namespace: {{ include "django-production-chart.namespaceIdentifier" .root }}
 spec:
   accessModes:

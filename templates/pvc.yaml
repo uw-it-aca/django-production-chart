@@ -1,10 +1,10 @@
-{{- $dot := . -}}
 {{- range $name, $map := .Values.podVolumes }}
 {{- if and ( hasKey $map "volume" ) ( hasKey $map.volume "claim" ) }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-{{ include "django-production-chart.pvcBase" (dict "root" $dot "name" $name "claim" $map.volume.claim ) }}
+{{- $claimName := ( $map.claimName | default ( include "django-production-chart.pvcName" (dict "root" $ "name" $name ) ) )  -}}
+{{ include "django-production-chart.pvcBase" ( dict "root" $ "name" $claimName "claim" $map.volume.claim ) }}
 {{- end }}
 {{- end -}}

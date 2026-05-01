@@ -38,7 +38,7 @@ volumes:
 {{- end }}
 {{- else }}
 {{- if hasKey $map "persistentVolumeClaim" }}
-  - name: {{ $name }}
+  - name: {{ include "django-production-chart.pvcName" ( dict "root" $ "name" $name ) }}
     persistentVolumeClaim:
 {{ toYaml $map.persistentVolumeClaim | indent 6 }}
 {{- end }}
