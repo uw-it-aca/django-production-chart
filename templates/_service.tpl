@@ -31,6 +31,9 @@ spec:
       protocol: TCP
       name: http
 {{- end }}
+{{- if ( hasKey .service "externalTrafficPolicy" ) }}
+  externalTrafficPolicy: {{ .service.externalTrafficPolicy }}
+{{- end }}
   selector:
     app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}
     app.kubernetes.io/instance: {{ .root.Values.instanceIdentifier }}
