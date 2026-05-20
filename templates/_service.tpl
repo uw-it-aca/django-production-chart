@@ -11,6 +11,10 @@ metadata:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}
     app.kubernetes.io/instance: {{ include "django-production-chart.instanceIdentifier" .root }}
 {{- include "django-production-chart.resourceLabels" .root | nindent 4 }}
+{{- if ( hasKey .service "loadBalancerIPAddresses" ) }}
+  annotations:
+    networking.gke.io/load-balancer-ip-addresses: {{ .service.loadBalancerIPAddresses | quote }}
+{{- end }}
 spec:
 {{- if or ( not .type ) ( has .type (list "ClusterIP" "NodePort" "LoadBalancer" "ExternalName")) }}
   type: {{ default "ClusterIP" .type }}
