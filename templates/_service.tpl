@@ -11,13 +11,15 @@ metadata:
     app.kubernetes.io/name: {{ include "django-production-chart.releaseIdentifier" .root }}
     app.kubernetes.io/instance: {{ include "django-production-chart.instanceIdentifier" .root }}
 {{- include "django-production-chart.resourceLabels" .root | nindent 4 }}
-{{- if ( hasKey .service "loadBalancerIPAddresses" ) }}
-  annotations:
-    networking.gke.io/load-balancer-ip-addresses: {{ .service.loadBalancerIPAddresses | quote }}
-{{- end }}
 spec:
 {{- if or ( not .type ) ( has .type (list "ClusterIP" "NodePort" "LoadBalancer" "ExternalName")) }}
   type: {{ default "ClusterIP" .type }}
+{{- end }}
+{{- if ( hasKey .service "loadBalancerIP" ) }}
+  loadBalancerIP: {{ .service.loadBalancerIP | quote }}
+{{- end }}
+{{- if ( hasKey .service "externalTrafficPolicy" ) }}
+  externalTrafficPolicy: {{ .service.externalTrafficPolicy }}
 {{- end }}
   ports:
 {{- if .service.ports }}
@@ -34,9 +36,6 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-{{- end }}
-{{- if ( hasKey .service "externalTrafficPolicy" ) }}
-  externalTrafficPolicy: {{ .service.externalTrafficPolicy }}
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}
