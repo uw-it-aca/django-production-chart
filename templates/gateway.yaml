@@ -1,0 +1,100 @@
+{{- if .Values.gateway.enabled }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) }}
+{{- $fullName := include "django-production-chart.fullname" . -}}
+{{- $branch := .Values.branch}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ (.Values.gateway).clusterIssuer | default "letsencrypt-gw" }}
+{{- with .Values.gateway.annotations }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- if .Values.securityPolicy.enabled }}
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.ingress | indent 4 }}
+{{- end }}
+spec:
+  parentRef:
+    # This is not an example, this is the name and namespace of the MCI managed Gateway
+    name: default-gateway
+    namespace: kgateway-system
+  listeners:
+{{- range .Values.gateway.hostnames }}
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: {{ . }}
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: {{ . }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ . }}-tls
+        options:
+{{- if $.Values.gateway.tlsCipherSuites }}
+          kgateway.dev/cipher-suites: {{ ( join ","  $.Values.gateway.tlsCipherSuites ) | quote }}
+{{- end }}
+{{- end }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: ListenerSet
+      name: {{ $fullName }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+      #sectionName: https
+      # Omit sectionName to attach to all listeners (http + https), or set
+      # sectionName: https to bind to a single listener entry.
+  hostnames:
+{{- range .Values.gateway.hostnames }}
+    - {{ . }}
+{{- end }}
+  rules:
+    # With no `matches` rules defined, all traffic will route to the backend.
+    - backendRefs:
+{{- range .Values.gateway.hostnames }}
+      - name: {{ . }}
+        port: 80
+{{- end }}
+    - filters:
+      - type: RequestRedirect
+        requestRedirect:
+          scheme: https
+          statusCode: 301
+{{- if $.Values.gateway.maxRequestSize }}
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: large-payload-policy
+  namespace: your-app-namespace
+  spec:
+    targetRefs:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+        name: {{ $fullName }}
+        namespace: {{ $.Values.namespaceIdentifier }}
+    buffer:
+      maxRequestSize: {{ .Values.gateway.maxRequestSize }}
+{{- end }}
+{{- end }}

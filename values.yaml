@@ -199,7 +199,32 @@ autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 5
+  # optional: scaling proirity and time out policies
+#  behavior:
+#    scaleUp:
+#      stabilizationWindowSeconds: 30
+#      # filters out sub-30s "noise" spikes
+      # The default is 0 seconds (reacts instantly)
+#      selectPolicy: Min
+#      policies:
+#      - type: Percent
+#        value: 100
+#        periodSeconds: 60
+#      - type: Pods
+#        value: 10
+#        periodSeconds: 60
+        # Takes ~5 minutes to reach 50 replicas
+#    scaleDown:
+#      stabilizationWindowSeconds: 300
+      # waits for 5 mins then remove 5 pods/min
+#      policies:
+#      - type: Pods
+#        value: 5
+#        periodSeconds: 60
+        # takes ~10 minutes from 50 replicas back down to min
 
+
+# ingress is DEPRECATED and the templating will be removed at some point
 ingress:
   enabled: false
   annotations: {}
@@ -211,6 +236,25 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+# expose application hostname(s) endpoint. https is implied. http is 301'd to https
+gateway:
+  enabled: false
+  hostnames:
+    - appname.uw.edu
+  # optional: specify maximum request size in bytes
+#  maxRequestSize: 2e+7
+  # optional: specify tls ciphers
+#  tlsCipherSuites:
+#    - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+#    - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+#    - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+#    - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+#    - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+#    - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+#    - TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+#    - TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
+#    - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
 
 database:
   engine: "mysql"
