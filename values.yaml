@@ -199,6 +199,8 @@ autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 5
+  # opitonal: request buffer maximum in bytes
+#  maxRequestSize: 2e+7
   # optional: scaling proirity and time out policies
 #  behavior:
 #    scaleUp:
