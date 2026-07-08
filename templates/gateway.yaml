@@ -41,8 +41,8 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: {{ . }}-tls
-        options:
 {{- if $.Values.gateway.tlsCipherSuites }}
+        options:
           kgateway.dev/cipher-suites: {{ ( join ","  $.Values.gateway.tlsCipherSuites ) | quote }}
 {{- end }}
 {{- end }}
