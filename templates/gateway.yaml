@@ -73,7 +73,7 @@ spec:
     # With no `matches` rules defined, all traffic will route to the backend.
     - backendRefs:
 {{- range .Values.gateway.hostnames }}
-      - name: {{ . }}
+      - name: {{ $.Values.releaseIdentifier }}
         port: 80
 {{- end }}
     - filters:
