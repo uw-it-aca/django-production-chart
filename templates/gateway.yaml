@@ -87,16 +87,21 @@ kind: TrafficPolicy
 metadata:
   name: {{ $fullName }}
   namespace: {{ $.Values.namespaceIdentifier }}
-  spec:
-    targetRefs:
-      - group: gateway.networking.k8s.io
-        kind: HTTPRoute
-        name: {{ $fullName }}
-        namespace: {{ $.Values.namespaceIdentifier }}
-    extAuth:
-      disable: {}
+  labels:
+    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: {{ $fullName }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+  extAuth:
+    disable: {}
 {{- if $.Values.gateway.maxRequestSize }}
-    buffer:
-      maxRequestSize: {{ .Values.gateway.maxRequestSize }}
+  buffer:
+    maxRequestSize: {{ .Values.gateway.maxRequestSize }}
 {{- end }}
 {{- end }}
