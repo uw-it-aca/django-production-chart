@@ -81,19 +81,21 @@ spec:
         requestRedirect:
           scheme: https
           statusCode: 301
-{{- if $.Values.gateway.maxRequestSize }}
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
 metadata:
-  name: large-payload-policy
-  namespace: your-app-namespace
+  name: {{ $fullName }}
+  namespace: {{ $.Values.namespaceIdentifier }}
   spec:
     targetRefs:
       - group: gateway.networking.k8s.io
         kind: HTTPRoute
         name: {{ $fullName }}
         namespace: {{ $.Values.namespaceIdentifier }}
+    extAuth:
+      disable: {}
+{{- if $.Values.gateway.maxRequestSize }}
     buffer:
       maxRequestSize: {{ .Values.gateway.maxRequestSize }}
 {{- end }}
