@@ -62,9 +62,6 @@ spec:
     - kind: ListenerSet
       name: {{ $fullName }}
       namespace: {{ $.Values.namespaceIdentifier }}
-      #sectionName: https
-      # Omit sectionName to attach to all listeners (http + https), or set
-      # sectionName: https to bind to a single listener entry.
   hostnames:
 {{- range .Values.gateway.hostnames }}
     - {{ . }}
@@ -81,6 +78,7 @@ spec:
         requestRedirect:
           scheme: https
           statusCode: 301
+{{- if $.Values.gateway.maxRequestSize }}
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
@@ -97,9 +95,6 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: {{ $fullName }}
-  extAuth:
-    disable: {}
-{{- if $.Values.gateway.maxRequestSize }}
   buffer:
     maxRequestSize: {{ .Values.gateway.maxRequestSize }}
 {{- end }}
