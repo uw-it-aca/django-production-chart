@@ -70,15 +70,6 @@ spec:
           requestRedirect:
             scheme: https
             statusCode: 301
-      backendRefs:
-        - name: {{ $.Values.releaseIdentifier }}
-          namespace: {{ $.Values.namespaceIdentifier }}
-          kind: Service
-          port: 80
-      matches:
-        - path:
-            type: PathPrefix
-            value: /
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
