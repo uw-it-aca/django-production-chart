@@ -47,6 +47,7 @@ spec:
 {{- end }}
 {{- range $index, $hostname := .Values.gateway.hostnames }}
 ---
+# categorically redirect http to https
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -64,6 +65,8 @@ spec:
       name: {{ $.Values.releaseIdentifier }}
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: "http-{{ $index }}"
+  hostnames:
+    - {{ $hostname }}
   rules:
     - filters:
         - type: RequestRedirect
@@ -71,6 +74,7 @@ spec:
             scheme: https
             statusCode: 301
 ---
+# ensure x-forwarded-proto and scheme are https
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -88,13 +92,19 @@ spec:
       name: {{ $fullName }}
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: https-{{ $index }}
+  hostnames:
+    - {{ $hostname }}
   rules:
-    - backendRefs:
-      - name: {{ $.Values.releaseIdentifier }}
-        namespace: {{ $.Values.namespaceIdentifier }}
-        kind: Service
-        port: 80
-        weight: 1
+    - matches
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ $.Values.releaseIdentifier }}
+          namespace: {{ $.Values.namespaceIdentifier }}
+          kind: Service
+          port: 80
+          weight: 1
       filters:
         - type: RequestHeaderModifier
           requestHeaderModifier:
@@ -103,10 +113,6 @@ spec:
                 value: https
               - name: X-Forwarded-Scheme
                 value: https
-      matches:
-        - path:
-            type: PathPrefix
-            value: /
 {{- end }}
 {{- if $.Values.gateway.maxRequestSize }}
 ---
