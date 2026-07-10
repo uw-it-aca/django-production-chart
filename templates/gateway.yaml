@@ -95,7 +95,7 @@ spec:
   hostnames:
     - {{ $hostname }}
   rules:
-    - matches
+    - matches:
         - path:
             type: PathPrefix
             value: /
