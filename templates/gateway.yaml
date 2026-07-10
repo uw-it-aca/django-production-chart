@@ -64,6 +64,8 @@ spec:
       name: {{ $.Values.releaseIdentifier }}
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: "http-{{ $index }}"
+  hostnames:
+    - {{ $hostname }}
   rules:
     - filters:
         - type: RequestRedirect
@@ -88,6 +90,8 @@ spec:
       name: {{ $fullName }}
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: https-{{ $index }}
+  hostnames:
+    - {{ $hostname }}
   rules:
     - filters:
       - type: RequestHeaderModifier
