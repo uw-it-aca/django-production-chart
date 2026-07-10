@@ -64,8 +64,6 @@ spec:
       name: {{ $.Values.releaseIdentifier }}
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: "http-{{ $index }}"
-  hostnames:
-    - {{ $hostname }}
   rules:
     - filters:
         - type: RequestRedirect
@@ -90,22 +88,21 @@ spec:
       name: {{ $fullName }}
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: https-{{ $index }}
-  hostnames:
-    - {{ $hostname }}
   rules:
-    - filters:
-      - type: RequestHeaderModifier
-        requestHeaderModifier:
-          set:
-            - name: X-Forwarded-Proto
-              value: https
-            - name: X-Forwarded-Scheme
-              value: https
-      backendRefs:
-        - name: {{ $.Values.releaseIdentifier }}
-          namespace: {{ $.Values.namespaceIdentifier }}
-          kind: Service
-          port: 80
+    - backendRefs:
+      - name: {{ $.Values.releaseIdentifier }}
+        namespace: {{ $.Values.namespaceIdentifier }}
+        kind: Service
+        port: 80
+        weight: 1
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Proto
+                value: https
+              - name: X-Forwarded-Scheme
+                value: https
       matches:
         - path:
             type: PathPrefix
