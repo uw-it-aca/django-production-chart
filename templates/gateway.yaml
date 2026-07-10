@@ -61,12 +61,11 @@ metadata:
 spec:
   parentRefs:
     - kind: ListenerSet
-      group: gateway.networking.k8s.io
       name: {{ $.Values.releaseIdentifier }}
       namespace: {{ $.Values.namespaceIdentifier }}
-      sectionName: "http-{{ $index }}"
+      sectionName: http-{{ $index }}
   hostnames:
-    - {{ $hostname }}
+    - {{ $hostname}}
   rules:
     - filters:
         - type: RequestRedirect
@@ -88,12 +87,11 @@ metadata:
 spec:
   parentRefs:
     - kind: ListenerSet
-      group: gateway.networking.k8s.io
-      name: {{ $fullName }}
+      name: {{ $.Values.releaseIdentifier }}
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: https-{{ $index }}
   hostnames:
-    - {{ $hostname }}
+    - {{ $hostname}}
   rules:
     - matches:
         - path:
@@ -104,7 +102,6 @@ spec:
           namespace: {{ $.Values.namespaceIdentifier }}
           kind: Service
           port: 80
-          weight: 1
       filters:
         - type: RequestHeaderModifier
           requestHeaderModifier:
@@ -128,9 +125,11 @@ metadata:
 {{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
 spec:
   targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      name: {{ $.Values.releaseIdentifier }}
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+    - kind: HTTPRoute
+      name: {{ $.Values.releaseIdentifier }}-https-{{ $index }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+{{- end }}
   buffer:
     maxRequestSize: {{ .Values.gateway.maxRequestSize }}
 {{- end }}
