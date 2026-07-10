@@ -7,13 +7,13 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: ListenerSet
 metadata:
-  name: {{ $fullName }}
+  name: {{ $.Values.releaseIdentifier }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
     app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
     app.kubernetes.io/component: gateway
-{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
   annotations:
     cert-manager.io/cluster-issuer: {{ (.Values.gateway).clusterIssuer | default "letsencrypt-gw" }}
 {{- with .Values.gateway.annotations }}
@@ -24,77 +24,115 @@ metadata:
 {{- end }}
 spec:
   parentRef:
-    # This is not an example, this is the name and namespace of the MCI managed Gateway
     name: default-gateway
     namespace: kgateway-system
   listeners:
-{{- range .Values.gateway.hostnames }}
-    - name: http
+{{- range $index, $hostname :=  .Values.gateway.hostnames }}
+    - name: http-{{ $index }}
       protocol: HTTP
       port: 80
-      hostname: {{ . }}
-    - name: https
+      hostname: {{ $hostname }}
+    - name: https-{{ $index }}
       protocol: HTTPS
       port: 443
-      hostname: {{ . }}
+      hostname: {{ $hostname }}
       tls:
         mode: Terminate
         certificateRefs:
-          - name: {{ . }}-tls
+          - name: {{ $hostname }}-tls
 {{- if $.Values.gateway.tlsCipherSuites }}
         options:
           kgateway.dev/cipher-suites: {{ ( join ","  $.Values.gateway.tlsCipherSuites ) | quote }}
 {{- end }}
 {{- end }}
+{{- range $index, $hostname := .Values.gateway.hostnames }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}
+  name: {{ $.Values.releaseIdentifier }}-http-{{ $index }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
     app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
     app.kubernetes.io/component: gateway
-{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
 spec:
   parentRefs:
     - kind: ListenerSet
+      group: gateway.networking.k8s.io
+      name: {{ $.Values.releaseIdentifier }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+      sectionName: "http-{{ $index }}"
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+      backendRefs:
+        - name: {{ $.Values.releaseIdentifier }}
+          namespace: {{ $.Values.namespaceIdentifier }}
+          kind: Service
+          port: 80
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $.Values.releaseIdentifier }}-https-{{ $index }}
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: ListenerSet
+      group: gateway.networking.k8s.io
       name: {{ $fullName }}
       namespace: {{ $.Values.namespaceIdentifier }}
-  hostnames:
-{{- range .Values.gateway.hostnames }}
-    - {{ . }}
-{{- end }}
+      sectionName: https-{{ $index }}
   rules:
-    # With no `matches` rules defined, all traffic will route to the backend.
-    - backendRefs:
-{{- range .Values.gateway.hostnames }}
-      - name: {{ $.Values.releaseIdentifier }}
-        port: 80
-{{- end }}
     - filters:
-      - type: RequestRedirect
-        requestRedirect:
-          scheme: https
-          statusCode: 301
+      - type: RequestHeaderModifier
+        requestHeaderModifier:
+          set:
+            - name: X-Forwarded-Proto
+              value: https
+            - name: X-Forwarded-Scheme
+              value: https
+      backendRefs:
+        - name: {{ $.Values.releaseIdentifier }}
+          namespace: {{ $.Values.namespaceIdentifier }}
+          kind: Service
+          port: 80
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+{{- end }}
 {{- if $.Values.gateway.maxRequestSize }}
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
 metadata:
-  name: {{ $fullName }}
+  name: {{ $.Values.releaseIdentifier }}
   namespace: {{ $.Values.namespaceIdentifier }}
   labels:
-    app.kubernetes.io/name: {{ .Values.releaseIdentifier }}
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
     app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
     app.kubernetes.io/component: gateway
-{{- include "django-production-chart.resourceLabels" . | nindent 4 }}
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
 spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      name: {{ $fullName }}
+      name: {{ $.Values.releaseIdentifier }}
   buffer:
     maxRequestSize: {{ .Values.gateway.maxRequestSize }}
 {{- end }}
