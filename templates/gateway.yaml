@@ -45,7 +45,45 @@ spec:
           kgateway.dev/cipher-suites: {{ ( join ","  $.Values.gateway.tlsCipherSuites ) | quote }}
 {{- end }}
 {{- end }}
+{{- if .Values.gateway.redirectToFirstHostname }}
+---
+# redirect defined hostnames to specific host
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $.Values.releaseIdentifier }}-legacy-redirect
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: ListenerSet
+      name: {{ $.Values.releaseIdentifier }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+  hostnames:
 {{- range $index, $hostname := .Values.gateway.hostnames }}
+{{- if ne $index 0 }}
+    - {{ $hostname}}
+{{- end }}
+{{- end }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+{{- if eq $index 0 }}
+            hostname: {{ $hostname }}
+{{- end }}
+{{- end }}
+            statusCode: 301
+{{- end }}
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+{{- if and $.Values.gateway.redirectToFirstHostname ( ne $index 0) }}
+{{- break }}
+{{- end }}
 ---
 # categorically redirect http to https
 apiVersion: gateway.networking.k8s.io/v1
