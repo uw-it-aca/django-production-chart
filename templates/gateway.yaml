@@ -144,10 +144,6 @@ spec:
         - type: RequestHeaderModifier
           requestHeaderModifier:
             set:
-              - name: X-Forwarded-Proto
-                value: https
-              - name: X-Forwarded-Scheme
-                value: https
               - name: X-Forwarded-Port
                 value: "443"
 {{- end }}
