@@ -40,9 +40,17 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: {{ $hostname }}-tls
-{{- if $.Values.gateway.tlsCipherSuites }}
+{{- if $.Values.gateway.tlsOptions }}
         options:
-          kgateway.dev/cipher-suites: {{ ( join ","  $.Values.gateway.tlsCipherSuites ) | quote }}
+{{- if $.Values.gateway.tlsOptions.cipherSuites }}
+          kgateway.dev/cipher-suites: {{ ( join ","  $.Values.gateway.tlsOptions.cipherSuites ) | quote }}
+{{- end }}
+{{- if $.Values.gateway.tlsOptions.minVersion }}
+          kgateway.dev/min-tls-version: {{ $.Values.gateway.tlsOptions.minVersion | quote }}
+{{- end }}
+{{- if $.Values.gateway.tlsOptions.maxVersion }}
+          kgateway.dev/max-tls-version: {{ $.Values.gateway.tlsOptions.maxVersion | quote }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- if .Values.gateway.redirectToFirstHostname }}
