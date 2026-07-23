@@ -148,6 +148,8 @@ spec:
                 value: https
               - name: X-Forwarded-Scheme
                 value: https
+              - name: X-Forwarded-Port
+                value: "443"
 {{- end }}
 {{- if $.Values.gateway.maxRequestSize }}
 ---
