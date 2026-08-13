@@ -30,9 +30,6 @@ spec:
 {{- end }}
       targetPort: {{ .targetPort }}
       protocol: {{ default "TCP" .protocol }}
-{{- if ( has ( int .port ) ( list 80 8000 8080 ) ) }}
-      appProtocol: kubernetes.io/h2c
-{{- end }}
 {{- end }}
 {{- else }}
     - port: {{ default 80 .service.port }}
