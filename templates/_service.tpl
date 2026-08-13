@@ -25,17 +25,21 @@ spec:
 {{- if .service.ports }}
 {{- range .service.ports }}
     - port: {{ .port }}
-      targetPort: {{ .targetPort }}
-      protocol: {{ default "TCP" .protocol }}
 {{- if .name }}
       name: {{ .name }}
+{{- end }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ default "TCP" .protocol }}
+{{- if ( has ( int .port ) ( list 80 8000 8080 ) ) }}
+      appProtocol: kubernetes.io/h2c
 {{- end }}
 {{- end }}
 {{- else }}
     - port: {{ default 80 .service.port }}
+      name: http
       targetPort: http
       protocol: TCP
-      name: http
+      appProtocol: kubernetes.io/h2c
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}

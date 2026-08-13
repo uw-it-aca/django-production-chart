@@ -86,7 +86,7 @@ spec:
             hostname: {{ $hostname }}
 {{- end }}
 {{- end }}
-            statusCode: 301
+            statusCode: 308
 {{- end }}
 {{- range $index, $hostname := .Values.gateway.hostnames }}
 {{- if and $.Values.gateway.redirectToFirstHostname ( ne $index 0) }}
