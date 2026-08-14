@@ -117,7 +117,7 @@ spec:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
-            statusCode: 301
+            statusCode: 308
 ---
 # route https from listener to service
 apiVersion: gateway.networking.k8s.io/v1
@@ -152,6 +152,10 @@ spec:
         - type: RequestHeaderModifier
           requestHeaderModifier:
             set:
+              - name: X-Forwarded-Proto
+                value: https
+              - name: X-Forwarded-Scheme
+                value: https
               - name: X-Forwarded-Port
                 value: "443"
 {{- end }}
