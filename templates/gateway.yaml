@@ -174,7 +174,6 @@ spec:
 {{- range $index, $hostname := .Values.gateway.hostnames }}
     - kind: HTTPRoute
       name: {{ $.Values.releaseIdentifier }}-https-{{ $index }}
-      namespace: {{ $.Values.namespaceIdentifier }}
 {{- end }}
   buffer:
     maxRequestSize: {{ .Values.gateway.maxRequestSize }}

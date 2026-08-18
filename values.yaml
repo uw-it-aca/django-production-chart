@@ -244,8 +244,8 @@ gateway:
   enabled: false
   hostnames:
     - appname.uw.edu
-  # optionally redirect all hostnames to first host
-  # in hostnames list.
+  # optionally redirect all hostnames listed above
+  # to the first hostname in the list.
 #  redirectToFirstHostname: true
   # optionally specify maximum permitted request size in bytes
 #  maxRequestSize: 2e+7
