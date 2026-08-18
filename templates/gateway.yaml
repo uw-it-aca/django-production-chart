@@ -172,7 +172,8 @@ metadata:
 spec:
   targetRefs:
 {{- range $index, $hostname := .Values.gateway.hostnames }}
-    - kind: HTTPRoute
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
       name: {{ $.Values.releaseIdentifier }}-https-{{ $index }}
 {{- end }}
   buffer:
