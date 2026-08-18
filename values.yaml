@@ -240,8 +240,8 @@ ingress:
   #      - chart-example.local
 
 # expose application hostname(s) endpoint.
-# for each hostname, both http and https endpoints are defined.
-# the hostname's http endpoint permanently 308 forwards to to https.
+# for each hostname, both http and https endpoints are created.
+# the hostname's http endpoint permanently 308 forwards to https.
 gateway:
   enabled: false
   hostnames:
