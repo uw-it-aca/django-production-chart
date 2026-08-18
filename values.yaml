@@ -226,7 +226,7 @@ autoscaling:
         # takes ~10 minutes from 50 replicas back down to min
 
 
-# ingress is DEPRECATED and the templating will be removed at some point
+# ingress is DEPRECATED. use the gateway value below.
 ingress:
   enabled: false
   annotations: {}
@@ -239,7 +239,9 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# expose application hostname(s) endpoint. https is implied. http is 301'd to https
+# expose application hostname(s) endpoint.
+# for each hostname, both http and https endpoints are defined.
+# the hostname's http endpoint permanently 308 forwards to to https.
 gateway:
   enabled: false
   hostnames:
@@ -247,9 +249,9 @@ gateway:
   # optionally redirect all hostnames listed above
   # to the first hostname in the list.
 #  redirectToFirstHostname: true
-  # optionally specify maximum permitted request size in bytes
+  # optionally specify maximum allowed request size in bytes
 #  maxRequestSize: 2e+7
-  # optionally provide tls connection parameters. only desired
+  # optionally specify tls connection parameters. only desired
   # parameter definitions are necessary.
 #  tlsOptions:
 #    cipherSuites:
