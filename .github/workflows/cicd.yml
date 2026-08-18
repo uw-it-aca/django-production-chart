@@ -4,7 +4,7 @@ name: Build and Test
 env:
   TEST_VALUES_PATH: "/uw-it-aca/myuw/main/docker/prod-values.yml"
   TEST_VALUES_HOST: "https://raw.githubusercontent.com"
-  HELM_APP_VERSION: "3.4.2"
+  HELM_APP_VERSION: "3.20.2"
   KUBEVAL_VERSION: "latest"
   KUBEVAL_SKIP_KINDS: "ExternalSecret,ServiceMonitor"
   KUBEVAL_SCHEMA_LOCATION: "https://raw.githubusercontent.com/yannh/kubernetes-json-schema"
