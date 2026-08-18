@@ -35,6 +35,7 @@ spec:
     - port: {{ default 80 .service.port }}
       targetPort: http
       protocol: TCP
+      name: http
 {{- end }}
   selector:
     app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}
