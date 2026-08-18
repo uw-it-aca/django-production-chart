@@ -152,8 +152,6 @@ spec:
         - type: RequestHeaderModifier
           requestHeaderModifier:
             set:
-              - name: X-Forwarded-Proto
-                value: https
               - name: X-Forwarded-Scheme
                 value: https
               - name: X-Forwarded-Port
