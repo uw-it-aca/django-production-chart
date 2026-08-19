@@ -157,10 +157,6 @@ spec:
               - name: X-Forwarded-Port
                 value: "443"
 {{- if $.Values.gateway.requestTimeouts }}
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
       timeouts:
 {{- if $.Values.gateway.requestTimeouts.frontEnd }}
         request: {{ $.Values.gateway.requestTimeouts.frontEnd }}
@@ -168,11 +164,6 @@ spec:
 {{- if $.Values.gateway.requestTimeouts.backEnd }}
         backendRequest: {{ $.Values.gateway.requestTimeouts.backEnd }}
 {{- end }}
-      backendRefs:
-        - name: {{ $.Values.releaseIdentifier }}
-          namespace: {{ $.Values.namespaceIdentifier }}
-          kind: Service
-          port: 80
 {{- end }}
 {{- end }}
 {{- if $.Values.gateway.rewriteRedirect }}
@@ -201,7 +192,7 @@ spec:
     - matches:
        - path:
            type: RegularExpression
-           value: {{ $.Values.gateway.rewriteRedirect.pathRegex }}
+           value: {{ $.Values.gateway.rewriteRedirect.pathRegex | quote }}
       filters:
         - type: RequestRedirect
           requestRedirect:

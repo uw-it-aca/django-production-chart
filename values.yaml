@@ -272,7 +272,7 @@ gateway:
 #    backEnd: 10s
   # optional path substitution and host redirection
 #  rewriteRedirect:
-#    pathMatchRegex: "^/(unknown-user|unauthorized-user)$"
+#    pathRegex: "^/(unknown-user|unauthorized-user)$"
 #    redirectHostname: test-login.canvas.uw.edu
 #    redirectPath: "/{path}"
 
