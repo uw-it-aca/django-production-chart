@@ -41,6 +41,9 @@ jobs:
           TEST_HELM_VALUES=${PWD}/${LOCAL_VALUES_FILENAME}
           echo "TEST_HELM_VALUES=$TEST_HELM_VALUES" >> $GITHUB_ENV
 
+          HELM_MAX_DECOMPRESSED_FILE_SIZE=0
+          echo "HELM_MAX_DECOMPRESSED_FILE_SIZE" >> $GITHUB_ENV
+
       - name: Generate Test Manifest from default values
         shell: bash
         run: >-
