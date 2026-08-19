@@ -266,6 +266,15 @@ gateway:
 #      - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
 #    minVersion: "1.0"
 #    maxVersion: "1.3"
+  # optional values to adjust default timeouts
+#  requestTimeouts:
+#    frontEnd: 30s
+#    backEnd: 10s
+  # optional path substitution and host redirection
+#  rewriteRedirect:
+#    pathRegex: "^/(unknown-user|unauthorized-user)$"
+#    redirectHostname: test-login.canvas.uw.edu
+#    redirectPath: "/{path}"
 
 database:
   engine: "mysql"
