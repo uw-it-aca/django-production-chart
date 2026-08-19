@@ -9,7 +9,6 @@ env:
   KUBEVAL_SKIP_KINDS: "ExternalSecret,ServiceMonitor"
   KUBEVAL_SCHEMA_LOCATION: "https://raw.githubusercontent.com/yannh/kubernetes-json-schema"
   KUBERNETES_VERSION: "master"
-  KUBEVAL_DIR: "kubeval-dist"
 
 on:
   push:
@@ -41,8 +40,8 @@ jobs:
           TEST_HELM_VALUES=${PWD}/${LOCAL_VALUES_FILENAME}
           echo "TEST_HELM_VALUES=$TEST_HELM_VALUES" >> $GITHUB_ENV
 
-          HELM_MAX_DECOMPRESSED_FILE_SIZE=0
-          echo "HELM_MAX_DECOMPRESSED_FILE_SIZE=$HELM_MAX_DECOMPRESSED_FILE_SIZE" >> $GITHUB_ENV
+          KUBEVAL_DIR="${RUNNER_TEMP}/kubeval-dist"
+          echo "KUBEVAL_DIR=$KUBEVAL_DIR" >> $GITHUB_ENV
 
       - name: Generate Test Manifest from default values
         shell: bash
