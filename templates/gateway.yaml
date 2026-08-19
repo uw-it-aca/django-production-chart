@@ -74,7 +74,7 @@ spec:
   hostnames:
 {{- range $index, $hostname := .Values.gateway.hostnames }}
 {{- if ne $index 0 }}
-    - {{ $hostname}}
+    - {{ $hostname }}
 {{- end }}
 {{- end }}
   rules:
@@ -111,7 +111,7 @@ spec:
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: http-{{ $index }}
   hostnames:
-    - {{ $hostname}}
+    - {{ $hostname }}
   rules:
     - filters:
         - type: RequestRedirect
@@ -137,7 +137,7 @@ spec:
       namespace: {{ $.Values.namespaceIdentifier }}
       sectionName: https-{{ $index }}
   hostnames:
-    - {{ $hostname}}
+    - {{ $hostname }}
   rules:
     - matches:
         - path:
@@ -156,6 +156,60 @@ spec:
                 value: https
               - name: X-Forwarded-Port
                 value: "443"
+{{- if $.Values.gateway.requestTimeouts }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      timeouts:
+{{- if $.Values.gateway.requestTimeouts.frontEnd }}
+        request: {{ $.Values.gateway.requestTimeouts.frontEnd }}
+{{- end }}
+{{- if $.Values.gateway.requestTimeouts.backEnd }}
+        backendRequest: {{ $.Values.gateway.requestTimeouts.backEnd }}
+{{- end }}
+      backendRefs:
+        - name: {{ $.Values.releaseIdentifier }}
+          namespace: {{ $.Values.namespaceIdentifier }}
+          kind: Service
+          port: 80
+{{- end }}
+{{- end }}
+{{- if $.Values.gateway.rewriteRedirect }}
+---
+# categorically rewrite path and redirect
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $.Values.releaseIdentifier }}-rewrite-redirect
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: ListenerSet
+      name: {{ $.Values.releaseIdentifier }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+  hostnames:
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+    - {{ $hostname }}
+{{- end }}
+  rules:
+    - matches:
+       - path:
+           type: RegularExpression
+           value: {{ $.Values.gateway.rewriteRedirect.pathRegex }}
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            hostname: {{ $.Values.gateway.rewriteRedirect.redirectHostname }}
+            statusCode: 301
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: {{ $.Values.gateway.rewriteRedirect.redirectPath }}
 {{- end }}
 {{- if $.Values.gateway.maxRequestSize }}
 ---
