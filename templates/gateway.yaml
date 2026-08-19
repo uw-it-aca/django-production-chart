@@ -1,0 +1,182 @@
+{{- if .Values.gateway.enabled }}
+{{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) }}
+{{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
+{{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) }}
+{{- $fullName := include "django-production-chart.fullname" . -}}
+{{- $branch := .Values.branch}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: {{ $.Values.releaseIdentifier }}
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ (.Values.gateway).clusterIssuer | default "letsencrypt-gw" }}
+{{- with .Values.gateway.annotations }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- if .Values.securityPolicy.enabled }}
+{{- include "django-production-chart.securityPolicyAnnotations" .Values.securityPolicy.ingress | indent 4 }}
+{{- end }}
+spec:
+  parentRef:
+    name: default-gateway
+    namespace: kgateway-system
+  listeners:
+{{- range $index, $hostname :=  .Values.gateway.hostnames }}
+    - name: http-{{ $index }}
+      protocol: HTTP
+      port: 80
+      hostname: {{ $hostname }}
+    - name: https-{{ $index }}
+      protocol: HTTPS
+      port: 443
+      hostname: {{ $hostname }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ $hostname }}-tls
+{{- if $.Values.gateway.tlsOptions }}
+        options:
+{{- if $.Values.gateway.tlsOptions.cipherSuites }}
+          kgateway.dev/cipher-suites: {{ ( join ","  $.Values.gateway.tlsOptions.cipherSuites ) | quote }}
+{{- end }}
+{{- if $.Values.gateway.tlsOptions.minVersion }}
+          kgateway.dev/min-tls-version: {{ $.Values.gateway.tlsOptions.minVersion | quote }}
+{{- end }}
+{{- if $.Values.gateway.tlsOptions.maxVersion }}
+          kgateway.dev/max-tls-version: {{ $.Values.gateway.tlsOptions.maxVersion | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if .Values.gateway.redirectToFirstHostname }}
+---
+# redirect defined hostnames to specific host
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $.Values.releaseIdentifier }}-legacy-redirect
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: ListenerSet
+      name: {{ $.Values.releaseIdentifier }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+  hostnames:
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+{{- if ne $index 0 }}
+    - {{ $hostname}}
+{{- end }}
+{{- end }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+{{- if eq $index 0 }}
+            hostname: {{ $hostname }}
+{{- end }}
+{{- end }}
+            statusCode: 308
+{{- end }}
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+{{- if and $.Values.gateway.redirectToFirstHostname ( ne $index 0) }}
+{{- break }}
+{{- end }}
+---
+# categorically redirect http to https
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $.Values.releaseIdentifier }}-http-{{ $index }}
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: ListenerSet
+      name: {{ $.Values.releaseIdentifier }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+      sectionName: http-{{ $index }}
+  hostnames:
+    - {{ $hostname}}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 308
+---
+# route https from listener to service
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $.Values.releaseIdentifier }}-https-{{ $index }}
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: ListenerSet
+      name: {{ $.Values.releaseIdentifier }}
+      namespace: {{ $.Values.namespaceIdentifier }}
+      sectionName: https-{{ $index }}
+  hostnames:
+    - {{ $hostname}}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ $.Values.releaseIdentifier }}
+          namespace: {{ $.Values.namespaceIdentifier }}
+          kind: Service
+          port: 80
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Scheme
+                value: https
+              - name: X-Forwarded-Port
+                value: "443"
+{{- end }}
+{{- if $.Values.gateway.maxRequestSize }}
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: {{ $.Values.releaseIdentifier }}
+  namespace: {{ $.Values.namespaceIdentifier }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}
+    app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+    app.kubernetes.io/component: gateway
+{{- include "django-production-chart.resourceLabels" $ | nindent 4 }}
+spec:
+  targetRefs:
+{{- range $index, $hostname := .Values.gateway.hostnames }}
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: {{ $.Values.releaseIdentifier }}-https-{{ $index }}
+{{- end }}
+  buffer:
+    maxRequestSize: {{ .Values.gateway.maxRequestSize }}
+{{- end }}
+{{- end }}

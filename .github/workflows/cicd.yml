@@ -4,12 +4,11 @@ name: Build and Test
 env:
   TEST_VALUES_PATH: "/uw-it-aca/myuw/main/docker/prod-values.yml"
   TEST_VALUES_HOST: "https://raw.githubusercontent.com"
-  HELM_APP_VERSION: "3.4.2"
+  HELM_APP_VERSION: "3.20.2"
   KUBEVAL_VERSION: "latest"
   KUBEVAL_SKIP_KINDS: "ExternalSecret,ServiceMonitor"
   KUBEVAL_SCHEMA_LOCATION: "https://raw.githubusercontent.com/yannh/kubernetes-json-schema"
   KUBERNETES_VERSION: "master"
-  KUBEVAL_DIR: "kubeval-dist"
 
 on:
   push:
@@ -41,6 +40,9 @@ jobs:
           TEST_HELM_VALUES=${PWD}/${LOCAL_VALUES_FILENAME}
           echo "TEST_HELM_VALUES=$TEST_HELM_VALUES" >> $GITHUB_ENV
 
+          KUBEVAL_DIR="${RUNNER_TEMP}/kubeval-dist"
+          echo "KUBEVAL_DIR=$KUBEVAL_DIR" >> $GITHUB_ENV
+
       - name: Generate Test Manifest from default values
         shell: bash
         run: >-
@@ -60,7 +62,7 @@ jobs:
       - name: Validate Manifest
         shell: bash
         run: >-
-          ./${KUBEVAL_DIR}/kubeval ${PWD}/${MANIFEST_FILE_NAME}
+          ${KUBEVAL_DIR}/kubeval ${PWD}/${MANIFEST_FILE_NAME}
           --schema-location "${KUBEVAL_SCHEMA_LOCATION}/${KUBERNETES_VERSION}"
           --strict
           --skip-kinds "${KUBEVAL_SKIP_KINDS}"
@@ -81,7 +83,7 @@ jobs:
       - name: Validate Manifest from test helm values
         shell: bash
         run: >-
-          ./${KUBEVAL_DIR}/kubeval ${PWD}/${MANIFEST_FILE_NAME}
+          ${KUBEVAL_DIR}/kubeval ${PWD}/${MANIFEST_FILE_NAME}
           --schema-location "${KUBEVAL_SCHEMA_LOCATION}/${KUBERNETES_VERSION}"
           --strict
           --skip-kinds "${KUBEVAL_SKIP_KINDS}"
