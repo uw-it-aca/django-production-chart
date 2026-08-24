@@ -198,9 +198,11 @@ spec:
           requestRedirect:
             hostname: {{ $.Values.gateway.rewriteRedirect.redirectHostname }}
             statusCode: 301
+{{- if $.Values.gateway.rewriteRedirect.redirectPath }}
             path:
               type: ReplaceFullPath
               replaceFullPath: {{ $.Values.gateway.rewriteRedirect.redirectPath }}
+{{- end }}
 {{- end }}
 {{- if $.Values.gateway.maxRequestSize }}
 ---
