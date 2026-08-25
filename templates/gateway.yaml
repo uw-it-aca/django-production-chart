@@ -156,6 +156,13 @@ spec:
                 value: https
               - name: X-Forwarded-Port
                 value: "443"
+{{- if $.Values.gateway.rateLimit }}
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.kgateway.dev
+            name: {{ $.Values.releaseIdentifier }}-ratelimit
+            kind: TrafficPolicy
+{{- end }}
 {{- if $.Values.gateway.requestTimeouts }}
       timeouts:
 {{- if $.Values.gateway.requestTimeouts.frontEnd }}
@@ -226,4 +233,19 @@ spec:
   buffer:
     maxRequestSize: {{ .Values.gateway.maxRequestSize }}
 {{- end }}
+{{- end }}
+{{- if $.Values.gateway.rateLimit }}
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: {{ $.Values.releaseIdentifier }}-ratelimit
+  namespace: {{ $.Values.namespaceIdentifier }}
+spec:
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: {{ $.Values.gateway.rateLimit.tokens }}
+        tokensPerFill: {{ $.Values.gateway.rateLimit.tokensPerFill }}
+        fillInterval: {{ $.Values.gateway.rateLimit.fillInterval }}
 {{- end }}

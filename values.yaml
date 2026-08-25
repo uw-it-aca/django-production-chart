@@ -275,6 +275,11 @@ gateway:
 #    pathRegex: "^/(unknown-user|unauthorized-user)$"
 #    redirectHostname: test-login.canvas.uw.edu
 #    redirectPath: "/{path}"
+  # optionally add rate limiting
+#  rateLimit:
+#    tokens: 750
+#    tokensPerFill: 500
+#    fillInterval: 1s
 
 database:
   engine: "mysql"
