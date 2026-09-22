@@ -444,12 +444,18 @@ affinity: {}
 #affinity:
 #   podsSpanNodes: true
 
-## sidecarContainers defines additional containers to run within the pod.
-## each key is the name of the sidecar container, and it's data is simply
-## toYaml'd into the pod's container list.  the mapping is rendered as
-## kubernetes initContainers in mapping key alphabetical order.  if
-## order is important to your deployment, assign key names such that
-## they are in alphabetical order.
+## sidecarContainers defines native Kubernetes sidecars to run within the pod.
+## each key is the name of the sidecar container. If image is omitted, the
+## sidecar inherits image.repository:image.tag from the main app container.
+## Omit image only for sidecars that intentionally run from the same app image
+## as the main container, such as app workers or companion processes. Set image
+## explicitly for infrastructure sidecars such as proxies, tunnels, exporters,
+## caches, databases, or vendor agents so a missing image does not accidentally
+## render as the app image.
+## imagePullPolicy defaults to Always and can be overridden per sidecar.
+## The mapping is rendered as Kubernetes initContainers with restartPolicy:
+## Always in mapping key alphabetical order. If order is important to your
+## deployment, assign key names such that they are in alphabetical order.
 ## Note: do not define volumeMounts here as they are added via "podVolumes"
 ## definitions.
 #sidecarContainers:
