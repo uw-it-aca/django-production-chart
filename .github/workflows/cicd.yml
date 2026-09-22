@@ -6,7 +6,9 @@ env:
   TEST_VALUES_HOST: "https://raw.githubusercontent.com"
   HELM_APP_VERSION: "3.20.2"
   KUBEVAL_VERSION: "latest"
-  KUBEVAL_SKIP_KINDS: "ExternalSecret,ServiceMonitor"
+  # HTTPRoute/ListenerSet (gateway.networking.k8s.io) and TrafficPolicy
+  # (gateway.kgateway.dev, a vendor CRD) have no schemas in KUBEVAL_SCHEMA_LOCATION
+  KUBEVAL_SKIP_KINDS: "ExternalSecret,ServiceMonitor,HTTPRoute,ListenerSet,TrafficPolicy"
   KUBEVAL_SCHEMA_LOCATION: "https://raw.githubusercontent.com/yannh/kubernetes-json-schema"
   KUBERNETES_VERSION: "master"
 
