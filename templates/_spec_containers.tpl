@@ -7,10 +7,10 @@ Application initialization containers
 {{ $.type }}:
 {{- end }}
 {{- range $podName, $container := .containers }}
+{{- $containerImage := default ( printf "%s:%s" $root.Values.image.repository $root.Values.image.tag ) $container.image }}
   - name: {{ $podName | quote }}
-{{- if $container.image }}
-    image: {{ $container.image | quote }}
-{{- end }}
+    image: {{ $containerImage | quote }}
+    imagePullPolicy: {{ default "Always" $container.imagePullPolicy | quote }}
 {{- if (and $.type (eq $.type "initContainers") (or (not $container.restartPolicy) (eq $container.restartPolicy "Always"))) }}
     restartPolicy: Always
 {{- end }}

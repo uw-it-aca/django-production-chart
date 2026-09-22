@@ -444,12 +444,18 @@ affinity: {}
 #affinity:
 #   podsSpanNodes: true
 
-## sidecarContainers defines additional containers to run within the pod.
-## each key is the name of the sidecar container, and it's data is simply
-## toYaml'd into the pod's container list.  the mapping is rendered as
-## kubernetes initContainers in mapping key alphabetical order.  if
-## order is important to your deployment, assign key names such that
-## they are in alphabetical order.
+## sidecarContainers defines native Kubernetes sidecars to run within the pod.
+## each key is the name of the sidecar container. If image is omitted, the
+## sidecar inherits image.repository:image.tag from the main app container.
+## Omit image only for sidecars that intentionally run from the same app image
+## as the main container, such as app workers or companion processes. Set image
+## explicitly for infrastructure sidecars such as proxies, tunnels, exporters,
+## caches, databases, or vendor agents so a missing image does not accidentally
+## render as the app image.
+## imagePullPolicy defaults to Always and can be overridden per sidecar.
+## The mapping is rendered as Kubernetes initContainers with restartPolicy:
+## Always in mapping key alphabetical order. If order is important to your
+## deployment, assign key names such that they are in alphabetical order.
 ## Note: do not define volumeMounts here as they are added via "podVolumes"
 ## definitions.
 #sidecarContainers:
@@ -480,6 +486,26 @@ affinity: {}
 #      - "sh"
 #      - "-c"
 #      - 'mkdir -m 0700 ~/.ssh && echo "${JUMPHOST_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${JUMPHOST_ID}@${JUMPHOST_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:25:{SMP_SERVER}:25'
+
+## initContainers defines additional containers to run during pod initialization
+## each key is the name of the init container. If image is omitted, the init
+## container inherits image.repository:image.tag from the main app container.
+## Omit image only for init containers that intentionally run from the same app
+## image as the main container. Set image explicitly for infrastructure or vendor
+## init containers so a missing image does not accidentally render as the app
+## image.
+## imagePullPolicy defaults to Always and can be overridden per init container.
+## Note: do not define volumeMounts here as they are added via "podVolumes"
+## by including the init container's name in podVolumes "containers" list.
+#initContainers:
+#  share-drive-permissions:
+#    image: alpine
+#    securityContext:
+#      runAsUser: 0
+#    command:
+#      - "sh"
+#      - "-c"
+#      - "/scripts/initialize.sh"
 
 ## nfsServer creates a ReadWriteMany peristentVolume and Claim based on
 ## an nfs server serving from a ReadWriteOnce standard PVC. resulting
