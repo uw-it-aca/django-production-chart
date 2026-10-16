@@ -4,6 +4,11 @@
 {{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) }}
 {{- $fullName := include "django-production-chart.fullname" . -}}
 {{- $branch := .Values.branch}}
+{{- /* gateway.listenerSet names an existing, shared ListenerSet to attach routes to instead of creating one */}}
+{{- $listenerSet := .Values.gateway.listenerSet | default dict }}
+{{- $listenerSetName := $listenerSet.name | default $.Values.releaseIdentifier }}
+{{- $listenerSetNamespace := $listenerSet.namespace | default $.Values.namespaceIdentifier }}
+{{- if not $listenerSet.name }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: ListenerSet
 metadata:
@@ -53,6 +58,7 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+{{- end }}
 {{- if .Values.gateway.redirectToFirstHostname }}
 ---
 # redirect defined hostnames to specific host
@@ -69,8 +75,8 @@ metadata:
 spec:
   parentRefs:
     - kind: ListenerSet
-      name: {{ $.Values.releaseIdentifier }}
-      namespace: {{ $.Values.namespaceIdentifier }}
+      name: {{ $listenerSetName }}
+      namespace: {{ $listenerSetNamespace }}
   hostnames:
 {{- range $index, $hostname := .Values.gateway.hostnames }}
 {{- if ne $index 0 }}
@@ -107,13 +113,23 @@ metadata:
 spec:
   parentRefs:
     - kind: ListenerSet
-      name: {{ $.Values.releaseIdentifier }}
-      namespace: {{ $.Values.namespaceIdentifier }}
-      sectionName: http-{{ $index }}
+      name: {{ $listenerSetName }}
+      namespace: {{ $listenerSetNamespace }}
+      sectionName: {{ $listenerSet.httpSection | default (printf "http-%d" $index) }}
   hostnames:
     - {{ $hostname }}
   rules:
+{{- if $.Values.gateway.paths }}
+    - matches:
+{{- range $.Values.gateway.paths }}
+        - path:
+            type: PathPrefix
+            value: {{ . }}
+{{- end }}
+      filters:
+{{- else }}
     - filters:
+{{- end }}
         - type: RequestRedirect
           requestRedirect:
             scheme: https
@@ -133,16 +149,18 @@ metadata:
 spec:
   parentRefs:
     - kind: ListenerSet
-      name: {{ $.Values.releaseIdentifier }}
-      namespace: {{ $.Values.namespaceIdentifier }}
-      sectionName: https-{{ $index }}
+      name: {{ $listenerSetName }}
+      namespace: {{ $listenerSetNamespace }}
+      sectionName: {{ $listenerSet.httpsSection | default (printf "https-%d" $index) }}
   hostnames:
     - {{ $hostname }}
   rules:
     - matches:
+{{- range (default (list "/") $.Values.gateway.paths) }}
         - path:
             type: PathPrefix
-            value: /
+            value: {{ . }}
+{{- end }}
       backendRefs:
         - name: {{ $.Values.releaseIdentifier }}
           namespace: {{ $.Values.namespaceIdentifier }}
@@ -189,8 +207,8 @@ metadata:
 spec:
   parentRefs:
     - kind: ListenerSet
-      name: {{ $.Values.releaseIdentifier }}
-      namespace: {{ $.Values.namespaceIdentifier }}
+      name: {{ $listenerSetName }}
+      namespace: {{ $listenerSetNamespace }}
   hostnames:
 {{- range $index, $hostname := .Values.gateway.hostnames }}
     - {{ $hostname }}
