@@ -275,6 +275,21 @@ gateway:
 #    pathRegex: "^/(unknown-user|unauthorized-user)$"
 #    redirectHostname: test-login.canvas.uw.edu
 #    redirectPath: "/{path}"
+  # optionally attach routes to an existing ListenerSet (e.g. one shared by
+  # several apps on the same hostname) instead of creating one for this
+  # release. when "name" is set no ListenerSet is created, and the
+  # http/https section names of the existing listeners are required.
+  # all hostnames above are routed through those listeners.
+#  listenerSet:
+#    name: shared-listenerset
+#    namespace: default
+#    httpSection: shared-http
+#    httpsSection: shared-https
+  # optionally restrict routes to these path prefixes (default is "/").
+  # the http-to-https redirect is limited to the same paths, so it does
+  # not capture other apps' traffic on a shared listener.
+#  paths:
+#    - /api
   # optionally add rate limiting
 #  rateLimit:
 #    tokens: 750
