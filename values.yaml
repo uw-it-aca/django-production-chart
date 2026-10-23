@@ -331,7 +331,7 @@ cronjob:
 ## preset's tolerations/affinity/nodeSelector are always applied. the
 ## preset's "resources" is used as a fallback only: an explicit job-level
 ## "resources" (above) always takes precedence over the preset's.
-#      workerType: "cronjob-large"
+#      workerType: "0015-worker-pool-large"
   ## workerTypes defines named pod spec presets (tolerations, affinity,
   ## resources, etc.) for jobs that need to run on our tainted, autoscaled
   ## node pools. reference a preset name via a job's "workerType" key to
@@ -341,7 +341,7 @@ cronjob:
   ## default values also indicate the maximum resources available to any
   ## given workload. Also note that the medium worker is a spot type.
   workerTypes:
-    cronjob-large:
+    0015-worker-pool-large:
       tolerations:
         - key: "uwdp.workload"
           operator: "Equal"
@@ -354,7 +354,7 @@ cronjob:
         limits:
           cpu: 7
           memory: "24G"
-    cronjob-medium-spot:
+    0015-worker-pool-medium-spot:
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
