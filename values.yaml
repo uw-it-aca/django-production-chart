@@ -78,8 +78,14 @@ deploymentInitialization:
 statefulset:
   enabled: false
 
+## Default image for the primary app container (deployment/statefulset/daemon
+## pods, and any cronjob/daemon/sidecar entry that does not set its own
+## "image" key). Per-entry "image" always takes precedence over this value,
+## so it is only a fallback. This chart-level default is a placeholder and
+## is not expected to be pullable; calling values files should override
+## both "repository" and "tag" with a real image reference.
 image:
-  repository: "acait/django-contianer"
+  repository: "acait/django-container"
   tag: "develop"
 
 # baseline security policy for various components
@@ -319,6 +325,58 @@ cronjob:
 #        requests:
 #          cpu: 25m
 #          memory: 256Mi
+## optional: schedule this job onto one of our tainted node pools
+## (which scale down to 0, so expect cold-start delays) by setting
+## "workerType" to the name of one of the presets below. when set, the
+## preset's tolerations/affinity/nodeSelector are always applied. the
+## preset's "resources" is used as a fallback only: an explicit job-level
+## "resources" (above) always takes precedence over the preset's.
+#      workerType: "0015-worker-pool-large"
+  ## workerTypes defines named pod spec presets (tolerations, affinity,
+  ## resources, etc.) for jobs that need to run on our tainted, autoscaled
+  ## node pools. reference a preset name via a job's "workerType" key to
+  ## apply its scheduling fields (tolerations/affinity/nodeSelector) to
+  ## that job's pod. the preset's "resources" is used only as a fallback
+  ## when the job itself does not define a "resources" key. Note that the
+  ## default values also indicate the maximum resources available to any
+  ## given workload. Also note that the medium worker is a spot type.
+  workerTypes:
+    0015-worker-pool-large:
+      tolerations:
+        - key: "uwdp.workload"
+          operator: "Equal"
+          value: "kpo-workers-large"
+          effect: "NoSchedule"
+      resources:
+        requests:
+          cpu: 7
+          memory: "24G"
+        limits:
+          cpu: 7
+          memory: "24G"
+    0015-worker-pool-medium-spot:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: cloud.google.com/gke-spot
+                    operator: In
+                    values:
+                      - "true"
+      tolerations:
+        - key: "uwdp.workload"
+          operator: "Equal"
+          value: "kpo-workers"
+          effect: "NoSchedule"
+      resources:
+        requests:
+          cpu: "3"
+          memory: "6G"
+        limits:
+          cpu: 3
+          memory: "6G"
 
 ## more efficient for shorter jobs and more complete monitoring
 daemon:
