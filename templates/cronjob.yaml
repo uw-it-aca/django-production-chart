@@ -3,6 +3,7 @@
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) }}
 {{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) }}
 {{- range .Values.cronjob.jobs -}}
+{{- $workerType := fromYaml ( include "django-production-chart.cronjobWorkerType" (dict "root" $ "job" .) ) }}
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -45,9 +46,12 @@ spec:
           automountServiceAccountToken: false
 {{- end }}
           restartPolicy: {{ default "OnFailure" .restartPolicy | quote }}
+{{- if $workerType -}}
+{{ include "django-production-chart.cronjobWorkerTypeScheduling" $workerType | trim | nindent 10 }}
+{{- end }}
 {{ include "django-production-chart.specVolumes" $ | indent 10 }}
 {{- include "django-production-chart.specContainerBase" ( merge ( dict "containerImage" .image "containerName" .name ) $ ) | nindent 10 -}}
-{{- include "django-production-chart.specContainerResources" (or .resources $.Values.resources) | nindent 14 -}}
+{{- include "django-production-chart.specContainerResources" (or .resources $workerType.resources $.Values.resources) | nindent 14 -}}
 {{- include "django-production-chart.specContainerEnv" $ | nindent 14 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" .command "args" .args) | nindent 14 -}}
 {{ include "django-production-chart.specContainers" (dict "root" $ "type" "initContainers" "containers" .sidecarContainers) | indent 10 -}}
