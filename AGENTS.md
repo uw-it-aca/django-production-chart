@@ -5,6 +5,28 @@ first for what the chart is and how it's used/structured — this file only
 covers things an agent needs to get right while editing, that aren't obvious
 from reading a single template in isolation.
 
+## Related repos (this chart is only one piece of the lifecycle)
+
+`django-production-chart` only renders manifests — it never contains an
+app's source, Dockerfile, or deploy workflow. Expect these related pieces to
+live in *other* repos, not here, and don't go looking for them in this
+checkout:
+
+- **The consuming app's own repo** — application code, its `Dockerfile`, and
+  a `.github/workflows/cicd.yml` that pulls in reusable actions from the
+  `actions` repo and ultimately renders *this* chart against the app's own
+  `docker/test-values.yml`/`docker/prod-values.yml`.
+- **[`django-container`](https://github.com/uw-it-aca/django-container)** —
+  the shared base image every app's `Dockerfile` builds from; common
+  config/code an app inherits for free lives there, not in this chart.
+- **[`actions`](https://github.com/uw-it-aca/actions)** — reusable GitHub
+  Actions, including `cicd-deploy` (see `README.md` → "How this chart is
+  used"), which is the actual caller of `helm template` against this chart
+  during a real deploy.
+
+If a task seems to require editing an app's Dockerfile, base image, or CI
+workflow, that work belongs in one of those other repos, not here.
+
 ## Before editing
 
 - This chart is consumed by many separate Django app repos via pinned git

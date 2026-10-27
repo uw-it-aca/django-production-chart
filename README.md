@@ -4,6 +4,12 @@ This is a Helm chart for deploying UWIT SETS Django-based applications to Kubern
 
 This README describes how the chart is structured, the conventions those values files follow, and how to validate changes to the chart itself (or to an app's values file) before merging.
 
+Note that the django-production-chart is one part of the complete application lifecycle:
+- Your application code lives in your code repo and contains instructions on how to build the containerized app in its dockerfile.
+- Your application will inherit some configuration and common code from its base image, [django-container](https://github.com/uw-it-aca/django-container).
+- Your application will include a GitHub workflow definition in `.github/workflows/cicd.yml` which will include reusable actions from [actions](https://github.com/uw-it-aca/actions).
+- During CI, when your application is to be deployed to a test or prod instance, it will then use django-production-chart along with the app-specific values files in your app repository.
+
 ## How this chart is used
 
 This chart is **not** deployed directly. A consuming app repo's CI/CD pipeline uses the shared [`uw-it-aca/actions/cicd-deploy`](https://github.com/uw-it-aca/actions/blob/main/cicd-deploy/action.yml) GitHub Action, which clones this chart at a pinned ref and renders it with:
