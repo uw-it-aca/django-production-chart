@@ -23,6 +23,15 @@ checkout:
   Actions, including `cicd-deploy` (see `README.md` → "How this chart is
   used"), which is the actual caller of `helm template` against this chart
   during a real deploy.
+- **A flux deploy repo + Vault (or wherever secrets actually live)** — once
+  `cicd-deploy` opens a PR with the rendered manifest and it's merged,
+  FluxCD applies it to the target cluster. This chart only *renders the
+  request* for a secret (an `ExternalSecret` object from `externalSecrets.secrets`,
+  or a reference to an existing mounted Secret) — it does not create,
+  populate, or manage the secret's actual contents. If a deploy is failing
+  because a secret/shared config value isn't available, the fix is almost
+  always in Vault (or whatever the external secret store is) or the flux
+  repo, not in this chart's templates.
 
 If a task seems to require editing an app's Dockerfile, base image, or CI
 workflow, that work belongs in one of those other repos, not here.

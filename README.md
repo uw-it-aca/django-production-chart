@@ -9,6 +9,7 @@ Note that the django-production-chart is one part of the complete application li
 - Your application will inherit some configuration and common code from its base image, [django-container](https://github.com/uw-it-aca/django-container).
 - Your application will include a GitHub workflow definition in `.github/workflows/cicd.yml` which will include reusable actions from [actions](https://github.com/uw-it-aca/actions).
 - During CI, when your application is to be deployed to a test or prod instance, it will then use django-production-chart along with the app-specific values files in your app repository.
+- Secrets & shared config: once your deployment manifest lands in the flux repo for a cluster, FluxCD will attempt to apply it to the cluster. If your app is expecting `externalSecrets` or shared config to be available, that is often managed out-of-band in Vault or elsewhere.
 
 ## How this chart is used
 
