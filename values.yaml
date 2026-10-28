@@ -46,6 +46,28 @@ containerPorts:
 #      containerPort: 25
 #      protocol: TCP
 
+# Declare front end application proxy
+proxyServer:
+  enabled: false
+  appPort: 8001
+#  configMap:
+#    nginx.conf: |
+#      upstream app_server {
+#          server 127.0.0.1:{{ .Values.containerPort }} fail_timeout=0;
+#      }
+#      server {
+#          listen 80;
+#          access_log stdout;
+#          error_log  stderr;
+#          ... app-specific proxy server config ...
+#      }
+# optionally override default sidecar container
+#  sidecar:
+#    image: nginx:stable
+#    ...
+#
+
+
 ## service defines a service object to expose the chart's deployment
 ## or statefulset as a service.
 service:

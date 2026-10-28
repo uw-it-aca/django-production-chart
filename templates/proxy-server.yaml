@@ -1,0 +1,6 @@
+{{/* instantiate objects necessary for proxy web server */}}
+{{ if and .Values.proxyServer .Values.proxyServer.enabled }}
+{{ $map_name := ( include "django-production-chart.proxyServerConfigMapName" . ) }}
+{{ $map := ( and .Values.proxyServer.configMap ( toYaml .Values.proxyServer.configMap ) ) | default ( include "django-production-chart.proxyDefaultConfigMap" . ) }}
+{{- include "django-production-chart.configmap" (dict "root" . "map_name" $map_name "map_data" $map ) }}
+{{- end -}}

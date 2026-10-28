@@ -2,6 +2,18 @@
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 {{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
+{{- if and .Values.proxyServer .Values.proxyServer.enabled }}
+{{/*
+Append proxy server container definition to sidecarContainers
+*/}}
+{{ $sidecars := merge ( .Values.sidecarContainers | default dict ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) }}
+{{ $_ := set .Values "sidecarContainers" $sidecars }}
+{{/*
+Append proxy server volume mount to podVolumes
+*/}}
+{{ $podvolumes := merge ( .Values.podVolumes | default dict ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) }}
+{{ $_ := set .Values "podVolumes" $podvolumes }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
