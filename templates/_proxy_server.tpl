@@ -82,10 +82,20 @@ Default proxy server sidecar container settings
 image: nginx:stable-alpine-slim
 imagePullPolicy: Always
 restartPolicy: Always
+resources:
+  limits:
+    cpu: 500m
+    memory: 768Mi
+  requests:
+    cpu: 100m
+    memory: 512Mi
 securityContext:
   privileged: false
   allowPrivilegeEscalation: true
   runAsNonRoot: false
+  capabilities:
+    drop:
+      - ALL
 ports:
   - name: http
     containerPort: {{ $.Values.containerPort }}
