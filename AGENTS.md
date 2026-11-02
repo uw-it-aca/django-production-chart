@@ -1,102 +1,56 @@
 # AGENTS.md
 
-Operational guidance for coding agents working in this repo. See `README.md`
-first for what the chart is and how it's used/structured — this file only
-covers things an agent needs to get right while editing, that aren't obvious
-from reading a single template in isolation. This chart is used in CI by 
-cloning this repo, using `helm --template` and pushing the manifests to
-another git repository for FluxCD to apply to the cluster. We are not
-using Helm directly against the cluster, and we are not publishing this
-Helm chart to a Helm repo.
+Operational guidance for coding agents working in this repo. Read `README.md`
+first: it is the single source of truth for what the chart is, how CI
+consumes it, its conventions, and how to validate it. This file only adds the
+rules and pitfalls an agent needs while editing, and links to the README
+rather than repeating it. If you find a fact that belongs in both places, put
+it in the README and link to it from here.
 
-## Related repos (this chart is only one piece of the lifecycle)
+## Scope: what does and doesn't belong in this repo
 
-`django-production-chart` only renders manifests — it never contains an
-app's source, Dockerfile, or deploy workflow. Expect these related pieces to
-live in *other* repos, not here, and don't go looking for them in this
-checkout:
+This chart only renders manifests. The app's source, `Dockerfile`, base
+image, CI workflow, and secret values all live in other repos or systems (see
+`README.md` → intro and [How this chart is used](README.md#how-this-chart-is-used)).
+Don't go looking for them in this checkout, and don't try to fix problems
+there by changing templates here:
 
-- **The consuming app's own repo** — application code, its `Dockerfile`, and
-  a `.github/workflows/cicd.yml` that pulls in reusable actions from the
-  `actions` repo and ultimately renders *this* chart against the app's own
-  `docker/test-values.yml`/`docker/prod-values.yml`.
-- **[`django-container`](https://github.com/uw-it-aca/django-container)** —
-  the shared base image every app's `Dockerfile` builds from; common
-  config/code an app inherits for free lives there, not in this chart.
-- **[`actions`](https://github.com/uw-it-aca/actions)** — reusable GitHub
-  Actions, including `cicd-deploy` (see `README.md` → "How this chart is
-  used"), which is the actual caller of `helm template` against this chart
-  during a real deploy. This step is also responsible for running builds,
-  linting, running tests, and vulnerability scans. Built containers will be
-  pushed to Google Artifact Registry.
-- **A flux deploy repo + Vault (or wherever secrets actually live)** — once
-  `cicd-deploy` opens a PR with the rendered manifest and it's merged,
-  FluxCD applies it to the target cluster. This chart only *renders the
-  request* for a secret (an `ExternalSecret` object from `externalSecrets.secrets`,
-  or a reference to an existing mounted Secret) — it does not create,
-  populate, or manage the secret's actual contents. If a deploy is failing
-  because a secret/shared config value isn't available, the fix is almost
-  always in Vault (or whatever the external secret store is) or the flux
-  repo, not in this chart's templates. Note that vault changes are slow-moving
-  (in some cases up to an hour to propagate to the cluster). Malformed or
-  missing secrets are a common cause of runtime issues, since CI cannot
-  test with them.
-
-If a task seems to require editing an app's Dockerfile, base image, or CI
-workflow, that work belongs in one of those other repos, not here.
+- If a task seems to require editing an app's `Dockerfile`, the
+  `django-container` base image, or a CI workflow, that work belongs in
+  another repo.
+- If a deploy fails because a secret or shared config value is missing or
+  malformed, the fix is almost always in Vault or the flux repo, not in this
+  chart.
 
 ## Before editing
 
-- This chart is consumed by many separate Django app repos via pinned git
-  ref/tag (see `README.md` → "How this chart is used"). There is no way to
-  "run the app" here — correctness is judged entirely by rendered manifest
-  output (`helm template`) plus schema validation. Treat every change as a
-  public API change to those consumers.
-- Don't hand-edit `/work/test-values.yml` (or any other app's real
-  `test-values.yml`/`prod-values.yml`) to "just test something" and leave it
-  changed — it's someone else's working file, not test fixture for this repo.
-  Create a small, throwaway values overlay instead (e.g.
-  `/tmp/<feature>-test-values.yml` if ephemeral files are acceptable in this
-  environment, otherwise a persistent file *outside* the chart directory) and
-  pass it with an extra `-f`.
+- There is no way to "run the app" here. Correctness is judged entirely by
+  rendered manifest output plus schema validation, and many app repos consume
+  this chart at a pinned git ref. Treat every change to templates or
+  `values.yaml` as a public API change to those consumers.
+- Never hand-edit an app's real `test-values.yml`/`prod-values.yml` to test
+  something. Use a throwaway overlay *outside* the chart directory (e.g.
+  `/tmp/<feature>-test-values.yml`) and pass it with an extra `-f`.
 
 ## Required validation after any template/values change
 
-Run all of these from the chart directory before considering a change done.
-`helm` and (optionally) `kubeconform`/`kubeval` may need installing first —
-see commands below and the full versions in `README.md` → "Validating
-rendered output".
+Run every step in [Validating rendered output](README.md#validating-rendered-output)
+before considering a change done: `helm lint`, a render with bare chart
+defaults, a render with a realistic app values file using the CI
+`--set-string` shape, and then **both** `kubeconform` and `kubeval` against
+that render ([CI](README.md#ci) explains why both are required). The README
+has copy-pasteable commands, including how to install the validators.
 
-```sh
-# 1. Lint
-helm lint . -f <some-values-file>.yml
+On top of that:
 
-# 2. Render with bare chart defaults (must not error)
-helm template test-release . --set-string image.tag=dev
-
-# 3. Render with a realistic app values file, using the same --set-string
-#    shape the real cicd-deploy action uses (see README for exact keys)
-helm template test-release . \
-  --set-string "image.tag=12345,chartVersion=abc1234,image.repository=example/repo" \
-  -f <some-values-file>.yml > /tmp/manifest.yaml
-
-# 4. Schema-validate that render (install kubeconform if not present:
-#    curl -fsSL -o /tmp/kubeconform.tar.gz \
-#      https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
-#    tar xzf /tmp/kubeconform.tar.gz -C /tmp kubeconform)
-/tmp/kubeconform -strict -verbose -ignore-missing-schemas /tmp/manifest.yaml
-```
-
-For whitespace-sensitive template changes, also eyeball the raw rendered
-output (`cat /tmp/manifest.yaml`, or `--show-only templates/<file>.yaml`) for
-stray blank lines or bad indentation — `kubeconform`/`kubeval` validate
-schema conformance, not cosmetic formatting, so they will not catch this
-class of bug.
-
-If a change touches `cronjob.yaml` or any `workerType` logic specifically,
-confirm with a values file that exercises **both** states: a job with
-`workerType` set and its own `resources`, and a job with `workerType` set and
-no `resources` — these take different code paths (see "Gotchas" below).
+- **Look at the raw rendered output** (`--show-only templates/<file>.yaml`)
+  for any whitespace-sensitive change. The validators check schema
+  conformance, not formatting, so they won't catch stray blank lines or bad
+  indentation.
+- **For anything touching `cronjob.yaml` or `workerType` logic**, render
+  with values that exercise both a job with `workerType` *and* its own
+  `resources`, and a job with `workerType` and *no* `resources`. These take
+  different code paths.
 
 ## Gotchas learned the hard way
 
@@ -110,47 +64,23 @@ no `resources` — these take different code paths (see "Gotchas" below).
   so `nindent`'s own newline is the only separator. After any such change,
   actually look at rendered output — don't just trust that `helm lint`
   passed.
-- **Resource precedence for cronjobs is intentionally**
-  `(or .resources $workerType.resources $.Values.resources)` in
-  `templates/cronjob.yaml` — a job's own `resources` always wins over its
-  `workerType` preset's `resources`, which in turn falls back to the
-  chart-wide default. Tolerations/affinity/nodeSelector from the preset are
-  *always* applied when `workerType` is set, independent of which
-  `resources` value is chosen. Don't conflate these two concerns.
-- **`image.repository`/`image.tag` in `values.yaml` is a `default()`
-  fallback, not string concatenation glue.** It's consumed via
-  `default (printf "%s:%s" .Values.image.repository .Values.image.tag)
-  .containerImage` in `_spec_container_base.tpl`/`_spec_containers.tpl`. Any
-  per-container `image` key always wins. In real deploys this fallback is
-  populated by the `cicd-deploy` action's `--set-string` overrides (commit
-  hash + computed registry path), not by the app's values file — see
-  `README.md` → "How this chart is used" for the exact composition.
-- **There are two independent validation/CI paths that must both keep
-  passing**, and a change that satisfies one can still break the other:
-  `kubeval` (this repo's own `.github/workflows/cicd.yml`, tests the chart
-  in isolation) and `kubeconform` (the `cicd-deploy` action in the separate
-  `uw-it-aca/actions` repo, used for every real app deploy). See
-  `README.md` → "Validating rendered output" and "CI" for exact commands.
-- **Bump `version` in `Chart.yaml`** for any functional template/values
-  change — consuming repos pin a chart ref/version, so this is the only
-  signal they have that something changed. Current version at time of
-  writing: `0.1.1`.
-- **`chartVersion`** (a top-level `values.yaml` key, separate from
-  `Chart.yaml`'s `version`) feeds the `app.kubernetes.io/version`/chart
-  label via `django-production-chart.chart` in `_helpers.tpl`, and is
-  normally overridden by CI with the chart's own git short-SHA. Don't
-  confuse it with `Chart.yaml`'s `version`.
-- **`workertype-test-values.yml` and `feature_tolerate-tainted-nodes.md`
-  live in `/work/`, not inside this chart repo** — they're scratch
-  artifacts from feature development, not chart files. Don't assume
-  everything referenced during a session lives under this chart's git root.
+- **Cronjob `resources` precedence and `workerType` scheduling are separate
+  concerns.** `(or .resources $workerType.resources $.Values.resources)` in
+  `templates/cronjob.yaml` is intentional, and the preset's scheduling
+  constraints apply regardless of which `resources` wins. Don't couple them.
+  See [Key conventions](README.md#key-conventions).
+- **`image.repository`/`image.tag` is a `default()` fallback**, not string
+  concatenation glue, and CI overrides it at deploy time. Don't
+  "fix" image handling by hardcoding a repository in `values.yaml` or an app
+  values file. See [Key conventions](README.md#key-conventions) →
+  Image configuration.
+- **Don't add a `chartVersion` default to `values.yaml`.** CI sets it, and a
+  default would mask the fallback to `Chart.yaml`'s `version`. See
+  [How this chart is used](README.md#how-this-chart-is-used).
 
 ## Commit/PR conventions
 
 - No enforced line-length limit on Markdown/docs in this repo.
-- Follow the existing `values.yaml` comment style when adding new keys:
-  purpose, default behavior, and a commented-out example if the shape isn't
-  obvious.
-- Prefer a new, narrowly-scoped `_*.tpl` named template over growing an
-  existing one once its logic becomes non-trivial (see
-  `_cronjob_worker_type.tpl` for precedent).
+- Follow [Making chart changes](README.md#making-chart-changes) for
+  `values.yaml` comment style, `Chart.yaml` versioning, and when to split
+  logic into a new `_*.tpl`.
