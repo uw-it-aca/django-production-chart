@@ -3,7 +3,11 @@
 Operational guidance for coding agents working in this repo. See `README.md`
 first for what the chart is and how it's used/structured — this file only
 covers things an agent needs to get right while editing, that aren't obvious
-from reading a single template in isolation.
+from reading a single template in isolation. This chart is used in CI by 
+cloning this repo, using `helm --template` and pushing the manifests to
+another git repository for FluxCD to apply to the cluster. We are not
+using Helm directly against the cluster, and we are not publishing this
+Helm chart to a Helm repo.
 
 ## Related repos (this chart is only one piece of the lifecycle)
 
@@ -22,7 +26,9 @@ checkout:
 - **[`actions`](https://github.com/uw-it-aca/actions)** — reusable GitHub
   Actions, including `cicd-deploy` (see `README.md` → "How this chart is
   used"), which is the actual caller of `helm template` against this chart
-  during a real deploy.
+  during a real deploy. This step is also responsible for running builds,
+  linting, running tests, and vulnerability scans. Built containers will be
+  pushed to Google Artifact Registry.
 - **A flux deploy repo + Vault (or wherever secrets actually live)** — once
   `cicd-deploy` opens a PR with the rendered manifest and it's merged,
   FluxCD applies it to the target cluster. This chart only *renders the
@@ -31,7 +37,10 @@ checkout:
   populate, or manage the secret's actual contents. If a deploy is failing
   because a secret/shared config value isn't available, the fix is almost
   always in Vault (or whatever the external secret store is) or the flux
-  repo, not in this chart's templates.
+  repo, not in this chart's templates. Note that vault changes are slow-moving
+  (in some cases up to an hour to propagate to the cluster). Malformed or
+  missing secrets are a common cause of runtime issues, since CI cannot
+  test with them.
 
 If a task seems to require editing an app's Dockerfile, base image, or CI
 workflow, that work belongs in one of those other repos, not here.

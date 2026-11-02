@@ -1,6 +1,6 @@
 # django-production-chart
 
-This is a Helm chart for deploying UWIT SETS Django-based applications to Kubernetes. Note: this is done by invoking  `helm --template` and writing the resultant manifests to a deploy repo watched by FluxCD. Consuming application repositories do not fork or copy this chart; instead their GitHub Actions deploy workflows pull this chart (by git ref / tag) and render it with an app-specific values file — typically `docker/test-values.yml` for the test cluster and `docker/prod-values.yml` for production.
+This is a Helm chart for creating deployment manifests for deploying UWIT SETS Django-based applications to Kubernetes. As described below, we are uing Helm as a templating engine and not using it to directly manage cluster resources. Consuming application repositories do not fork or copy this chart; instead their GitHub Actions deploy workflows pull this chart (by git ref / tag) and render it with an app-specific values file — typically `docker/test-values.yml` for the test cluster and `docker/prod-values.yml` for production.
 
 This README describes how the chart is structured, the conventions those values files follow, and how to validate changes to the chart itself (or to an app's values file) before merging.
 
@@ -8,8 +8,10 @@ Note that the django-production-chart is one part of the complete application li
 - Your application code lives in your code repo and contains instructions on how to build the containerized app in its dockerfile.
 - Your application will inherit some configuration and common code from its base image, [django-container](https://github.com/uw-it-aca/django-container).
 - Your application will include a GitHub workflow definition in `.github/workflows/cicd.yml` which will include reusable actions from [actions](https://github.com/uw-it-aca/actions).
-- During CI, when your application is to be deployed to a test or prod instance, it will then use django-production-chart along with the app-specific values files in your app repository.
-- Secrets & shared config: once your deployment manifest lands in the flux repo for a cluster, FluxCD will attempt to apply it to the cluster. If your app is expecting `externalSecrets` or shared config to be available, that is often managed out-of-band in Vault or elsewhere.
+- GitHub actions will build and test your containerized image, and push the container to Google Artifact Registry.
+- During CI, when your application is to be deployed to a test or prod instance, it will then use django-production-chart along with the app-specific values files in your app repository to create the necessary Kubernetes manifest(s) and push/PR them to the GitHub repo used by FluxCD. 
+- Your deployment manifest lands in the flux repo for a cluster as a PR, once merged to main FluxCD will attempt reconcile the manifest and apply it to the cluster. Note: typicaly PRs to eval clusters are auto-merged, but PRs to prod clusters need human review & merge.
+- Secrets & shared config: If your app is expecting `externalSecrets` or shared config to be available, that is managed out-of-band in Vault. Changes in Vault can take up to an hour to propagate to the cluster, so be aware of that if your app needs a new/changed secret value. Malformed or missing secrets are a very common cause of runtime failures, as the test stage in CI cannot incorporate real cluster secrets.
 
 ## How this chart is used
 
@@ -215,7 +217,7 @@ If you add a new template or `values.yaml` key, make sure it renders cleanly bot
 
 ## Making chart changes
 
-- Bump `version` in `Chart.yaml` for any functional change to templates or `values.yaml` defaults (consuming repos typically pin a chart version/ref, so this is how they know a new release is available).
+- You can bump `version` in `Chart.yaml` for any functional change to templates or `values.yaml` defaults if you wish, however 
 - Document new `values.yaml` keys with a comment above them, following the existing style (purpose, default behavior, and a commented-out example if the shape isn't obvious).
 - Prefer adding a new, narrowly-scoped `_*.tpl` named template over growing an existing one, when a template's logic becomes non-trivial (see `_cronjob_worker_type.tpl` for an example).
 - Validate with `helm lint`, then `helm template` + `kubeconform` (and `kubeval`, and `kubectl apply --dry-run=server` if the change affects CRDs/validating webhooks), against both the bare chart defaults and a real app values file, before opening a PR.
