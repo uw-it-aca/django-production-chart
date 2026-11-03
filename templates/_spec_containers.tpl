@@ -54,5 +54,6 @@ Application initialization containers
     env:
 {{ toYaml $container.environmentVariables | indent 6 }}
 {{- end }}
+{{ include "django-production-chart.specContainerProbes" $container | indent 4 }}
 {{- end }}
 {{- end -}}

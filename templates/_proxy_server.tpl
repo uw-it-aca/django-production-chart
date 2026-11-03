@@ -11,7 +11,11 @@ nginx.conf: |
   sendfile on;
   upstream app_server {
       # All containers in the same pod are reachable with 127.0.0.1
-      server 127.0.0.1:{{ .Values.proxyServer.appPort }} fail_timeout=0;
+{{- if ( and $.Values.containerPorts $.Values.containerPorts.enabled ) }}
+    server 127.0.0.1:{{ range $.Values.containerPorts }}{{ if ( and .name ( eq .name "http") ) }}{{ .containerPort }}{{ end }}{{ end }} fail_timeout=0;
+{{- else }}
+    server 127.0.0.1:{{ $.Values.containerPort }} fail_timeout=0;
+{{- end }}
   }
   map $http_x_forwarded_proto $xfproto {
     default $http_x_forwarded_proto;
@@ -96,20 +100,45 @@ securityContext:
     drop:
       - ALL
 ports:
-  - name: http
-    containerPort: {{ $.Values.containerPort }}
+  - containerPort: {{ $.Values.proxyServer.servicePort }}
     protocol: TCP
+    name: http
+liveness:
+  enabled: true
+  httpGet:
+    path: {{ $.Values.proxyServer.serviceProbePath }}
+    port: {{ $.Values.proxyServer.servicePort }}
+readiness:
+  enabled: true
+  httpGet:
+    path: {{ $.Values.proxyServer.serviceProbePath }}
+    port: {{ $.Values.proxyServer.servicePort }}
+  initialDelaySeconds: 2
 {{- end -}}
 
 {{/*
-Supply proxy server sidecar container settings
+Supply proxy server volumes
 */}}
 {{- define "django-production-chart.proxyServerPodVolume" -}}
-proxy-server:
+proxy-server-config:
   volume:
     configMap:
       name: {{ include "django-production-chart.proxyServerConfigMapName" . }}
   mount:
     mountPath: /etc/nginx/conf.d
   containers: [ proxy-server ]
+proxy-server-statics:
+  volume:
+    emptyDir: {}
+  mount:
+    mountPath: /static
+    readOnly: true
+  containers: [ base, proxy-server ]
+proxy-server-media:
+  volume:
+    emptyDir: {}
+  mount:
+    mountPath: /media
+    readOnly: true
+  containers: [ base, proxy-server ]
 {{- end -}}

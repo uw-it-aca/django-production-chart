@@ -12,7 +12,7 @@ Append proxy server container definition to sidecarContainers
 Append proxy server volume mount to podVolumes
 */}}
 {{ $podvolumes := merge ( .Values.podVolumes | default dict ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) }}
-{{ $_ := set .Values "podVolumes" $podvolumes }}
+{{ $_ := set $.Values "podVolumes" $podvolumes }}
 {{- end }}
 apiVersion: apps/v1
 kind: Deployment
@@ -53,6 +53,6 @@ spec:
 {{ include "django-production-chart.specVolumes" . | indent 6 }}
 {{ include "django-production-chart.specContainer" . | indent 6 }}
 {{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
-{{ include "django-production-chart.specContainerProbes" . | indent 10 }}
+{{ include "django-production-chart.specContainerProbes" .Values | indent 10 }}
 {{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .Values.sidecarContainers) | indent 6 }}
 {{- end -}}

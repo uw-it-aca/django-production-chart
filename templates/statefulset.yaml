@@ -50,7 +50,7 @@ spec:
 {{ include "django-production-chart.specVolumes" . | indent 6 }}
 {{ include "django-production-chart.specContainer" . | indent 6 }}
 {{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
-{{ include "django-production-chart.specContainerProbes" . | indent 10 }}
+{{ include "django-production-chart.specContainerProbes" .Values | indent 10 }}
 {{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .Values.sidecarContainers) | indent 6 }}
 {{- $i := 0 }}
 {{- range $name, $map := .Values.podVolumes }}

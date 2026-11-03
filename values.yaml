@@ -49,11 +49,12 @@ containerPorts:
 # Declare front end application proxy
 proxyServer:
   enabled: false
-  appPort: 8001
+  servicePort: 8080
+  serviceProbePath: /nghealth
 #  configMap:
 #    nginx.conf: |
 #      upstream app_server {
-#          server 127.0.0.1:{{ .Values.containerPort }} fail_timeout=0;
+#          server 127.0.0.1:{{ $.Values.containerPort }} fail_timeout=0;
 #      }
 #      server {
 #          listen 80;
@@ -499,7 +500,7 @@ readiness:
 ## alternatives must define/provide endpoint
 #  httpGet:
 #    path: /readiness
-#    port: "8080"
+#    port: "8001"
 #  tcpSocket:
 #    port: "5050"
 ## optionally override delay and period
