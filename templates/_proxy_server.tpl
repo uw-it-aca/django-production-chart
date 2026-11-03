@@ -68,7 +68,7 @@ nginx.conf: |
 {{- end -}}
 
 {{/*
-Supply proxy server sidecar container settings
+Proxy server sidecar container settings
 */}}
 {{- define "django-production-chart.proxyServerSidecar" -}}
 proxy-server:
@@ -80,7 +80,7 @@ proxy-server:
 {{- end -}}
 
 {{/*
-Default proxy server sidecar container settings
+Default proxy server sidecar container definition
 */}}
 {{- define "django-production-chart.proxyServerSidecarDefault" -}}
 image: nginx:stable
@@ -117,7 +117,7 @@ readiness:
 {{- end -}}
 
 {{/*
-Supply proxy server volumes
+Proxy server podVolumes for nginx configmap and /static volume from app container
 */}}
 {{- define "django-production-chart.proxyServerPodVolume" -}}
 proxy-server-config:
