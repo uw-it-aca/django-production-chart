@@ -6,8 +6,6 @@ proxy-server
 
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
 nginx.conf: |
-  include /etc/nginx/mime.types;
-  default_type application/octet-stream;
   sendfile on;
   upstream app_server {
       # All containers in the same pod are reachable with 127.0.0.1
