@@ -6,14 +6,8 @@ proxy-server
 
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
 nginx.conf: |
-  sendfile on;
   upstream app_server {
-      # All containers in the same pod are reachable with 127.0.0.1
-{{- if ( and $.Values.containerPorts $.Values.containerPorts.enabled ) }}
-    server 127.0.0.1:{{ range $.Values.containerPorts }}{{ if ( and .name ( eq .name "http") ) }}{{ .containerPort }}{{ end }}{{ end }} fail_timeout=0;
-{{- else }}
-    server 127.0.0.1:{{ $.Values.containerPort }} fail_timeout=0;
-{{- end }}
+    server 127.0.0.1:{{ if ( and $.Values.containerPorts $.Values.containerPorts.enabled ) }}{{ range $.Values.containerPorts }}{{ if ( and .name ( eq .name "http") ) }}{{ .containerPort }}{{ end }}{{ end }}{{ else }}{{ $.Values.containerPort }}{{ end }} fail_timeout=0;
   }
   map $http_x_forwarded_proto $xfproto {
     default $http_x_forwarded_proto;
