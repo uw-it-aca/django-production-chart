@@ -107,12 +107,12 @@ liveness:
   enabled: true
   httpGet:
     path: {{ $.Values.proxyServer.serviceProbePath }}
-    port: {{ $.Values.proxyServer.servicePort }}
+    port: http
 readiness:
   enabled: true
   httpGet:
     path: {{ $.Values.proxyServer.serviceProbePath }}
-    port: {{ $.Values.proxyServer.servicePort }}
+    port: http
   initialDelaySeconds: 2
 {{- end -}}
 
