@@ -14,7 +14,7 @@ nginx.conf: |
     ''      $scheme;
   }
   server {
-      listen 80;
+      listen 8080;
       charset utf-8;
       underscores_in_headers on;
       port_in_redirect off;
@@ -43,7 +43,7 @@ nginx.conf: |
               }
               try_files /$uri @django;
           }
-          location /nghealth {
+          location {{ $.Values.proxyServer.serviceProbePath }} {
               return 200;
           }
           try_files $uri @django;

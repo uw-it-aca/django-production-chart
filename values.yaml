@@ -50,7 +50,7 @@ containerPorts:
 proxyServer:
   enabled: false
   servicePort: 8080
-  serviceProbePath: /nghealth
+  serviceProbePath: /healthz
 #  configMap:
 #    nginx.conf: |
 #      upstream app_server {
