@@ -75,7 +75,7 @@ proxy-server:
 Default proxy server sidecar container definition
 */}}
 {{- define "django-production-chart.proxyServerSidecarDefault" -}}
-image: nginx:stable
+image: nginx/nginx-unprivileged:stable
 imagePullPolicy: Always
 restartPolicy: Always
 resources:
@@ -87,6 +87,8 @@ resources:
     memory: 512Mi
 securityContext:
   privileged: false
+  runAsNonRoot: true
+  runAsUser: 101
   allowPrivilegeEscalation: false
   capabilities:
     drop:
