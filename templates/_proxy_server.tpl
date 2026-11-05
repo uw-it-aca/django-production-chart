@@ -88,7 +88,8 @@ resources:
 securityContext:
   privileged: false
   runAsNonRoot: true
-  runAsUser: 101
+  runAsUser: 1000
+  runAsGroup: 1000
   allowPrivilegeEscalation: false
   capabilities:
     drop:
@@ -126,7 +127,6 @@ proxy-server-socket:
     emptyDir: {}
   mount:
     mountPath: /var/run/gunicorn
-    readOnly: true
   containers: [ base, proxy-server ]
 proxy-server-statics:
   volume:
