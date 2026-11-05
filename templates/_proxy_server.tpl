@@ -7,7 +7,7 @@ proxy-server
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
 nginx.conf: |
   upstream app_server {
-    server 127.0.0.1:{{ if ( and $.Values.containerPorts $.Values.containerPorts.enabled ) }}{{ range $.Values.containerPorts }}{{ if ( and .name ( eq .name "http") ) }}{{ .containerPort }}{{ end }}{{ end }}{{ else }}{{ $.Values.containerPort }}{{ end }} fail_timeout=0;
+    server unix:/var/run/gunicorn/gunicorn.sock;
   }
   map $http_x_forwarded_proto $xfproto {
     default $http_x_forwarded_proto;
@@ -121,6 +121,13 @@ proxy-server-config:
   mount:
     mountPath: /etc/nginx/conf.d
   containers: [ proxy-server ]
+proxy-server-socket:
+  volume:
+    emptyDir: {}
+  mount:
+    mountPath: /var/run/gunicorn
+    readOnly: true
+  containers: [ base, proxy-server ]
 proxy-server-statics:
   volume:
     emptyDir: {}
