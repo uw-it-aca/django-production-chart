@@ -6,13 +6,7 @@
 {{/*
 Inject proxy server container definition into sidecarContainers
 */}}
-{{ $sidecars := merge ( .Values.sidecarContainers | default dict ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) }}
-{{ $_ := set .Values "sidecarContainers" $sidecars }}
-{{/*
-Inject proxy server volume mounts into podVolumes
-*/}}
-{{ $podvolumes := merge ( .Values.podVolumes | default dict ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) }}
-{{ $_ := set $.Values "podVolumes" $podvolumes }}
+{{ include "django-production-chart.injectProxyServerSidecar" . }}
 {{- end }}
 apiVersion: apps/v1
 kind: Deployment

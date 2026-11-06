@@ -4,6 +4,19 @@
 proxy-server
 {{- end -}}
 
+{{- define "django-production-chart.injectProxyServerSidecar" -}}
+{{/*
+Inject proxy server container into containerContainers
+*/}}
+{{ $sidecars := merge ( $.Values.sidecarContainers | default dict ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) }}
+{{ $_ := set $.Values "sidecarContainers" $sidecars }}
+{{/*
+Inject proxy server volume mounts into podVolumes
+*/}}
+{{ $podvolumes := merge ( .Values.podVolumes | default dict ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) }}
+{{ $_ := set $.Values "podVolumes" $podvolumes }}
+{{- end -}}
+
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
 nginx.conf: |
   upstream app_server {
@@ -133,13 +146,11 @@ proxy-server-statics:
     emptyDir: {}
   mount:
     mountPath: /static
-    readOnly: true
   containers: [ base, proxy-server ]
 proxy-server-media:
   volume:
     emptyDir: {}
   mount:
     mountPath: /media
-    readOnly: true
   containers: [ base, proxy-server ]
 {{- end -}}
