@@ -1,4 +1,4 @@
-{{/* Defines default nginx config */}}
+{{/* Helper definitions to inject HTTP proxy server and config with default nginx. */}}
 
 {{- define "django-production-chart.proxyServerConfigMapName" -}}
 proxy-server

@@ -36,7 +36,7 @@ containers:
 {{ include "django-production-chart.volumeMount" (dict "root" $root "name" $name "map" $map ) | indent 6 }}
 {{- end }}
 {{- end }}
-{{- if and $map.mounts }}
+{{- if $map.mounts }}
 {{- if hasKey $map.mounts "base" }}
 {{ include "django-production-chart.volumeMount" (dict "root" $root "name" $name "map" ( get $map.mounts "base" ) ) | indent 6 }}
 {{- end }}
