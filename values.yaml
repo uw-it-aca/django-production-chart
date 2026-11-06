@@ -611,7 +611,17 @@ nfsServer:
 ##                                     the cluster. a volumeClaimTemplates entry
 ##                                     is automatically created based on this definition
 ##                     or yaml that will be directly added to the pod's volumes list.
-##   "mount"      : (requireed) defines how the volume will be mounted by containers
+##   "mount"      : (required if mounts not present) defines how the volume will
+##                  be mounted by containers
+##   "mounts"     : (required if mount not present) defines map of containers specifying
+##                  how volume will be mounted by container.  for example:
+##                     mounts:
+##                       base:
+##                         mount:
+##                           mountPath: /static
+##                       proxy-server:
+##                         mount:
+##                           mountPath: /common/static
 ##   "claimName"  : (optional) name assigned to pvc, overriding template-generaged name
 ##   "containers" : (optional) lists containers within the pod the mount
 ##                  definition applies to.  if undefined, the mount is added to

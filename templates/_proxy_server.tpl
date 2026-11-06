@@ -38,24 +38,14 @@ nginx.conf: |
           return 204;
       }
       location /media  {
-        alias /media;
+        alias /common/media;
       }
       location /static {
-        alias /static;
+        alias /common/static;
         access_log off;
         expires 30d;
       }
       location / {
-          location /static {
-              add_header Access-Control-Allow-Origin *;
-              add_header Access-Control-Max-Age 3600;
-              add_header Access-Control-Expose-Headers Content-Length;
-              add_header Access-Control-Allow-Headers Range;
-              if ($request_method = OPTIONS) {
-                  return 204;
-              }
-              try_files /$uri @django;
-          }
           location {{ $.Values.proxyServer.serviceProbePath }} {
               return 200;
           }
@@ -144,13 +134,21 @@ proxy-server-socket:
 proxy-server-statics:
   volume:
     emptyDir: {}
-  mount:
-    mountPath: /static
-  containers: [ base, proxy-server ]
+  mounts:
+    base:
+      mount:
+        mountPath: /static
+    proxy-server:
+      mount:
+       mountPath: /common/static
 proxy-server-media:
   volume:
     emptyDir: {}
-  mount:
-    mountPath: /media
-  containers: [ base, proxy-server ]
+  mounts:
+    base:
+      mount:
+        mountPath: /media
+    proxy-server:
+      mount:
+        mountPath: /common/media
 {{- end -}}
