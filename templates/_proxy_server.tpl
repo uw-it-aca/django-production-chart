@@ -19,8 +19,8 @@ nginx.conf: |
       underscores_in_headers on;
       port_in_redirect off;
       client_max_body_size 4G;
-      access_log stdout;
-      error_log  stderr;
+      access_log /dev/stdout main;
+      error_log  /dev/stderr notice;
       location = /favicon.ico {
           return 204;
       }
