@@ -20,14 +20,14 @@ Inject proxy server volume mounts into podVolumes
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
 nginx.conf: |
   upstream app_server {
-    server unix:/var/run/gunicorn/gunicorn.sock;
+    server unix:/var/run/gunicorn/gunicorn.sock fail_timeout=0;
   }
   map $http_x_forwarded_proto $xfproto {
     default $http_x_forwarded_proto;
     ''      $scheme;
   }
   server {
-      listen 8080;
+      listen 8080 default_server;
       charset utf-8;
       underscores_in_headers on;
       port_in_redirect off;
@@ -38,17 +38,17 @@ nginx.conf: |
           return 204;
       }
       location /media  {
-        alias /common/media;
+        root /common;
       }
       location /static {
-        alias /common/static;
+        root /common;
         access_log off;
         expires 30d;
       }
+      location {{ $.Values.proxyServer.serviceProbePath }} {
+        return 200;
+      }
       location / {
-          location {{ $.Values.proxyServer.serviceProbePath }} {
-              return 200;
-          }
           try_files $uri @django;
       }
       location @django {
