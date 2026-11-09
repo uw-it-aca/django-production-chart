@@ -37,14 +37,14 @@ nginx.conf: |
       location = /favicon.ico {
           return 204;
       }
-      location /media  {
-        root /common;
-      }
-      location /static {
-        root /common;
-        access_log off;
-        expires 30d;
-      }
+  #    location /media  {
+  #      root /common;
+  #    }
+  #    location /static {
+  #      root /common;
+  #      access_log off;
+  #      expires 30d;
+  #    }
       location {{ $.Values.proxyServer.serviceProbePath }} {
         return 200;
       }
@@ -134,21 +134,11 @@ proxy-server-socket:
 proxy-server-statics:
   volume:
     emptyDir: {}
-  mounts:
-    base:
-      mount:
-        mountPath: /static
-    proxy-server:
-      mount:
-       mountPath: /common/static
+  mount:
+    mountPath: /common/static
 proxy-server-media:
   volume:
     emptyDir: {}
-  mounts:
-    base:
-      mount:
-        mountPath: /media
-    proxy-server:
-      mount:
-        mountPath: /common/media
+  mount:
+    mountPath: /common/media
 {{- end -}}
