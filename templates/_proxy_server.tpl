@@ -19,46 +19,58 @@ Inject proxy server volume mounts into podVolumes
 
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
 nginx.conf: |
-  upstream app_server {
-    server unix:/var/run/gunicorn/gunicorn.sock fail_timeout=0;
+  daemon off;
+  worker_processes 1;
+  access_log /dev/stdout main;
+  error_log  /dev/stderr notice;
+  pid /tmp/nginx.pid;
+  proxy_temp_path /tmp/proxy_temp;
+  client_body_temp_path /tmp/client_temp;
+  fastcgi_temp_path /tmp/fastcgi_temp;
+  uwsgi_temp_path /tmp/uwsgi_temp;
+  scgi_temp_path /tmp/scgi_temp;
+  events {
+    worker_connections 5000;
+    accept_mutex off; # set to 'on' if nginx worker_processes > 1
   }
-  map $http_x_forwarded_proto $xfproto {
-    default $http_x_forwarded_proto;
-    ''      $scheme;
-  }
-  server {
-      listen 8080 default_server;
+  http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    sendfile on;
+    upstream app_server {
+      server unix:/var/run/gunicorn/gunicorn.sock fail_timeout=0;
+    }
+    map $http_x_forwarded_proto $xfproto {
+      default $http_x_forwarded_proto;
+      ''      $scheme;
+    }
+    server {
+      listen {{ $.Values.proxyServer.servicePort }} default_server;
       charset utf-8;
       underscores_in_headers on;
       port_in_redirect off;
       client_max_body_size 4G;
-      access_log /dev/stdout main;
-      error_log  /dev/stderr notice;
       location = /favicon.ico {
           return 204;
       }
-  #    location /media  {
-  #      root /common;
-  #    }
-  #    location /static {
-  #      root /common;
-  #      access_log off;
-  #      expires 30d;
-  #    }
       location {{ $.Values.proxyServer.serviceProbePath }} {
         return 200;
       }
+      # include for app-specific location config
+      include /etc/nginx/includes/locations.conf;
       location / {
-          try_files $uri @django;
+        # checks for static file, if not found proxy to app
+        try_files $uri @proxy_to_app;
       }
-      location @django {
-          proxy_pass_request_headers on;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $xfproto;
-          proxy_set_header Host $http_host;
-          proxy_redirect off;
-          proxy_pass http://app_server;
+      location @proxy_to_app {
+        proxy_pass_request_headers on;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $xfproto;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_pass http://app_server;
       }
+    }
   }
 {{- end -}}
 
@@ -123,7 +135,8 @@ proxy-server-config:
     configMap:
       name: {{ include "django-production-chart.proxyServerConfigMapName" . }}
   mount:
-    mountPath: /etc/nginx/conf.d
+    mountPath: /etc/nginx/nginx.conf
+    subPath: nginx.conf
   containers: [ proxy-server ]
 proxy-server-socket:
   volume:
