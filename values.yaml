@@ -64,8 +64,9 @@ proxyServer:
 #      }
 # optionally override default sidecar container
 #  sidecar:
-#    image: nginx:stable
-#    ...
+#    proxy-server:
+#      image: nginx:stable
+#      ...
 #
 
 
