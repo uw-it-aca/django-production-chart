@@ -4,9 +4,13 @@
 proxy-server
 {{- end -}}
 
+{{/*
+Injects proxy-server components into the global Values such that the resulting
+manifest contains the necessary proxy-server objects
+*/}}
 {{- define "django-production-chart.injectProxyServerSidecar" -}}
 {{/*
-Inject proxy server container into containerContainers
+Inject proxy server containers into sidecarContainers
 */}}
 {{ $sidecars := merge ( $.Values.sidecarContainers | default dict ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) }}
 {{ $_ := set $.Values "sidecarContainers" $sidecars }}
@@ -17,6 +21,9 @@ Inject proxy server volume mounts into podVolumes
 {{ $_ := set $.Values "podVolumes" $podvolumes }}
 {{- end -}}
 
+{{/*
+Define nginx.conf appropriate for default proxy-sidecar
+*/}}
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
 nginx.conf: |
   worker_processes 1;
@@ -58,7 +65,6 @@ nginx.conf: |
       location {{ $.Values.proxyServer.serviceProbePath }} {
         return 200;
       }
-      # include for app-specific location config
       location /media  {
         alias /common/media;
       }
@@ -68,7 +74,6 @@ nginx.conf: |
         expires 30d;
       }
       location / {
-        # checks for static file, if not found proxy to app
         try_files $uri @proxy_to_app;
       }
       location @proxy_to_app {
@@ -84,7 +89,9 @@ nginx.conf: |
 {{- end -}}
 
 {{/*
-Proxy server sidecar container settings
+Proxy server sidecar container settings.
+By default, defines an nginx proxy sidecar and a run-once sidecar to copy
+/static and /media filesystems, if present, to the shared emptyDir volume.
 */}}
 {{- define "django-production-chart.proxyServerSidecar" -}}
 {{- if .Values.proxyServer.sidecar }}
