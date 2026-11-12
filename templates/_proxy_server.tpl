@@ -114,10 +114,10 @@ proxy-server-statics:
     - "sh"
     - "-c"
     - |
-      if [[ -d /statics ]] ; then
+      if [ -d /statics ] ; then
         cp -r /statics/. /common/static
       fi
-      if [[ -d /media ]] ; then
+      if [ -d /media ] ; then
         cp -r /media/. /common/media
       fi
 proxy-server:
