@@ -33,6 +33,10 @@ volumes:
     configMap:
       name: {{ printf "%s-%s" ( include "django-production-chart.releaseIdentifier" $dot ) $map.volume.configMap.name }}
 {{- end }}
+{{- if hasKey $map.volume "emptyDir" }}
+  - name: {{ $name }}
+{{ toYaml $map.volume | indent 4 }}
+{{- end }}
 {{- if hasKey $map.volume "claim" }}
 {{ toYaml $map.volume | indent 4 }}
 {{- end }}

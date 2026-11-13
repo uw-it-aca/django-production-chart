@@ -2,6 +2,12 @@
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 {{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
+{{- if and .Values.proxyServer .Values.proxyServer.enabled }}
+{{/*
+Inject proxy server container definition into sidecarContainers
+*/}}
+{{ include "django-production-chart.injectProxyServerSidecar" . }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -41,6 +47,6 @@ spec:
 {{ include "django-production-chart.specVolumes" . | indent 6 }}
 {{ include "django-production-chart.specContainer" . | indent 6 }}
 {{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
-{{ include "django-production-chart.specContainerProbes" . | indent 10 }}
+{{ include "django-production-chart.specContainerProbes" .Values | indent 10 }}
 {{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .Values.sidecarContainers) | indent 6 }}
 {{- end -}}

@@ -46,6 +46,30 @@ containerPorts:
 #      containerPort: 25
 #      protocol: TCP
 
+# Declare front end application proxy
+proxyServer:
+  enabled: false
+  servicePort: 8080
+  serviceProbePath: /healthz
+#  configMap:
+#    nginx.conf: |
+#      upstream app_server {
+#          server 127.0.0.1:{{ $.Values.containerPort }} fail_timeout=0;
+#      }
+#      server {
+#          listen 80;
+#          access_log stdout;
+#          error_log  stderr;
+#          ... app-specific proxy server config ...
+#      }
+# optionally override default sidecar container
+#  sidecar:
+#    proxy-server:
+#      image: nginx:stable
+#      ... sidecar container-specific config ...
+#
+
+
 ## service defines a service object to expose the chart's deployment
 ## or statefulset as a service.
 service:
@@ -477,7 +501,7 @@ readiness:
 ## alternatives must define/provide endpoint
 #  httpGet:
 #    path: /readiness
-#    port: "8080"
+#    port: "8001"
 #  tcpSocket:
 #    port: "5050"
 ## optionally override delay and period
@@ -588,7 +612,17 @@ nfsServer:
 ##                                     the cluster. a volumeClaimTemplates entry
 ##                                     is automatically created based on this definition
 ##                     or yaml that will be directly added to the pod's volumes list.
-##   "mount"      : (requireed) defines how the volume will be mounted by containers
+##   "mount"      : (required if mounts: not present) defines how the volume will
+##                  be mounted by containers
+##   "mounts"     : (required if mount: not present) defines map of containers specifying
+##                  how volume will be mounted by container.  for example:
+##                     mounts:
+##                       base:
+##                         mount:
+##                           mountPath: /static
+##                       proxy-server:
+##                         mount:
+##                           mountPath: /common/static
 ##   "claimName"  : (optional) name assigned to pvc, overriding template-generaged name
 ##   "containers" : (optional) lists containers within the pod the mount
 ##                  definition applies to.  if undefined, the mount is added to
