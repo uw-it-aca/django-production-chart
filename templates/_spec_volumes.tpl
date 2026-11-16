@@ -37,6 +37,10 @@ volumes:
   - name: {{ $name }}
 {{ toYaml $map.volume | indent 4 }}
 {{- end }}
+{{- if hasKey $map.volume "image" }}
+  - name: {{ $name }}
+{{ toYaml $map.volume | indent 4 }}
+{{- end }}
 {{- if hasKey $map.volume "claim" }}
 {{ toYaml $map.volume | indent 4 }}
 {{- end }}

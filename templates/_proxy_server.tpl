@@ -90,43 +90,13 @@ nginx.conf: |
 
 {{/*
 Proxy server sidecar container settings.
-By default, defines an nginx proxy sidecar and a run-once sidecar to copy
-/static and /media filesystems, if present, to the shared emptyDir volume.
+By default, defines an nginx proxy sidecar. The app image's /static is mounted
+read-only into it as an image volume (no copy).
 */}}
 {{- define "django-production-chart.proxyServerSidecar" -}}
 {{- if .Values.proxyServer.sidecar }}
 {{ toYaml .Values.proxyServer.sidecar }}
 {{- else }}
-proxy-server-statics:
-  image: {{ printf "%s:%s" $.Values.image.repository $.Values.image.tag }}
-  imagePullPolicy: Always
-  restartPolicy: Never
-  resources:
-    limits:
-      cpu: 500m
-      memory: 768Mi
-    requests:
-      cpu: 100m
-      memory: 512Mi
-  securityContext:
-    privileged: false
-    runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-  command:
-    - "sh"
-    - "-c"
-    - |
-      if [ -d /static ] ; then
-        cp -r /static/. /common/static
-      fi
-      if [ -d /media ] ; then
-        cp -r /media/. /common/media
-      fi
 proxy-server:
   image: nginx/nginx-unprivileged:stable
   imagePullPolicy: Always
@@ -172,7 +142,7 @@ Default proxy server sidecar container definition
 {{- end -}}
 
 {{/*
-Proxy server podVolumes for nginx configmap and /static volume from app container
+Proxy server podVolumes: nginx configmap, gunicorn socket, /static from app image
 */}}
 {{- define "django-production-chart.proxyServerPodVolume" -}}
 proxy-server-config:
@@ -191,14 +161,12 @@ proxy-server-socket:
   containers: [ base, proxy-server ]
 proxy-server-statics:
   volume:
-    emptyDir: {}
+    image:
+      reference: {{ printf "%s:%s" $.Values.image.repository $.Values.image.tag }}
+      pullPolicy: IfNotPresent
   mount:
     mountPath: /common/static
-  containers: [ base, proxy-server, proxy-server-statics ]
-proxy-server-media:
-  volume:
-    emptyDir: {}
-  mount:
-    mountPath: /common/media
-  containers: [ base, proxy-server, proxy-server-statics ]
+    subPath: static
+    readOnly: true
+  containers: [ proxy-server ]
 {{- end -}}
