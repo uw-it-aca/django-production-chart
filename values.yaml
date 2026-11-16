@@ -101,6 +101,9 @@ proxyServer:
 #      access_log off;
 #      expires 30d;
 #    }
+  # replaces the whole default ConfigMap (nginx.conf and everything in it, so
+  # `locations` is ignored unless you include it). Values are rendered with
+  # `tpl`, so {{ }} expressions are evaluated against the chart root.
 #  configMap:
 #    nginx.conf: |
 #      upstream app_server {
@@ -112,7 +115,9 @@ proxyServer:
 #          error_log  stderr;
 #          ... app-specific proxy server config ...
 #      }
-# optionally override default sidecar container
+  # replaces the default sidecar container definition entirely (not merged with
+  # it): the entry must be complete, including image, ports and probes. The key
+  # must be `proxy-server`. Not templated.
 #  sidecar:
 #    proxy-server:
 #      image: nginx/nginx-unprivileged:1.30.6
