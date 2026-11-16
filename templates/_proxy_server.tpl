@@ -153,7 +153,7 @@ proxy-server:
     httpGet:
       path: {{ $.Values.proxyServer.readinessPath }}
       port: http
-    initialDelaySeconds: 2
+    initialDelay: 2
 {{- end }}
 {{- end -}}
 
