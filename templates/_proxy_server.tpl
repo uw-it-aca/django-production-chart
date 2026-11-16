@@ -22,6 +22,22 @@ Inject proxy server volume mounts into podVolumes
 {{- end -}}
 
 {{/*
+App-specific nginx locations, included in the server block. Defaults to serving
+the app image's /static.
+*/}}
+{{- define "django-production-chart.proxyServerLocations" -}}
+{{- if $.Values.proxyServer.locations -}}
+{{ $.Values.proxyServer.locations }}
+{{- else -}}
+location /static {
+  alias /static;
+  access_log off;
+  expires 30d;
+}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Define nginx.conf appropriate for default proxy-sidecar
 */}}
 {{- define "django-production-chart.proxyDefaultConfigMap" -}}
@@ -65,14 +81,7 @@ nginx.conf: |
       location {{ $.Values.proxyServer.serviceProbePath }} {
         return 200;
       }
-      location /media  {
-        alias /common/media;
-      }
-      location /static {
-        alias /common/static;
-        access_log off;
-        expires 30d;
-      }
+{{ include "django-production-chart.proxyServerLocations" . | indent 6 }}
       location / {
         try_files $uri @proxy_to_app;
       }
@@ -142,7 +151,7 @@ Default proxy server sidecar container definition
 {{- end -}}
 
 {{/*
-Proxy server podVolumes: nginx configmap, gunicorn socket, /static from app image
+Proxy server podVolumes: nginx configmap, gunicorn socket, paths from the app image
 */}}
 {{- define "django-production-chart.proxyServerPodVolume" -}}
 proxy-server-config:
@@ -159,14 +168,16 @@ proxy-server-socket:
   mount:
     mountPath: /var/run/gunicorn
   containers: [ base, proxy-server ]
-proxy-server-statics:
+{{- range $i, $p := $.Values.proxyServer.appImagePaths }}
+proxy-server-image-{{ $i }}:
   volume:
     image:
       reference: {{ printf "%s:%s" $.Values.image.repository $.Values.image.tag }}
       pullPolicy: IfNotPresent
   mount:
-    mountPath: /common/static
-    subPath: static
+    mountPath: {{ $p.mountPath }}
+    subPath: {{ $p.path }}
     readOnly: true
   containers: [ proxy-server ]
+{{- end }}
 {{- end -}}

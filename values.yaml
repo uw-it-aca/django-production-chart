@@ -51,6 +51,21 @@ proxyServer:
   enabled: false
   servicePort: 8080
   serviceProbePath: /healthz
+  # paths from the app image mounted read-only into the proxy container as an
+  # image volume (no copy). path is relative to the image root.
+  appImagePaths:
+    - path: static
+      mountPath: /static
+#    - path: app/compass/templates
+#      mountPath: /app/compass/templates
+  # nginx snippet included in the server block (replaces the default /static
+  # location). Typically the app's existing docker/locations.conf.
+#  locations: |
+#    location /api/static {
+#      alias /static;
+#      access_log off;
+#      expires 30d;
+#    }
 #  configMap:
 #    nginx.conf: |
 #      upstream app_server {
