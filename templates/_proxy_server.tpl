@@ -5,20 +5,20 @@ proxy-server
 {{- end -}}
 
 {{/*
-Injects proxy-server components into the global Values such that the resulting
-manifest contains the necessary proxy-server objects
+Values to overlay on a copy of the root Values for the main workload (deployment
+or statefulset): sidecarContainers and podVolumes with the proxy-server
+components merged in. User-supplied entries win. Never mutates .Values, so other
+workloads (release job, cronjobs, daemons) are unaffected.
+
+Usage (see deployment.yaml, statefulset.yaml): overlay this onto a deepCopy of
+.Values, build a local context from it, and pass that context instead of . to
+the spec includes.
 */}}
-{{- define "django-production-chart.injectProxyServerSidecar" -}}
-{{/*
-Inject proxy server containers into sidecarContainers
-*/}}
-{{ $sidecars := merge ( $.Values.sidecarContainers | default dict ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) }}
-{{ $_ := set $.Values "sidecarContainers" $sidecars }}
-{{/*
-Inject proxy server volume mounts into podVolumes
-*/}}
-{{ $podvolumes := merge ( .Values.podVolumes | default dict ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) }}
-{{ $_ := set $.Values "podVolumes" $podvolumes }}
+{{- define "django-production-chart.proxyServerValues" -}}
+sidecarContainers:
+{{ merge ( deepCopy ( $.Values.sidecarContainers | default dict ) ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) | toYaml | indent 2 }}
+podVolumes:
+{{ merge ( deepCopy ( $.Values.podVolumes | default dict ) ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) | toYaml | indent 2 }}
 {{- end -}}
 
 {{/*
