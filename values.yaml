@@ -57,11 +57,18 @@ proxyServer:
 #          server 127.0.0.1:{{ $.Values.containerPort }} fail_timeout=0;
 #      }
 #      server {
+#  {{ $.Values.serverSettings | index 6 }}
 #          listen 80;
 #          access_log stdout;
 #          error_log  stderr;
 #          ... app-specific proxy server config ...
 #      }
+# optionally override default proxy server settings (nginx)
+#  serverSettings: |-
+#    charset utf-8;
+#    underscores_in_headers on;
+#    port_in_redirect off;
+#    client_max_body_size 4G;
 # optionally override default sidecar container
 #  sidecar:
 #    proxy-server:
