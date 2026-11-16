@@ -52,6 +52,16 @@ proxyServer:
   servicePort: 8080
   # liveness: answered by nginx itself
   serviceProbePath: /healthz
+  # nginx sidecar resources. Estimates for a pure reverse proxy, not measured
+  # under load: tune per app from observed usage. Requests count toward the pod
+  # total that HPA utilization targets are computed against, so keep them small.
+  # No CPU limit, to avoid throttling nginx during bursts.
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
   # readiness: nginx location that proxies to readinessAppPath on the app, so
   # the pod is only Ready once gunicorn answers. Any response below 500 counts.
   readinessPath: /readyz

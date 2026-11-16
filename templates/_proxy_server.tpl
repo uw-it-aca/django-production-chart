@@ -124,12 +124,7 @@ proxy-server:
   imagePullPolicy: Always
   restartPolicy: Always
   resources:
-    limits:
-      cpu: 500m
-      memory: 768Mi
-    requests:
-      cpu: 100m
-      memory: 512Mi
+{{ toYaml $.Values.proxyServer.resources | indent 4 }}
   securityContext:
     privileged: false
     runAsNonRoot: true
