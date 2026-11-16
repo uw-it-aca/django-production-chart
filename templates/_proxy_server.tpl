@@ -81,6 +81,19 @@ nginx.conf: |
       location {{ $.Values.proxyServer.serviceProbePath }} {
         return 200;
       }
+      # readiness: passes through to the app over the socket. Any answer below
+      # 500 means gunicorn is serving; 5xx, including nginx's own 502 while the
+      # socket is missing, is not intercepted and fails the probe.
+      location = {{ $.Values.proxyServer.readinessPath }} {
+        access_log off;
+        proxy_set_header Host $http_host;
+        proxy_pass http://app_server{{ $.Values.proxyServer.readinessAppPath }};
+        proxy_intercept_errors on;
+        error_page 300 301 302 303 304 307 308 400 401 402 403 404 405 406 408 409 410 411 412 413 414 415 416 417 418 421 422 423 424 425 426 428 429 431 451 =200 @ready_ok;
+      }
+      location @ready_ok {
+        return 200;
+      }
 {{ include "django-production-chart.proxyServerLocations" . | indent 6 }}
       location / {
         try_files $uri @proxy_to_app;
@@ -138,7 +151,7 @@ proxy-server:
   readiness:
     enabled: true
     httpGet:
-      path: {{ $.Values.proxyServer.serviceProbePath }}
+      path: {{ $.Values.proxyServer.readinessPath }}
       port: http
     initialDelaySeconds: 2
 {{- end }}

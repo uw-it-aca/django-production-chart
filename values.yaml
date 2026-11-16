@@ -50,7 +50,12 @@ containerPorts:
 proxyServer:
   enabled: false
   servicePort: 8080
+  # liveness: answered by nginx itself
   serviceProbePath: /healthz
+  # readiness: nginx location that proxies to readinessAppPath on the app, so
+  # the pod is only Ready once gunicorn answers. Any response below 500 counts.
+  readinessPath: /readyz
+  readinessAppPath: /
   # paths from the app image mounted read-only into the proxy container as an
   # image volume (no copy). path is relative to the image root.
   appImagePaths:
