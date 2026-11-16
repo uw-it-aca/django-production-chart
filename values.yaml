@@ -65,6 +65,10 @@ proxyServer:
 #    storageSize: 5Gi
 #    storageClassName: <rwx storage class>
 #    accessModes: [ ReadWriteMany ]
+  # gunicorn unix socket shared with nginx. Must match the bind in the app
+  # image's gunicorn config (django-container conf/gunicorn.py). Its directory is
+  # an emptyDir mounted in both containers.
+  socketPath: /var/run/gunicorn/gunicorn.sock
   # nginx sidecar image. Pinned to an exact version for reproducible rollouts;
   # bump deliberately. Pulled from docker.io (short name), so a registry
   # pull-through cache/mirror for docker.io applies.

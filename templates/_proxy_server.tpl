@@ -77,7 +77,7 @@ nginx.conf: |
     default_type application/octet-stream;
     sendfile on;
     upstream app_server {
-      server unix:/var/run/gunicorn/gunicorn.sock fail_timeout=0;
+      server unix:{{ $.Values.proxyServer.socketPath }} fail_timeout=0;
     }
     map $http_x_forwarded_proto $xfproto {
       default $http_x_forwarded_proto;
@@ -188,7 +188,7 @@ proxy-server-socket:
   volume:
     emptyDir: {}
   mount:
-    mountPath: /var/run/gunicorn
+    mountPath: {{ dir $.Values.proxyServer.socketPath }}
   containers: [ base, proxy-server ]
 {{- range $i, $p := $.Values.proxyServer.appImagePaths }}
 proxy-server-image-{{ $i }}:
