@@ -167,12 +167,6 @@ proxy-server:
 {{- end -}}
 
 {{/*
-Default proxy server sidecar container definition
-*/}}
-{{- define "django-production-chart.proxyServerSidecarDefault" -}}
-{{- end -}}
-
-{{/*
 Proxy server podVolumes: nginx configmap, gunicorn socket, paths from the app image
 */}}
 {{- define "django-production-chart.proxyServerPodVolume" -}}

@@ -62,7 +62,7 @@ proxyServer:
   media:
     enabled: false
     mountPath: /media
-#    storageSize: 5Gi
+#    storageSize: 5Gi          # required when enabled
 #    storageClassName: <rwx storage class>
 #    accessModes: [ ReadWriteMany ]
   # gunicorn unix socket shared with nginx. Must match the bind in the app
@@ -560,7 +560,7 @@ readiness:
 ## alternatives must define/provide endpoint
 #  httpGet:
 #    path: /readiness
-#    port: "8001"
+#    port: "8080"
 #  tcpSocket:
 #    port: "5050"
 ## optionally override delay and period
@@ -671,17 +671,8 @@ nfsServer:
 ##                                     the cluster. a volumeClaimTemplates entry
 ##                                     is automatically created based on this definition
 ##                     or yaml that will be directly added to the pod's volumes list.
-##   "mount"      : (required if mounts: not present) defines how the volume will
+##   "mount"      : (required) defines how the volume will
 ##                  be mounted by containers
-##   "mounts"     : (required if mount: not present) defines map of containers specifying
-##                  how volume will be mounted by container.  for example:
-##                     mounts:
-##                       base:
-##                         mount:
-##                           mountPath: /static
-##                       proxy-server:
-##                         mount:
-##                           mountPath: /common/static
 ##   "claimName"  : (optional) name assigned to pvc, overriding template-generaged name
 ##   "containers" : (optional) lists containers within the pod the mount
 ##                  definition applies to.  if undefined, the mount is added to

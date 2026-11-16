@@ -4,6 +4,7 @@
 {{ $map := ( and .Values.proxyServer.configMap ( tpl ( toYaml .Values.proxyServer.configMap ) . ) ) | default ( include "django-production-chart.proxyDefaultConfigMap" . ) }}
 {{- include "django-production-chart.configmap" (dict "root" . "map_name" $map_name "map_data" $map ) }}
 {{- if .Values.proxyServer.media.enabled }}
+{{- $_ := required "proxyServer.media.storageSize is required when proxyServer.media.enabled" .Values.proxyServer.media.storageSize }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
