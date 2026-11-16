@@ -52,6 +52,19 @@ proxyServer:
   servicePort: 8080
   # liveness: answered by nginx itself
   serviceProbePath: /healthz
+  # user-uploaded files shared between the app and the proxy. When enabled the
+  # chart renders one PersistentVolumeClaim, named from the release only (it is
+  # reused across deploys, never one per deploy), mounted read-write in the app
+  # and read-only in nginx. It is a normal manifest object: it is removed, along
+  # with the data if the storage class reclaims volumes, when media is disabled
+  # or the app is removed from flux. Multiple replicas need ReadWriteMany
+  # (the default) storage.
+  media:
+    enabled: false
+    mountPath: /media
+#    storageSize: 5Gi
+#    storageClassName: <rwx storage class>
+#    accessModes: [ ReadWriteMany ]
   # nginx sidecar image. Pinned to an exact version for reproducible rollouts;
   # bump deliberately. Pulled from docker.io (short name), so a registry
   # pull-through cache/mirror for docker.io applies.

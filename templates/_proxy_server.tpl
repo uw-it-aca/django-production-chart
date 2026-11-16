@@ -5,6 +5,14 @@ proxy-server
 {{- end -}}
 
 {{/*
+Name of the media PVC. Derived from the release only (not the image tag), so
+redeploys reuse it instead of creating another.
+*/}}
+{{- define "django-production-chart.proxyServerMediaClaimName" -}}
+{{ include "django-production-chart.pvcName" (dict "root" . "name" "proxy-server-media") }}
+{{- end -}}
+
+{{/*
 Values to overlay on a copy of the root Values for the main workload (deployment
 or statefulset): sidecarContainers and podVolumes with the proxy-server
 components merged in. User-supplied entries win. Never mutates .Values, so other
@@ -34,6 +42,12 @@ location /static {
   access_log off;
   expires 30d;
 }
+{{- if $.Values.proxyServer.media.enabled }}
+
+location /media {
+  alias {{ $.Values.proxyServer.media.mountPath }};
+}
+{{- end }}
 {{- end -}}
 {{- end -}}
 
@@ -187,5 +201,14 @@ proxy-server-image-{{ $i }}:
     subPath: {{ $p.path }}
     readOnly: true
   containers: [ proxy-server ]
+{{- end }}
+{{- if $.Values.proxyServer.media.enabled }}
+proxy-server-media:
+  volume:
+    persistentVolumeClaim:
+      claimName: {{ include "django-production-chart.proxyServerMediaClaimName" . }}
+  mount:
+    mountPath: {{ $.Values.proxyServer.media.mountPath }}
+  containers: [ base, proxy-server ]
 {{- end }}
 {{- end -}}
