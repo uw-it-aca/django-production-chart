@@ -120,8 +120,8 @@ read-only into it as an image volume (no copy).
 {{ toYaml .Values.proxyServer.sidecar }}
 {{- else }}
 proxy-server:
-  image: nginx/nginx-unprivileged:stable
-  imagePullPolicy: Always
+  image: {{ printf "%s:%s" $.Values.proxyServer.image.repository $.Values.proxyServer.image.tag }}
+  imagePullPolicy: {{ $.Values.proxyServer.image.pullPolicy }}
   restartPolicy: Always
   resources:
 {{ toYaml $.Values.proxyServer.resources | indent 4 }}

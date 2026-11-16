@@ -52,6 +52,13 @@ proxyServer:
   servicePort: 8080
   # liveness: answered by nginx itself
   serviceProbePath: /healthz
+  # nginx sidecar image. Pinned to an exact version for reproducible rollouts;
+  # bump deliberately. Pulled from docker.io (short name), so a registry
+  # pull-through cache/mirror for docker.io applies.
+  image:
+    repository: nginx/nginx-unprivileged
+    tag: "1.30.6"
+    pullPolicy: IfNotPresent
   # nginx sidecar resources. Estimates for a pure reverse proxy, not measured
   # under load: tune per app from observed usage. Requests count toward the pod
   # total that HPA utilization targets are computed against, so keep them small.
@@ -95,7 +102,7 @@ proxyServer:
 # optionally override default sidecar container
 #  sidecar:
 #    proxy-server:
-#      image: nginx:stable
+#      image: nginx/nginx-unprivileged:1.30.6
 #      ... sidecar container-specific config ...
 #
 
