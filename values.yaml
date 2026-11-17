@@ -116,11 +116,19 @@ proxyServer:
 #          server 127.0.0.1:{{ $.Values.containerPort }} fail_timeout=0;
 #      }
 #      server {
+#  {{ $.Values.proxyServer.serverSettings | indent 6 }}
 #          listen 80;
 #          access_log stdout;
 #          error_log  stderr;
 #          ... app-specific proxy server config ...
 #      }
+  # replaces the default server-block settings (charset, header and body-size
+  # options) inside the generated nginx.conf. Ignored when `configMap` is set.
+#  serverSettings: |-
+#    charset utf-8;
+#    underscores_in_headers on;
+#    port_in_redirect off;
+#    client_max_body_size 4G;
   # replaces the default sidecar container definition entirely (not merged with
   # it): the entry must be complete, including image, ports and probes. The key
   # must be `proxy-server`. Not templated.

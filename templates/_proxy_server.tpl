@@ -85,10 +85,14 @@ nginx.conf: |
     }
     server {
       listen {{ $.Values.proxyServer.servicePort }} default_server;
+{{- if $.Values.proxyServer.serverSettings }}
+{{ $.Values.proxyServer.serverSettings | indent 6 }}
+{{- else }}
       charset utf-8;
       underscores_in_headers on;
       port_in_redirect off;
       client_max_body_size 4G;
+{{- end }}
       location = /favicon.ico {
           return 204;
       }
