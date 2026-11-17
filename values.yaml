@@ -58,12 +58,17 @@ proxyServer:
   # and read-only in nginx. It is a normal manifest object: it is removed, along
   # with the data if the storage class reclaims volumes, when media is disabled
   # or the app is removed from flux. Multiple replicas need ReadWriteMany
-  # (the default) storage.
+  # (the default) storage, which needs an RWX-capable storage class. On GKE the
+  # standard Persistent Disk classes are RWO only (Multi-Attach errors across
+  # nodes, including during rolling updates), so use Filestore (e.g.
+  # standard-rwx / enterprise-rwx) or, for a single replica with a Recreate
+  # strategy, set accessModes to [ ReadWriteOnce ]. Object storage
+  # (django-storages) is often a better fit than a shared filesystem.
   media:
     enabled: false
     mountPath: /media
 #    storageSize: 5Gi          # required when enabled
-#    storageClassName: <rwx storage class>
+#    storageClassName: <rwx storage class>   # required when enabled
 #    accessModes: [ ReadWriteMany ]
   # gunicorn unix socket shared with nginx. Must match the bind in the app
   # image's gunicorn config (django-container conf/gunicorn.py). Its directory is

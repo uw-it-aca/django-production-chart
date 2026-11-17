@@ -5,6 +5,7 @@
 {{- include "django-production-chart.configmap" (dict "root" . "map_name" $map_name "map_data" $map ) }}
 {{- if .Values.proxyServer.media.enabled }}
 {{- $_ := required "proxyServer.media.storageSize is required when proxyServer.media.enabled" .Values.proxyServer.media.storageSize }}
+{{- $_ := required "proxyServer.media.storageClassName is required when proxyServer.media.enabled (the default class may not support the requested accessModes, e.g. GKE PD is RWO only)" .Values.proxyServer.media.storageClassName }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
