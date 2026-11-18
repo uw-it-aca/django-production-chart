@@ -50,29 +50,96 @@ containerPorts:
 proxyServer:
   enabled: false
   servicePort: 8080
+  # liveness: answered by nginx itself
   serviceProbePath: /healthz
+  # user-uploaded files shared between the app and the proxy. When enabled the
+  # chart renders one PersistentVolumeClaim, named from the release only (it is
+  # reused across deploys, never one per deploy), mounted read-write in the app
+  # and read-only in nginx. It is a normal manifest object: it is removed, along
+  # with the data if the storage class reclaims volumes, when media is disabled
+  # or the app is removed from flux. Multiple replicas need ReadWriteMany
+  # (the default) storage, which needs an RWX-capable storage class. On GKE the
+  # standard Persistent Disk classes are RWO only (Multi-Attach errors across
+  # nodes, including during rolling updates), so use Filestore (e.g.
+  # standard-rwx / enterprise-rwx) or, for a single replica with a Recreate
+  # strategy, set accessModes to [ ReadWriteOnce ]. Object storage
+  # (django-storages) is often a better fit than a shared filesystem.
+  media:
+    enabled: false
+    mountPath: /media
+#    storageSize: 5Gi          # required when enabled
+#    storageClassName: <rwx storage class>   # required when enabled
+#    accessModes: [ ReadWriteMany ]
+  # gunicorn unix socket shared with nginx. Must match the bind in the app
+  # image's gunicorn config (django-container conf/gunicorn.py). Its directory is
+  # an emptyDir mounted in both containers.
+  socketPath: /var/run/gunicorn/gunicorn.sock
+  # nginx sidecar image. Pinned to an exact version for reproducible rollouts;
+  # bump deliberately. Pulled from docker.io (short name), so a registry
+  # pull-through cache/mirror for docker.io applies.
+  image:
+    repository: nginx/nginx-unprivileged
+    tag: "1.30.6"
+    pullPolicy: Always
+  # nginx sidecar resources. Estimates for a pure reverse proxy, not measured
+  # under load: tune per app from observed usage. Requests count toward the pod
+  # total that HPA utilization targets are computed against, so keep them small.
+  # The CPU limit is generous because cluster policy (checkov CKV_K8S_11)
+  # requires one; raise it if nginx is throttled under load.
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 500m
+      memory: 128Mi
+  # readiness: nginx location that proxies to readinessAppPath on the app, so
+  # the pod is only Ready once gunicorn answers. Any response below 500 counts.
+  readinessPath: /readyz
+  readinessAppPath: /
+  # paths from the app image mounted read-only into the proxy container as an
+  # image volume (no copy). path is relative to the image root.
+  appImagePaths:
+    - path: static
+      mountPath: /static
+#    - path: app/compass/templates
+#      mountPath: /app/compass/templates
+  # nginx snippet included in the server block (replaces the default /static
+  # location). Typically the app's existing docker/locations.conf.
+#  locations: |
+#    location /api/static {
+#      alias /static;
+#      access_log off;
+#      expires 30d;
+#    }
+  # replaces the whole default ConfigMap (nginx.conf and everything in it, so
+  # `locations` is ignored unless you include it). Values are rendered with
+  # `tpl`, so {{ }} expressions are evaluated against the chart root.
 #  configMap:
 #    nginx.conf: |
 #      upstream app_server {
 #          server 127.0.0.1:{{ $.Values.containerPort }} fail_timeout=0;
 #      }
 #      server {
-#  {{ $.Values.serverSettings | index 6 }}
+#  {{ $.Values.proxyServer.serverSettings | indent 6 }}
 #          listen 80;
 #          access_log stdout;
 #          error_log  stderr;
 #          ... app-specific proxy server config ...
 #      }
-# optionally override default proxy server settings (nginx)
+  # replaces the default server-block settings (charset, header and body-size
+  # options) inside the generated nginx.conf. Ignored when `configMap` is set.
 #  serverSettings: |-
 #    charset utf-8;
 #    underscores_in_headers on;
 #    port_in_redirect off;
 #    client_max_body_size 4G;
-# optionally override default sidecar container
+  # replaces the default sidecar container definition entirely (not merged with
+  # it): the entry must be complete, including image, ports and probes. The key
+  # must be `proxy-server`. Not templated.
 #  sidecar:
 #    proxy-server:
-#      image: nginx:stable
+#      image: nginx/nginx-unprivileged:1.30.6
 #      ... sidecar container-specific config ...
 #
 
@@ -508,7 +575,7 @@ readiness:
 ## alternatives must define/provide endpoint
 #  httpGet:
 #    path: /readiness
-#    port: "8001"
+#    port: "8080"
 #  tcpSocket:
 #    port: "5050"
 ## optionally override delay and period
@@ -619,17 +686,8 @@ nfsServer:
 ##                                     the cluster. a volumeClaimTemplates entry
 ##                                     is automatically created based on this definition
 ##                     or yaml that will be directly added to the pod's volumes list.
-##   "mount"      : (required if mounts: not present) defines how the volume will
+##   "mount"      : (required) defines how the volume will
 ##                  be mounted by containers
-##   "mounts"     : (required if mount: not present) defines map of containers specifying
-##                  how volume will be mounted by container.  for example:
-##                     mounts:
-##                       base:
-##                         mount:
-##                           mountPath: /static
-##                       proxy-server:
-##                         mount:
-##                           mountPath: /common/static
 ##   "claimName"  : (optional) name assigned to pvc, overriding template-generaged name
 ##   "containers" : (optional) lists containers within the pod the mount
 ##                  definition applies to.  if undefined, the mount is added to

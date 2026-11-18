@@ -5,20 +5,50 @@ proxy-server
 {{- end -}}
 
 {{/*
-Injects proxy-server components into the global Values such that the resulting
-manifest contains the necessary proxy-server objects
+Name of the media PVC. Derived from the release only (not the image tag), so
+redeploys reuse it instead of creating another.
 */}}
-{{- define "django-production-chart.injectProxyServerSidecar" -}}
+{{- define "django-production-chart.proxyServerMediaClaimName" -}}
+{{ include "django-production-chart.pvcName" (dict "root" . "name" "proxy-server-media") }}
+{{- end -}}
+
 {{/*
-Inject proxy server containers into sidecarContainers
+Values to overlay on a copy of the root Values for the main workload (deployment
+or statefulset): sidecarContainers and podVolumes with the proxy-server
+components merged in. User-supplied entries win. Never mutates .Values, so other
+workloads (release job, cronjobs, daemons) are unaffected.
+
+Usage (see deployment.yaml, statefulset.yaml): overlay this onto a deepCopy of
+.Values, build a local context from it, and pass that context instead of . to
+the spec includes.
 */}}
-{{ $sidecars := merge ( $.Values.sidecarContainers | default dict ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) }}
-{{ $_ := set $.Values "sidecarContainers" $sidecars }}
+{{- define "django-production-chart.proxyServerValues" -}}
+sidecarContainers:
+{{ merge ( deepCopy ( $.Values.sidecarContainers | default dict ) ) ( fromYaml ( include "django-production-chart.proxyServerSidecar" . ) ) | toYaml | indent 2 }}
+podVolumes:
+{{ merge ( deepCopy ( $.Values.podVolumes | default dict ) ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) | toYaml | indent 2 }}
+{{- end -}}
+
 {{/*
-Inject proxy server volume mounts into podVolumes
+App-specific nginx locations, included in the server block. Defaults to serving
+the app image's /static.
 */}}
-{{ $podvolumes := merge ( .Values.podVolumes | default dict ) ( fromYaml ( include "django-production-chart.proxyServerPodVolume" . ) ) }}
-{{ $_ := set $.Values "podVolumes" $podvolumes }}
+{{- define "django-production-chart.proxyServerLocations" -}}
+{{- if $.Values.proxyServer.locations -}}
+{{ $.Values.proxyServer.locations }}
+{{- else -}}
+location /static {
+  alias /static;
+  access_log off;
+  expires 30d;
+}
+{{- if $.Values.proxyServer.media.enabled }}
+
+location /media {
+  alias {{ $.Values.proxyServer.media.mountPath }};
+}
+{{- end }}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -47,7 +77,7 @@ nginx.conf: |
     default_type application/octet-stream;
     sendfile on;
     upstream app_server {
-      server unix:/var/run/gunicorn/gunicorn.sock fail_timeout=0;
+      server unix:{{ $.Values.proxyServer.socketPath }} fail_timeout=0;
     }
     map $http_x_forwarded_proto $xfproto {
       default $http_x_forwarded_proto;
@@ -69,14 +99,20 @@ nginx.conf: |
       location {{ $.Values.proxyServer.serviceProbePath }} {
         return 200;
       }
-      location /media  {
-        alias /common/media;
-      }
-      location /static {
-        alias /common/static;
+      # readiness: passes through to the app over the socket. Any answer below
+      # 500 means gunicorn is serving; 5xx, including nginx's own 502 while the
+      # socket is missing, is not intercepted and fails the probe.
+      location = {{ $.Values.proxyServer.readinessPath }} {
         access_log off;
-        expires 30d;
+        proxy_set_header Host $http_host;
+        proxy_pass http://app_server{{ $.Values.proxyServer.readinessAppPath }};
+        proxy_intercept_errors on;
+        error_page 300 301 302 303 304 307 308 400 401 402 403 404 405 406 408 409 410 411 412 413 414 415 416 417 418 421 422 423 424 425 426 428 429 431 451 =200 @ready_ok;
       }
+      location @ready_ok {
+        return 200;
+      }
+{{ include "django-production-chart.proxyServerLocations" . | indent 6 }}
       location / {
         try_files $uri @proxy_to_app;
       }
@@ -94,54 +130,19 @@ nginx.conf: |
 
 {{/*
 Proxy server sidecar container settings.
-By default, defines an nginx proxy sidecar and a run-once sidecar to copy
-/static and /media filesystems, if present, to the shared emptyDir volume.
+By default, defines an nginx proxy sidecar. The app image's /static is mounted
+read-only into it as an image volume (no copy).
 */}}
 {{- define "django-production-chart.proxyServerSidecar" -}}
 {{- if .Values.proxyServer.sidecar }}
 {{ toYaml .Values.proxyServer.sidecar }}
 {{- else }}
-proxy-server-statics:
-  image: {{ printf "%s:%s" $.Values.image.repository $.Values.image.tag }}
-  imagePullPolicy: Always
-  restartPolicy: Never
-  resources:
-    limits:
-      cpu: 500m
-      memory: 768Mi
-    requests:
-      cpu: 100m
-      memory: 512Mi
-  securityContext:
-    privileged: false
-    runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-  command:
-    - "sh"
-    - "-c"
-    - |
-      if [ -d /static ] ; then
-        cp -r /static/. /common/static
-      fi
-      if [ -d /media ] ; then
-        cp -r /media/. /common/media
-      fi
 proxy-server:
-  image: nginx/nginx-unprivileged:stable
-  imagePullPolicy: Always
+  image: {{ printf "%s:%s" $.Values.proxyServer.image.repository $.Values.proxyServer.image.tag }}
+  imagePullPolicy: {{ $.Values.proxyServer.image.pullPolicy }}
   restartPolicy: Always
   resources:
-    limits:
-      cpu: 500m
-      memory: 768Mi
-    requests:
-      cpu: 100m
-      memory: 512Mi
+{{ toYaml $.Values.proxyServer.resources | indent 4 }}
   securityContext:
     privileged: false
     runAsNonRoot: true
@@ -163,20 +164,14 @@ proxy-server:
   readiness:
     enabled: true
     httpGet:
-      path: {{ $.Values.proxyServer.serviceProbePath }}
+      path: {{ $.Values.proxyServer.readinessPath }}
       port: http
-    initialDelaySeconds: 2
+    initialDelay: 2
 {{- end }}
 {{- end -}}
 
 {{/*
-Default proxy server sidecar container definition
-*/}}
-{{- define "django-production-chart.proxyServerSidecarDefault" -}}
-{{- end -}}
-
-{{/*
-Proxy server podVolumes for nginx configmap and /static volume from app container
+Proxy server podVolumes: nginx configmap, gunicorn socket, paths from the app image
 */}}
 {{- define "django-production-chart.proxyServerPodVolume" -}}
 proxy-server-config:
@@ -191,18 +186,27 @@ proxy-server-socket:
   volume:
     emptyDir: {}
   mount:
-    mountPath: /var/run/gunicorn
+    mountPath: {{ dir $.Values.proxyServer.socketPath }}
   containers: [ base, proxy-server ]
-proxy-server-statics:
+{{- range $i, $p := $.Values.proxyServer.appImagePaths }}
+proxy-server-image-{{ $i }}:
   volume:
-    emptyDir: {}
+    image:
+      reference: {{ printf "%s:%s" $.Values.image.repository $.Values.image.tag }}
+      pullPolicy: IfNotPresent
   mount:
-    mountPath: /common/static
-  containers: [ base, proxy-server, proxy-server-statics ]
+    mountPath: {{ $p.mountPath }}
+    subPath: {{ $p.path }}
+    readOnly: true
+  containers: [ proxy-server ]
+{{- end }}
+{{- if $.Values.proxyServer.media.enabled }}
 proxy-server-media:
   volume:
-    emptyDir: {}
+    persistentVolumeClaim:
+      claimName: {{ include "django-production-chart.proxyServerMediaClaimName" . }}
   mount:
-    mountPath: /common/media
-  containers: [ base, proxy-server, proxy-server-statics ]
+    mountPath: {{ $.Values.proxyServer.media.mountPath }}
+  containers: [ base, proxy-server ]
+{{- end }}
 {{- end -}}
