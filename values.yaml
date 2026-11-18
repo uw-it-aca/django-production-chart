@@ -79,7 +79,7 @@ proxyServer:
   # pull-through cache/mirror for docker.io applies.
   image:
     repository: nginx/nginx-unprivileged
-    tag: "1.30.6"
+    tag: "1.30.7-alpine-slim"
     pullPolicy: Always
   # nginx sidecar resources. Estimates for a pure reverse proxy, not measured
   # under load: tune per app from observed usage. Requests count toward the pod
