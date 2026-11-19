@@ -14,7 +14,7 @@ Nginx ingress
         matchLabels:
           name: ingress-nginx
   ports:
-{{- include "django-production-chart.netpolicy.container-ports" . | indent 4 }}
+{{- include "django-production-chart.netpolicy.ingress-ports" . | indent 4 }}
 {{- end }}
 {{- end }}
 
@@ -32,7 +32,7 @@ Metrics ingress
     - port: {{ .metricsPort }}
       protocol: TCP
 {{- else }}
-{{- include "django-production-chart.netpolicy.container-ports" .root | indent 4 }}
+{{- include "django-production-chart.netpolicy.ingress-ports" .root | indent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -107,8 +107,8 @@ Helper for common reference for server pod
 */}}
 {{- define "django-production-chart.netpolicy.app-labels" }}
 matchLabels:
-  app.kubernetes.io/name: {{ $.Values.releaseIdentifier }}{{ if eq .component "server" }}{{else}}-{{ .component }}{{ end }}
-  app.kubernetes.io/instance: {{ $.Values.instanceIdentifier }}
+  app.kubernetes.io/name: {{ .root.Values.releaseIdentifier }}{{ if eq .component "server" }}{{else}}-{{ .component }}{{ end }}
+  app.kubernetes.io/instance: {{ .root.Values.instanceIdentifier }}
   app.kubernetes.io/component: {{ .component }}
 {{- end }}
 
@@ -152,5 +152,27 @@ Helper to collect exposed server ports
 {{- else }}
 - port: {{ .Values.containerPort | default 8000 }}
   protocol: TCP
+{{- end }}
+{{- end }}
+
+{{/*
+Helper to collect server ports reachable from outside the pod. With the proxy
+sidecar, traffic arrives on proxyServer.servicePort; the app's "http" port is
+not listening on TCP (gunicorn uses a unix socket), so it is left out.
+*/}}
+{{- define "django-production-chart.netpolicy.ingress-ports" }}
+{{- if and .Values.proxyServer .Values.proxyServer.enabled }}
+- port: {{ .Values.proxyServer.servicePort }}
+  protocol: TCP
+{{- if .Values.containerPorts.enabled }}
+{{- range .Values.containerPorts.ports }}
+{{- if ne (.name | default "") "http" }}
+- port: {{ .containerPort }}
+  protocol: {{ .protocol | default "TCP" }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- else }}
+{{- include "django-production-chart.netpolicy.container-ports" . }}
 {{- end }}
 {{- end }}

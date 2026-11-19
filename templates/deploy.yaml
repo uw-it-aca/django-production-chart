@@ -45,5 +45,5 @@ spec:
 {{- include "django-production-chart.specContainerEnv" . | nindent 10 -}}
 {{- include "django-production-chart.specContainerCommand" (dict "command" (list "/scripts/deploy.sh")) | nindent 10 -}}
 {{- include "django-production-chart.specContainerPorts" . | nindent 10 -}}
-{{- include "django-production-chart.specContainerProbes" . | nindent 10 -}}
+{{- include "django-production-chart.specContainerProbes" .Values | nindent 10 -}}
 {{- end }}

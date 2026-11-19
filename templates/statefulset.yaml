@@ -2,6 +2,11 @@
 {{- $_ := set .Values "releaseIdentifier" ( include "django-production-chart.releaseIdentifier" . ) -}}
 {{- $_ := set .Values "namespaceIdentifier" ( include "django-production-chart.namespaceIdentifier" . ) -}}
 {{- $_ := set .Values "instanceIdentifier" ( include "django-production-chart.instanceIdentifier" . ) -}}
+{{- $ctx := . -}}
+{{- if and .Values.proxyServer .Values.proxyServer.enabled -}}
+{{- $vals := mergeOverwrite ( deepCopy .Values ) ( fromYaml ( include "django-production-chart.proxyServerValues" . ) ) -}}
+{{- $ctx = dict "Values" $vals "Release" .Release "Chart" .Chart "Capabilities" .Capabilities "Template" .Template "Files" .Files -}}
+{{- end -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -47,13 +52,13 @@ spec:
 {{ include "django-production-chart.securityPolicySpec" .Values.securityPolicy.statefulset | indent 6 }}
 {{- end }}
 {{ include "django-production-chart.specControllerScheduling" . | indent 6 }}
-{{ include "django-production-chart.specVolumes" . | indent 6 }}
-{{ include "django-production-chart.specContainer" . | indent 6 }}
-{{ include "django-production-chart.specContainerLifecycle" . | indent 10 }}
-{{ include "django-production-chart.specContainerProbes" . | indent 10 }}
-{{ include "django-production-chart.specContainers" (dict "root" . "type" "initContainers" "containers" .Values.sidecarContainers) | indent 6 }}
+{{ include "django-production-chart.specVolumes" $ctx | indent 6 }}
+{{ include "django-production-chart.specContainer" $ctx | indent 6 }}
+{{ include "django-production-chart.specContainerLifecycle" $ctx | indent 10 }}
+{{ include "django-production-chart.specContainerProbes" $ctx.Values | indent 10 }}
+{{ include "django-production-chart.specContainers" (dict "root" $ctx "type" "initContainers" "containers" $ctx.Values.sidecarContainers) | indent 6 }}
 {{- $i := 0 }}
-{{- range $name, $map := .Values.podVolumes }}
+{{- range $name, $map := $ctx.Values.podVolumes }}
 {{- if hasKey $map "volume" }}
 {{- if hasKey $map.volume "claimTemplate" }}
 {{- if eq $i 0 }}
