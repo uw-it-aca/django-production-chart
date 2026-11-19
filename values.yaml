@@ -64,9 +64,16 @@ proxyServer:
   # standard-rwx / enterprise-rwx) or, for a single replica with a Recreate
   # strategy, set accessModes to [ ReadWriteOnce ]. Object storage
   # (django-storages) is often a better fit than a shared filesystem.
+  # media.type: `pvc` (default, described above) or `emptyDir`. An emptyDir is
+  # shared by the app and nginx within one pod only: it is not shared across
+  # replicas and is lost when the pod restarts, so use it only for regenerable
+  # or short-lived files, not durable uploads. It needs no storageSize or
+  # storageClassName; `sizeLimit` is optional.
   media:
     enabled: false
+    type: pvc
     mountPath: /media
+#    sizeLimit: 1Gi            # emptyDir only
 #    storageSize: 5Gi          # required when enabled
 #    storageClassName: <rwx storage class>   # required when enabled
 #    accessModes: [ ReadWriteMany ]

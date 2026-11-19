@@ -203,8 +203,16 @@ proxy-server-image-{{ $i }}:
 {{- if $.Values.proxyServer.media.enabled }}
 proxy-server-media:
   volume:
+{{- if eq $.Values.proxyServer.media.type "emptyDir" }}
+    emptyDir:
+{{- with $.Values.proxyServer.media.sizeLimit }}
+      sizeLimit: {{ . }}
+{{- else }} {}
+{{- end }}
+{{- else }}
     persistentVolumeClaim:
       claimName: {{ include "django-production-chart.proxyServerMediaClaimName" . }}
+{{- end }}
   mount:
     mountPath: {{ $.Values.proxyServer.media.mountPath }}
   containers: [ base, proxy-server ]
