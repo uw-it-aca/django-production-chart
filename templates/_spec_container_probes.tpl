@@ -14,6 +14,7 @@ tcpSocket:
 exec:
 {{- $command := .command | default (list "/scripts/ready.sh") }}
 {{ include "django-production-chart.specContainerCommand" (dict "command" $command "args" "") | indent 2 }}
+timeoutSeconds: {{ .timeoutSeconds | default 10 }}
 {{- end }}
 initialDelaySeconds: {{ .initialDelay | default 5 }}
 periodSeconds: {{ .period | default 5 }}
